@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from apps.accounts.permissions import role_required
-from apps.tables.models import RestaurantTable, TableSession
+from apps.tables.models import RestaurantTable, TableSession, SessionStatus
 from apps.tables.selectors import get_table_by_qr_token, get_active_session_for_table, list_tables_with_status
 from apps.catalog.selectors import get_categories, get_all_menu_items
 from apps.ordering.models import Order
@@ -13,16 +13,30 @@ def customer_dine_in_view(request, qr_token=None):
     session = None
     all_tables = list_tables_with_status()
 
+    # Find active sessions currently opened by cashier
+    open_sessions = TableSession.objects.filter(
+        status__in=[SessionStatus.OPEN, SessionStatus.BILL_REQUESTED, SessionStatus.PAYMENT_PENDING]
+    ).select_related('table').order_by('-opened_at')
+    
+    active_open_tables = [s.table for s in open_sessions]
+
     if qr_token:
         table = get_table_by_qr_token(qr_token)
         if table:
             session = get_active_session_for_table(table)
 
-    # If no QR code provided, default to first available table for quick testing
-    if not table and all_tables.exists():
-        table = all_tables.first()
-        session = get_active_session_for_table(table)
-        qr_token = table.qr_token
+    # If no QR code specified in URL:
+    if not table:
+        # 1. Automatically connect to the table opened by cashier!
+        if open_sessions.exists():
+            session = open_sessions.first()
+            table = session.table
+            qr_token = table.qr_token
+        # 2. Or fallback to the first restaurant table
+        elif all_tables.exists():
+            table = all_tables.first()
+            session = get_active_session_for_table(table)
+            qr_token = table.qr_token
 
     categories = get_categories(active_only=True)
     
@@ -31,6 +45,7 @@ def customer_dine_in_view(request, qr_token=None):
         'session': session,
         'qr_token': qr_token,
         'all_tables': all_tables,
+        'active_open_tables': active_open_tables,
         'categories': categories,
     })
 

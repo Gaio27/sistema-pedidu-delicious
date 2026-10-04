@@ -6,8 +6,11 @@ class CashierApp {
   constructor() {
     this.pendingOrders = [];
     this.tables = [];
-    this.selectedTable = null;
+    this.tableFilter = 'ALL';
+    this.selectedTableId = null;
     this.selectedOrderForReject = null;
+    this.currentPaymentSessionId = null;
+    this.currentBillAmount = 0;
     this.init();
   }
 
@@ -21,6 +24,21 @@ class CashierApp {
       this.loadPendingOrders();
       this.loadTables();
     }, 6000);
+  }
+
+  setTableFilter(filter) {
+    this.tableFilter = filter;
+    
+    // Update button states
+    const btnAll = document.getElementById('filter-table-all');
+    const btnOpen = document.getElementById('filter-table-open');
+    const btnAvail = document.getElementById('filter-table-avail');
+
+    if (btnAll) btnAll.className = filter === 'ALL' ? 'btn btn-primary btn-sm px-2 fw-bold' : 'btn btn-outline-primary btn-sm px-2';
+    if (btnOpen) btnOpen.className = filter === 'OPEN' ? 'btn btn-success btn-sm px-2 fw-bold' : 'btn btn-outline-success btn-sm px-2';
+    if (btnAvail) btnAvail.className = filter === 'AVAILABLE' ? 'btn btn-secondary btn-sm px-2 fw-bold' : 'btn btn-outline-secondary btn-sm px-2';
+
+    this.renderTablesUI();
   }
 
   async loadPendingOrders() {
@@ -109,58 +127,106 @@ class CashierApp {
     const container = document.getElementById('tables-grid-container');
     if (!container) return;
 
-    container.innerHTML = this.tables
+    // Filter tables based on user selection
+    let filteredTables = this.tables;
+    if (this.tableFilter === 'OPEN') {
+      filteredTables = this.tables.filter((t) => t.active_session !== null);
+    } else if (this.tableFilter === 'AVAILABLE') {
+      filteredTables = this.tables.filter((t) => t.active_session === null);
+    }
+
+    if (filteredTables.length === 0) {
+      container.innerHTML = `
+        <div class="col-12 text-center py-5 text-muted">
+          <i class="fa-solid fa-chair fa-3x mb-2 text-secondary"></i>
+          <h6>La iha meza tuir filtru ne'e.</h6>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = filteredTables
       .map((table) => {
         const session = table.active_session;
         const isOccupied = session !== null;
-        const statusClass = {
-          AVAILABLE: 'status-available',
-          OCCUPIED: 'status-occupied',
-          CLEANING: 'status-cleaning',
-          MAINTENANCE: 'status-maintenance',
-        }[table.status] || 'bg-secondary text-white';
+        const remaining = session ? parseFloat(session.remaining_balance !== undefined ? session.remaining_balance : session.bill_total) : 0;
+        const isPaid = session && (session.is_fully_paid || session.status === 'PAID' || remaining <= 0);
+
+        let sessionBadge = '';
+        if (session) {
+          if (isPaid) {
+            sessionBadge = '<span class="badge bg-success text-white"><i class="fa-solid fa-check-circle me-1"></i> PAID</span>';
+          } else if (session.status === 'BILL_REQUESTED') {
+            sessionBadge = '<span class="badge bg-danger text-white pulse"><i class="fa-solid fa-receipt me-1"></i> Husu Konta</span>';
+          } else {
+            sessionBadge = '<span class="badge bg-info text-dark">Sesi Loke</span>';
+          }
+        }
 
         return `
-        <div class="col-md-4 col-sm-6 mb-3">
-          <div class="card card-custom p-3 h-100 ${isOccupied ? 'border-primary' : ''}">
-            <div class="d-flex justify-content-between align-items-start mb-2">
-              <h5 class="fw-bold mb-0">${table.display_name}</h5>
-              <span class="badge badge-status ${statusClass}">${table.status}</span>
-            </div>
-            
-            <div class="text-muted small mb-3">
-              Kapasitas: ${table.capacity || 4} Kursi | Kode: ${table.table_code}
+        <div class="col-md-6 mb-3">
+          <div class="card card-custom p-3 h-100 ${isOccupied ? (isPaid ? 'border-success' : 'border-primary') : ''}">
+            <div class="d-flex justify-content-between align-items-start mb-1">
+              <div>
+                <h5 class="fw-bold mb-0 text-dark">${table.display_name}</h5>
+                <span class="text-muted small">${table.table_code} | Kapasidade: ${table.capacity || 4} Kursi</span>
+              </div>
+              <div>${isOccupied ? sessionBadge : '<span class="badge bg-light text-secondary border">Mamuk</span>'}</div>
             </div>
 
             ${
               isOccupied
                 ? `
-              <div class="p-2 bg-light rounded small mb-3">
-                <div class="d-flex justify-content-between">
-                  <span>Tamu: <strong>${session.guest_count} Orang</strong></span>
-                  <span class="badge ${session.status === 'BILL_REQUESTED' ? 'bg-danger text-white' : 'bg-info text-dark'}">${session.status}</span>
+              <div class="p-2 bg-light rounded small my-2 border">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <span>Bainaka: <strong>${session.guest_count} Ema</strong></span>
+                  <span>Pedidu: <strong>${session.orders_count}</strong></span>
                 </div>
-                <div class="d-flex justify-content-between mt-1">
-                  <span>Pesanan: ${session.orders_count}</span>
-                  <span class="fw-bold text-primary">Bill: $${session.bill_total}</span>
+                <div class="d-flex justify-content-between align-items-center border-top pt-1">
+                  <span class="text-muted">Konta Totál:</span>
+                  <span class="fw-bold fs-6 ${isPaid ? 'text-success' : 'text-primary'}">
+                    $${session.bill_total}
+                    ${isPaid ? ' <span class="badge bg-success-subtle text-success small">Selu Tiha Ona</span>' : (remaining < parseFloat(session.bill_total) ? ` <small class="text-danger">($${remaining.toFixed(2)} resta)</small>` : '')}
+                  </span>
                 </div>
               </div>
-              <div class="d-flex gap-2 mt-auto">
-                <button class="btn btn-sm btn-primary flex-fill fw-bold" onclick="cashierApp.openPaymentModal('${session.id}', '${table.display_name}', '${session.bill_total}')">
-                  <i class="fa-solid fa-cash-register me-1"></i> Pembayaran / POS
-                </button>
-                <button class="btn btn-sm btn-outline-secondary" title="Tutup Meja" onclick="cashierApp.closeSession('${session.id}', '${table.display_name}')">
+
+              <div class="d-flex gap-2 mt-auto flex-wrap">
+                ${
+                  isPaid
+                    ? `
+                  <button class="btn btn-sm btn-success flex-fill fw-bold" onclick="cashierApp.viewReceiptForSession('${session.id}')" title="Haree Resibu Pagamentu">
+                    <i class="fa-solid fa-receipt me-1"></i> Resibu (Selu Tiha)
+                  </button>
+                `
+                    : `
+                  <button class="btn btn-sm btn-primary flex-fill fw-bold" onclick="cashierApp.openPaymentModal('${session.id}', '${table.display_name}')">
+                    <i class="fa-solid fa-cash-register me-1"></i> Selu Bill ($${remaining.toFixed(2)})
+                  </button>
+                `
+                }
+                
+                <a href="/t/${table.qr_token}/" target="_blank" class="btn btn-sm btn-outline-info" title="Loke Menu Dine-in Meza Ne'e">
+                  <i class="fa-solid fa-qrcode me-1"></i> Menu
+                </a>
+
+                <button class="btn btn-sm btn-outline-danger" title="Tutup / Taka Meza" onclick="cashierApp.handleCloseSession('${session.id}', '${table.display_name}')">
                   <i class="fa-solid fa-lock"></i>
                 </button>
               </div>
             `
                 : `
               <div class="text-center py-3 text-muted small">
-                Meja Kosong / Siap Digunakan
+                Meza Mamuk / Prontu atu simu bainaka
               </div>
-              <button class="btn btn-sm btn-outline-primary w-100 mt-auto" onclick="cashierApp.openSessionModal('${table.id}', '${table.display_name}')">
-                <i class="fa-solid fa-door-open me-1"></i> Buka Sesi Meja
-              </button>
+              <div class="d-flex gap-2 mt-auto">
+                <button class="btn btn-sm btn-outline-primary flex-fill fw-bold" onclick="cashierApp.openSessionModal('${table.id}', '${table.display_name}')">
+                  <i class="fa-solid fa-door-open me-1"></i> Loke Sesi Meza
+                </button>
+                <a href="/t/${table.qr_token}/" target="_blank" class="btn btn-sm btn-outline-secondary" title="Haree Menu">
+                  <i class="fa-solid fa-qrcode"></i>
+                </a>
+              </div>
             `
             }
           </div>
@@ -231,13 +297,80 @@ class CashierApp {
     }
   }
 
-  async openPaymentModal(sessionId, tableName, billTotal) {
+  openPaymentModal(sessionId, tableName) {
     this.currentPaymentSessionId = sessionId;
+
+    // Find table & active session details
+    const table = this.tables.find((t) => t.active_session && t.active_session.id === sessionId);
+    const session = table ? table.active_session : null;
+
+    if (!session) {
+      showToast('Sesi meza la hetan.', 'error');
+      return;
+    }
+
+    const remaining = parseFloat(session.remaining_balance !== undefined ? session.remaining_balance : session.bill_total) || 0;
+
     document.getElementById('pos-table-name').textContent = tableName;
-    document.getElementById('pos-bill-total').textContent = `$${billTotal}`;
-    document.getElementById('pos-tendered-amount').value = billTotal;
-    this.currentBillAmount = parseFloat(billTotal);
+    document.getElementById('pos-bill-total').textContent = `$${remaining.toFixed(2)}`;
+    document.getElementById('pos-tendered-amount').value = remaining.toFixed(2);
+    this.currentBillAmount = remaining;
     this.calculateChange();
+
+    const statusEl = document.getElementById('pos-paid-status');
+    if (statusEl) {
+      if (session.total_paid && parseFloat(session.total_paid) > 0) {
+        statusEl.textContent = `Selu tiha ona: $${session.total_paid} | Totál Pedidu: $${session.bill_total}`;
+      } else {
+        statusEl.textContent = `Totál Pedidu: $${session.bill_total}`;
+      }
+    }
+
+    // Populate itemized order breakdown
+    const itemsContainer = document.getElementById('pos-order-items-container');
+    if (itemsContainer) {
+      if (!session.items || session.items.length === 0) {
+        itemsContainer.innerHTML = '<div class="text-center py-3 text-muted small">La iha item pedidu atu selu.</div>';
+      } else {
+        itemsContainer.innerHTML = `
+          <table class="table table-sm table-borderless mb-0 small">
+            <thead class="border-bottom text-muted">
+              <tr>
+                <th>Item</th>
+                <th class="text-center">Qtd</th>
+                <th class="text-end">Presu</th>
+                <th class="text-end">Subtotál</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${session.items
+                .map(
+                  (item) => `
+                <tr class="border-bottom border-light">
+                  <td>
+                    <strong>${item.name}</strong>
+                    ${item.note ? `<div class="badge bg-warning text-dark"><i class="fa-solid fa-pen small"></i> ${item.note}</div>` : ''}
+                    <div class="text-muted" style="font-size: 0.75rem;">${item.order_code}</div>
+                  </td>
+                  <td class="text-center fw-bold">${item.quantity}</td>
+                  <td class="text-end text-muted">$${item.unit_price}</td>
+                  <td class="text-end fw-bold text-dark">$${item.subtotal}</td>
+                </tr>
+              `
+                )
+                .join('')}
+            </tbody>
+          </table>
+        `;
+      }
+    }
+
+    // Ensure submit button is enabled and reset
+    const payBtn = document.getElementById('btn-submit-payment');
+    if (payBtn) {
+      payBtn.disabled = false;
+      payBtn.innerHTML = '<i class="fa-solid fa-check-circle me-1"></i> Kompleta Pagamentu';
+    }
 
     const modal = new bootstrap.Modal(document.getElementById('paymentModal'));
     modal.show();
@@ -270,6 +403,12 @@ class CashierApp {
   async processPayment() {
     const tendered = parseFloat(document.getElementById('pos-tendered-amount').value) || 0;
     const method = document.getElementById('pos-payment-method').value;
+    const payBtn = document.getElementById('btn-submit-payment');
+
+    if (payBtn) {
+      payBtn.disabled = true;
+      payBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Prosesu Hela...';
+    }
 
     try {
       const payment = await apiPost(`/api/v1/cashier/table-sessions/${this.currentPaymentSessionId}/payments/`, {
@@ -280,13 +419,26 @@ class CashierApp {
 
       bootstrap.Modal.getInstance(document.getElementById('paymentModal')).hide();
       this.loadTables();
-      
+
       showToast(`${t('payment_success')} $${payment.amount}! ${t('change_label')} $${payment.change_amount}`, 'success');
       SoundEffects.playSuccess();
-      
+
       this.showReceiptModal(payment);
     } catch (e) {
       showToast(t(e.message), 'error');
+      if (payBtn) {
+        payBtn.disabled = false;
+        payBtn.innerHTML = '<i class="fa-solid fa-check-circle me-1"></i> Kompleta Pagamentu';
+      }
+    }
+  }
+
+  async viewReceiptForSession(sessionId) {
+    try {
+      const payment = await apiGet(`/api/v1/cashier/table-sessions/${sessionId}/payments/`);
+      this.showReceiptModal(payment);
+    } catch (e) {
+      showToast(t(e.message) || 'Resibu la hetan.', 'error');
     }
   }
 
@@ -296,33 +448,136 @@ class CashierApp {
       receiptContent.innerHTML = `
         <div class="receipt-paper" id="printable-receipt">
           <div class="text-center mb-2">
-            <h5 class="fw-bold mb-0">CELVASS RESTO & BAR</h5>
-            <small>Av. Nicolau Lobato, Dili, Timor-Leste</small><br>
+            <h5 class="fw-bold mb-0">CELVASS RESTO &amp; BAR</h5>
+            <small>Praia dos Coqueiros, Dili, Timor-Leste</small><br>
             <small>Tel: +670 7712 3456</small>
           </div>
-          <div class="border-top border-bottom py-1 my-2 small">
-            <div>Resibu Nu: <strong>${payment.payment_code}</strong></div>
-            <div>Data: ${new Date(payment.paid_at).toLocaleString()}</div>
+          <div class="border-top border-bottom py-1 my-2 small text-start">
+            <div><strong>Meza:</strong> ${payment.table_name || payment.table_code || '-'}</div>
+            <div><strong>Resibu Nu:</strong> ${payment.payment_code}</div>
+            <div><strong>Data:</strong> ${new Date(payment.paid_at).toLocaleString()}</div>
           </div>
-          <div class="d-flex justify-content-between fw-bold my-1">
-            <span>TOTÁL KANTA:</span>
-            <span>$${payment.amount}</span>
+          <div class="my-2 text-start">
+            <table style="width: 100%; font-size: 11px; border-collapse: collapse;">
+              <thead>
+                <tr style="border-bottom: 1px dashed #666;">
+                  <th style="text-align: left; padding: 2px 0;">Item</th>
+                  <th style="text-align: center; padding: 2px 0;">Qtd</th>
+                  <th style="text-align: right; padding: 2px 0;">Subtotál</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${(payment.items || [])
+                  .map(
+                    (i) => `
+                  <tr>
+                    <td style="padding: 2px 0;">
+                      <strong>${i.name}</strong>
+                      ${i.note ? `<br><small style="color: #666;">* ${i.note}</small>` : ''}
+                    </td>
+                    <td style="text-align: center; padding: 2px 0;">${i.quantity}</td>
+                    <td style="text-align: right; padding: 2px 0;">$${i.subtotal}</td>
+                  </tr>
+                `
+                  )
+                  .join('')}
+              </tbody>
+            </table>
           </div>
-          <div class="d-flex justify-content-between small">
-            <span>OSAN SIMU:</span>
-            <span>$${payment.tendered_amount}</span>
-          </div>
-          <div class="d-flex justify-content-between fw-bold text-success border-top pt-1 mt-1">
-            <span>OSAN FILA:</span>
-            <span>$${payment.change_amount}</span>
+          <div class="border-top border-dark pt-1 small text-start">
+            <div class="d-flex justify-content-between fw-bold">
+              <span>TOTÁL KANTA:</span>
+              <span>$${payment.amount}</span>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span>OSAN SIMU:</span>
+              <span>$${payment.tendered_amount}</span>
+            </div>
+            <div class="d-flex justify-content-between fw-bold text-success border-top pt-1 mt-1">
+              <span>OSAN FILA (CHANGE):</span>
+              <span>$${payment.change_amount}</span>
+            </div>
           </div>
           <div class="text-center mt-3 small text-muted">
-            <p>Obrigado barak ba ita-boot nia vizita!</p>
+            <p class="mb-0">Obrigado barak ba ita-boot nia vizita!</p>
+            <small>Sistema PWA Celvass Resto &amp; Bar</small>
           </div>
         </div>
       `;
       new bootstrap.Modal(document.getElementById('receiptModal')).show();
     }
+  }
+
+  printCurrentReceipt() {
+    const receiptEl = document.getElementById('printable-receipt');
+    if (!receiptEl) {
+      window.print();
+      return;
+    }
+
+    // Open an isolated print window strictly formatted for 1-page 80mm thermal receipt
+    const printWindow = window.open('', '_blank', 'width=380,height=600');
+    if (!printWindow) {
+      window.print();
+      return;
+    }
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Receipt - Celvass Resto &amp; Bar</title>
+        <style>
+          @page {
+            size: 80mm auto;
+            margin: 0mm;
+          }
+          html, body {
+            margin: 0;
+            padding: 8px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 11px;
+            line-height: 1.25;
+            background: #fff;
+            color: #000;
+            width: 76mm;
+            max-width: 100%;
+          }
+          .text-center { text-align: center; }
+          .text-start { text-align: left; }
+          .text-end { text-align: right; }
+          .fw-bold { font-weight: bold; }
+          .d-flex { display: flex; }
+          .justify-content-between { display: flex; justify-content: space-between; }
+          .border-top { border-top: 1px dashed #000; }
+          .border-bottom { border-bottom: 1px dashed #000; }
+          .my-1 { margin-top: 4px; margin-bottom: 4px; }
+          .my-2 { margin-top: 8px; margin-bottom: 8px; }
+          .py-1 { padding-top: 4px; padding-bottom: 4px; }
+          .pt-1 { padding-top: 4px; }
+          .mt-1 { margin-top: 4px; }
+          .mt-3 { margin-top: 12px; }
+          .mb-0 { margin-bottom: 0; }
+          .mb-2 { margin-bottom: 6px; }
+          table { width: 100%; border-collapse: collapse; }
+          td, th { padding: 2px 0; }
+          @media print {
+            body { margin: 0; padding: 4px; }
+          }
+        </style>
+      </head>
+      <body>
+        ${receiptEl.outerHTML}
+        <script>
+          window.onload = function() {
+            window.print();
+            setTimeout(function() { window.close(); }, 500);
+          };
+        <\/script>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
   }
 
   async handleCloseSession(sessionId, tableName) {

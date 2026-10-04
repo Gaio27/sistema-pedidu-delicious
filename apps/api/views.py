@@ -19,6 +19,7 @@ from apps.ordering.services import submit_customer_order, confirm_order_by_cashi
 from apps.ordering.selectors import get_pending_orders_for_cashier, get_orders_for_session, get_order_by_code
 from apps.kitchen.services import start_preparing_order, mark_order_ready, mark_order_served
 from apps.kitchen.selectors import get_kitchen_queue_orders
+from apps.payments.models import Payment, PaymentStatus
 from apps.payments.services import calculate_session_bill, record_cash_payment
 from apps.payments.selectors import get_completed_payment_for_session
 
@@ -160,12 +161,30 @@ class PublicRequestBillAPIView(APIView):
     def post(self, request, session_token):
         session = get_session_by_public_token(session_token)
         if not session:
-            return api_error("TABLE_SESSION_NOT_OPEN", "Sesi meja tidak ditemukan.", http_status=status.HTTP_404_NOT_FOUND)
+            return api_error("TABLE_SESSION_NOT_OPEN", "Sesi meja tidak ditemukan atau sudah ditutup.", http_status=status.HTTP_404_NOT_FOUND)
         
+        if session.status == SessionStatus.PAID:
+            bill = calculate_session_bill(session)
+            return api_response({
+                "status": "PAID",
+                "message": "Konta ba meza ne'e selu tiha ona.",
+                "bill": bill
+            })
+
+        if session.status == SessionStatus.BILL_REQUESTED:
+            bill = calculate_session_bill(session)
+            return api_response({
+                "status": "BILL_REQUESTED",
+                "message": "Konta husu tiha ona, favor aguarda kaixa.",
+                "bill_requested_at": session.bill_requested_at,
+                "bill": bill
+            })
+
         updated_session = request_bill_for_session(session=session)
         bill = calculate_session_bill(updated_session)
         return api_response({
             "status": updated_session.status,
+            "message": "Konta haruka tiha ona ba kaixa.",
             "bill_requested_at": updated_session.bill_requested_at,
             "bill": bill
         })
@@ -294,6 +313,27 @@ class CashierCloseTableSessionAPIView(APIView):
 class CashierPaymentAPIView(APIView):
     permission_classes = [AllowAny]
 
+    def get(self, request, session_id):
+        try:
+            session = TableSession.objects.get(id=session_id)
+            bill = calculate_session_bill(session)
+            last_payment = Payment.objects.filter(table_session=session, status=PaymentStatus.COMPLETED).last()
+            if not last_payment:
+                return api_error("NO_PAYMENT_FOUND", "Belum ada pembayaran untuk sesi ini.", http_status=status.HTTP_404_NOT_FOUND)
+            return api_response({
+                "payment_code": last_payment.payment_code,
+                "amount": str(last_payment.amount),
+                "tendered_amount": str(last_payment.tendered_amount),
+                "change_amount": str(last_payment.change_amount),
+                "paid_at": last_payment.paid_at,
+                "table_name": session.table.display_name,
+                "table_code": session.table.table_code,
+                "items": bill.get("items", []),
+                "subtotal": str(bill.get("subtotal", last_payment.amount)),
+            })
+        except TableSession.DoesNotExist:
+            return api_error("RESOURCE_NOT_FOUND", "Sesi meja tidak ditemukan.", http_status=status.HTTP_404_NOT_FOUND)
+
     def post(self, request, session_id):
         serializer = CashPaymentRequestSerializer(data=request.data)
         if not serializer.is_valid():
@@ -311,6 +351,7 @@ class CashierPaymentAPIView(APIView):
                 method=serializer.validated_data['method'],
                 idempotency_key=idempotency_key
             )
+            bill = calculate_session_bill(session)
             return api_response({
                 "payment_code": payment.payment_code,
                 "amount": str(payment.amount),
@@ -318,6 +359,10 @@ class CashierPaymentAPIView(APIView):
                 "change_amount": str(payment.change_amount),
                 "status": payment.status,
                 "paid_at": payment.paid_at,
+                "table_name": session.table.display_name,
+                "table_code": session.table.table_code,
+                "items": bill.get("items", []),
+                "subtotal": str(bill.get("subtotal", payment.amount)),
             }, http_status=status.HTTP_201_CREATED)
         except TableSession.DoesNotExist:
             return api_error("RESOURCE_NOT_FOUND", "Sesi meja tidak ditemukan.", http_status=status.HTTP_404_NOT_FOUND)

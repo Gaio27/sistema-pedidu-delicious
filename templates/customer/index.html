@@ -37,7 +37,14 @@
               <i class="fa-solid fa-qrcode me-1"></i> Troka Meza
             </button>
             <ul class="dropdown-menu dropdown-menu-end shadow">
-              <li><h6 class="dropdown-header" data-i18n="select_table">Hili Meza Dine-In</h6></li>
+              {% if active_open_tables %}
+                <li><h6 class="dropdown-header text-success fw-bold"><i class="fa-solid fa-door-open me-1"></i> Meza Sesi Loke Hela (Active)</h6></li>
+                {% for ot in active_open_tables %}
+                  <li><a class="dropdown-item {% if ot.id == table.id %}active fw-bold{% endif %}" href="/t/{{ ot.qr_token }}/">🟢 {{ ot.display_name }}</a></li>
+                {% endfor %}
+                <li><hr class="dropdown-divider"></li>
+              {% endif %}
+              <li><h6 class="dropdown-header text-muted" data-i18n="select_table">Meza Hotu (All Tables)</h6></li>
               {% for t in all_tables %}
                 <li><a class="dropdown-item {% if t.id == table.id %}active fw-bold{% endif %}" href="/t/{{ t.qr_token }}/">{{ t.display_name }} ({{ t.status }})</a></li>
               {% endfor %}
@@ -45,9 +52,19 @@
           </div>
 
           {% if session and session.is_active %}
-            <button class="btn btn-sm btn-warning text-dark fw-bold rounded-pill px-3 shadow-sm" onclick="customerApp.requestBill()" data-i18n="request_bill">
-              <i class="fa-solid fa-receipt me-1"></i> Husu Konta
-            </button>
+            {% if session.status == 'BILL_REQUESTED' %}
+              <button class="btn btn-sm btn-secondary text-white fw-bold rounded-pill px-3 shadow-sm" disabled id="btn-request-bill">
+                <i class="fa-solid fa-clock me-1"></i> <span data-i18n="bill_already_requested">Konta Husu Tiha Ona</span>
+              </button>
+            {% elif session.status == 'PAID' %}
+              <button class="btn btn-sm btn-success text-white fw-bold rounded-pill px-3 shadow-sm" disabled id="btn-request-bill">
+                <i class="fa-solid fa-circle-check me-1"></i> <span data-i18n="bill_already_paid">Selu Tiha Ona</span>
+              </button>
+            {% else %}
+              <button class="btn btn-sm btn-warning text-dark fw-bold rounded-pill px-3 shadow-sm" onclick="customerApp.requestBill()" id="btn-request-bill" data-i18n="request_bill">
+                <i class="fa-solid fa-receipt me-1"></i> Husu Konta
+              </button>
+            {% endif %}
           {% endif %}
 
           <button class="btn btn-sm btn-light fw-bold rounded-pill px-3" onclick="installPWA()">
@@ -57,6 +74,18 @@
       </div>
     </div>
   </div>
+
+  <!-- Active Cashier-Opened Tables Bar -->
+  {% if active_open_tables %}
+    <div class="d-flex align-items-center gap-2 overflow-auto pb-2 mb-3" style="white-space: nowrap;">
+      <span class="badge bg-success bg-opacity-10 text-success border border-success fw-bold px-2 py-2 rounded-pill"><i class="fa-solid fa-door-open me-1"></i> Meza Loke:</span>
+      {% for ot in active_open_tables %}
+        <a href="/t/{{ ot.qr_token }}/" class="btn btn-sm {% if ot.id == table.id %}btn-success fw-bold text-white shadow-sm{% else %}btn-outline-success bg-white shadow-sm{% endif %} rounded-pill px-3 py-1">
+          <i class="fa-solid fa-chair me-1"></i> {{ ot.display_name }}
+        </a>
+      {% endfor %}
+    </div>
+  {% endif %}
 
   <!-- Live Orders Section -->
   <div id="customer-active-orders"></div>

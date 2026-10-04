@@ -282,12 +282,28 @@ class CustomerApp {
   async requestBill() {
     if (!this.sessionToken) return;
 
+    const btn = document.getElementById('btn-request-bill');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Haruka Hela...';
+    }
+
     try {
-      await apiPost(`/api/v1/public/sessions/${this.sessionToken}/request-bill/`);
-      showToast(t('bill_sent_toast'), 'info');
+      const res = await apiPost(`/api/v1/public/sessions/${this.sessionToken}/request-bill/`);
+      const msg = res.message || t('bill_sent_toast');
+      showToast(msg, 'info');
       SoundEffects.playBell();
+      if (btn) {
+        btn.disabled = true;
+        btn.className = 'btn btn-sm btn-secondary text-white fw-bold rounded-pill px-3 shadow-sm';
+        btn.innerHTML = '<i class="fa-solid fa-clock me-1"></i> Konta Husu Tiha Ona';
+      }
     } catch (e) {
       showToast(t(e.message), 'error');
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-receipt me-1"></i> Husu Konta';
+      }
     }
   }
 

@@ -1,7 +1,7 @@
 import secrets
 from decimal import Decimal
 from typing import Dict, Any
-from django.db import transaction
+from django.db import models, transaction
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 
@@ -28,6 +28,7 @@ def calculate_session_bill(session: TableSession) -> Dict[str, Any]:
     """
     Aggregates bill across all approved orders for the session.
     Excludes WAITING_CASHIER_CONFIRMATION, REJECTED, and CANCELLED orders.
+    Accurately computes total_paid, remaining_balance, and full payment state.
     """
     orders = Order.objects.filter(
         table_session=session,
@@ -39,7 +40,7 @@ def calculate_session_bill(session: TableSession) -> Dict[str, Any]:
     discount_total = sum((o.discount_total for o in orders), Decimal('0.00'))
     grand_total = sum((o.grand_total for o in orders), Decimal('0.00'))
 
-    # Gather item line details
+    # Gather item line details with notes
     all_items = []
     for order in orders:
         for item in order.items.all():
@@ -48,8 +49,18 @@ def calculate_session_bill(session: TableSession) -> Dict[str, Any]:
                 'quantity': item.quantity,
                 'unit_price': str(item.unit_price),
                 'subtotal': str(item.subtotal),
+                'note': item.note or '',
                 'order_code': order.order_code
             })
+
+    # Calculate completed payments for this session
+    total_paid = Payment.objects.filter(
+        table_session=session,
+        status=PaymentStatus.COMPLETED
+    ).aggregate(total=models.Sum('amount'))['total'] or Decimal('0.00')
+
+    remaining_balance = max(Decimal('0.00'), grand_total - total_paid)
+    is_fully_paid = (total_paid >= grand_total and grand_total > Decimal('0.00'))
 
     return {
         'orders_count': orders.count(),
@@ -57,6 +68,9 @@ def calculate_session_bill(session: TableSession) -> Dict[str, Any]:
         'tax_total': tax_total.quantize(Decimal('0.01')),
         'discount_total': discount_total.quantize(Decimal('0.01')),
         'grand_total': grand_total.quantize(Decimal('0.01')),
+        'total_paid': total_paid.quantize(Decimal('0.01')),
+        'remaining_balance': remaining_balance.quantize(Decimal('0.01')),
+        'is_fully_paid': is_fully_paid,
         'items': all_items,
         'has_active_unconfirmed_orders': Order.objects.filter(
             table_session=session,
@@ -75,6 +89,7 @@ def record_cash_payment(
 ) -> Payment:
     """
     Records payment, computes exact change, marks session PAID and orders COMPLETED.
+    Prevents duplicate payments when session balance is already $0.00.
     """
     with transaction.atomic():
         locked_session = TableSession.objects.select_for_update().get(id=session.id)
@@ -88,31 +103,33 @@ def record_cash_payment(
             if existing_payment:
                 return existing_payment
 
-        if locked_session.status == SessionStatus.PAID:
-            existing_payment = Payment.objects.filter(
-                table_session=locked_session,
-                status=PaymentStatus.COMPLETED
-            ).first()
-            if existing_payment:
-                return existing_payment
-
         if locked_session.status == SessionStatus.CLOSED:
             raise ValidationError("Cannot process payment for an already closed session.")
 
         bill = calculate_session_bill(locked_session)
-        bill_total = bill['grand_total']
+        remaining_balance = bill['remaining_balance']
         
-        if bill_total <= Decimal('0.00'):
+        if bill['grand_total'] <= Decimal('0.00'):
             raise ValidationError("No billable orders found for this table session.")
+
+        # Prevent paying if already fully paid and no new orders exist
+        if remaining_balance <= Decimal('0.00') or bill['is_fully_paid']:
+            existing_payment = Payment.objects.filter(
+                table_session=locked_session,
+                status=PaymentStatus.COMPLETED
+            ).last()
+            if existing_payment:
+                return existing_payment
+            raise ValidationError("Konta meza ne'e selu hotu ona (All billable orders are already paid).")
 
         tendered_dec = Decimal(str(tendered_amount)).quantize(Decimal('0.01'))
         
         if method == PaymentMethod.CASH:
-            if tendered_dec < bill_total:
-                raise ValidationError(f"Tendered cash (${tendered_dec}) is less than bill total (${bill_total}).")
-            change_amount = (tendered_dec - bill_total).quantize(Decimal('0.01'))
+            if tendered_dec < remaining_balance:
+                raise ValidationError(f"Tendered cash (${tendered_dec}) is less than bill balance (${remaining_balance}).")
+            change_amount = (tendered_dec - remaining_balance).quantize(Decimal('0.01'))
         else:
-            tendered_dec = bill_total
+            tendered_dec = remaining_balance
             change_amount = Decimal('0.00')
 
         payment = Payment.objects.create(
@@ -120,7 +137,7 @@ def record_cash_payment(
             table_session=locked_session,
             payment_code=generate_payment_code(),
             method=method,
-            amount=bill_total,
+            amount=remaining_balance,
             tendered_amount=tendered_dec,
             change_amount=change_amount,
             status=PaymentStatus.COMPLETED,

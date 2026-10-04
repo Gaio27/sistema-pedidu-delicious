@@ -57,8 +57,12 @@ class RestaurantTableSerializer(serializers.ModelSerializer):
             'guest_count': session.guest_count,
             'opened_at': session.opened_at,
             'bill_total': str(bill['grand_total']),
+            'total_paid': str(bill['total_paid']),
+            'remaining_balance': str(bill['remaining_balance']),
+            'is_fully_paid': bill['is_fully_paid'],
             'orders_count': bill['orders_count'],
             'has_unconfirmed': bill['has_active_unconfirmed_orders'],
+            'items': bill['items'],
         }
 
 class OrderItemSerializer(serializers.ModelSerializer):
