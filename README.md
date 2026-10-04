@@ -13,6 +13,8 @@
 [![PWA](https://img.shields.io/badge/PWA-Offline%20%2B%20Service%20Worker-5A0FC8?logo=pwa&logoColor=white)](https://web.dev/progressive-web-apps/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16%2B-336791?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
+[![Neon](https://img.shields.io/badge/Neon-PostgreSQL-00E599?logo=postgresql&logoColor=white)](https://console.neon.tech)
+[![Vercel Deployment](https://img.shields.io/badge/Vercel-celvass--pwa.vercel.app-black?logo=vercel&logoColor=white)](https://celvass-pwa.vercel.app)
 [![Versaun](https://img.shields.io/badge/Versaun-2.1.0-blue)](https://github.com/sagedral02/Sistema-Pedidu-Hahan-Bazeia-ba-PWA-ba-Celvass-Resto-Bar)
 ![Lisensa](https://img.shields.io/badge/Lisensa-MIT-green)
 
