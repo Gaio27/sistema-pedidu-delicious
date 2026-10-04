@@ -9,7 +9,9 @@ def manifest_json(request):
         "name": "Celvass Resto & Bar - Dine In PWA",
         "short_name": "Celvass",
         "description": "Progressive Web Application for Restaurant Dine-In Ordering with Cashier Verification",
+        "id": "/",
         "start_url": "/",
+        "scope": "/",
         "display": "standalone",
         "background_color": "#0f172a",
         "theme_color": "#f97316",
@@ -34,22 +36,28 @@ def manifest_json(request):
 @cache_control(no_cache=True, no_store=True, must_revalidate=True)
 def service_worker(request):
     sw_code = """
-const CACHE_NAME = 'celvass-pwa-v2';
+const CACHE_NAME = 'celvass-pwa-v3';
 const STATIC_ASSETS = [
     '/',
     '/offline/',
     '/static/css/style.css',
     '/static/js/i18n.js',
     '/static/js/api.js',
+    '/static/js/sound.js',
     '/static/js/websocket.js',
     '/static/js/customer.js',
-    '/static/icons/default-food.png'
+    '/static/js/pwa.js',
+    '/static/icons/default-food.png',
+    '/static/icons/icon-192.png',
+    '/static/icons/icon-512.png'
 ];
 
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
-            return cache.addAll(STATIC_ASSETS).catch(() => {});
+            return cache.addAll(STATIC_ASSETS).catch((err) => {
+                console.warn('PWA Asset cache skip:', err);
+            });
         })
     );
     self.skipWaiting();

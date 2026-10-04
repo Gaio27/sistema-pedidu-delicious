@@ -4,46 +4,56 @@
 {% block title %}{{ table.display_name|default:"Pilih Meja" }} - {{ current_restaurant.name }}{% endblock %}
 
 {% block content %}
-<div class="container" style="max-width: 900px; padding-bottom: 90px;">
+<div class="container" style="max-width: 960px; padding-bottom: 100px;">
 
-  <!-- Table Header / Session Banner -->
-  <div class="card card-custom p-3 mb-3 bg-white shadow-sm border-0">
-    <div class="d-flex justify-content-between align-items-center">
-      <div class="d-flex align-items-center gap-3">
-        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; font-size: 1.25rem;">
-          <i class="fa-solid fa-chair"></i>
+  <!-- Restaurant Hero Banner -->
+  <div class="resto-hero-banner">
+    <div class="row align-items-center g-3">
+      <div class="col-md-7">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="badge bg-warning text-dark fw-bold px-2 py-1"><i class="fa-solid fa-star me-1"></i> 4.9 (500+ Reviews)</span>
+          <span class="badge bg-white bg-opacity-20 text-white px-2 py-1"><i class="fa-solid fa-location-dot me-1"></i> Praia dos Coqueiros, Dili</span>
         </div>
-        <div>
-          <h5 class="fw-bold mb-0">{{ table.display_name|default:"Meza Seidauk Hili" }}</h5>
-          <div class="small text-muted">
-            {% if session and session.is_active %}
-              <span class="text-success fw-bold"><i class="fa-solid fa-circle-check"></i> <span data-i18n="active_session">Sesi Ativu</span></span> (<span data-i18n="guests">Tamu</span>: {{ session.guest_count }} <span data-i18n="people">Ema</span>)
-            {% else %}
-              <span class="text-warning fw-bold"><i class="fa-solid fa-circle-exclamation"></i> <span data-i18n="session_not_opened">Sesi Seidauk Loke hosi Kaixa</span></span>
-            {% endif %}
-          </div>
+        <h3 class="fw-bold mb-1 text-white">{{ current_restaurant.name }}</h3>
+        <p class="text-white-50 small mb-2">Esperiénsia gastronómika modernu iha tasi-ibun Dili ho vizaun tasi furak no pedidu dixital PWA.</p>
+        
+        <!-- Table & Session Status -->
+        <div class="d-inline-flex align-items-center gap-2 bg-white bg-opacity-10 rounded-pill px-3 py-1 mt-1 border border-white border-opacity-10">
+          <i class="fa-solid fa-chair text-warning"></i>
+          <span class="fw-bold small">{{ table.display_name|default:"Meza Seidauk Hili" }}</span>
+          {% if session and session.is_active %}
+            <span class="badge bg-success rounded-pill small ms-1"><i class="fa-solid fa-circle-check me-1"></i> Sesi Ativu ({{ session.guest_count }} Ema)</span>
+          {% else %}
+            <span class="badge bg-warning text-dark rounded-pill small ms-1"><i class="fa-solid fa-circle-exclamation me-1"></i> Sesi Seidauk Loke</span>
+          {% endif %}
         </div>
       </div>
 
-      <div class="d-flex gap-2">
-        <!-- Switch Table Dropdown -->
-        <div class="dropdown">
-          <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" data-i18n="switch_table">
-            <i class="fa-solid fa-qrcode me-1"></i> Troka Meza
-          </button>
-          <ul class="dropdown-menu dropdown-menu-end shadow">
-            <li><h6 class="dropdown-header" data-i18n="select_table">Hili Meza Dine-In</h6></li>
-            {% for t in all_tables %}
-              <li><a class="dropdown-item {% if t.id == table.id %}active fw-bold{% endif %}" href="/t/{{ t.qr_token }}/">{{ t.display_name }} ({{ t.status }})</a></li>
-            {% endfor %}
-          </ul>
-        </div>
+      <div class="col-md-5 text-md-end">
+        <div class="d-flex flex-wrap gap-2 justify-content-md-end">
+          <!-- Switch Table Dropdown -->
+          <div class="dropdown">
+            <button class="btn btn-sm btn-outline-light dropdown-toggle rounded-pill px-3" type="button" data-bs-toggle="dropdown" data-i18n="switch_table">
+              <i class="fa-solid fa-qrcode me-1"></i> Troka Meza
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow">
+              <li><h6 class="dropdown-header" data-i18n="select_table">Hili Meza Dine-In</h6></li>
+              {% for t in all_tables %}
+                <li><a class="dropdown-item {% if t.id == table.id %}active fw-bold{% endif %}" href="/t/{{ t.qr_token }}/">{{ t.display_name }} ({{ t.status }})</a></li>
+              {% endfor %}
+            </ul>
+          </div>
 
-        {% if session and session.is_active %}
-          <button class="btn btn-sm btn-outline-primary fw-bold" onclick="customerApp.requestBill()" data-i18n="request_bill">
-            <i class="fa-solid fa-receipt me-1"></i> Husu Konta (Bill)
+          {% if session and session.is_active %}
+            <button class="btn btn-sm btn-warning text-dark fw-bold rounded-pill px-3 shadow-sm" onclick="customerApp.requestBill()" data-i18n="request_bill">
+              <i class="fa-solid fa-receipt me-1"></i> Husu Konta
+            </button>
+          {% endif %}
+
+          <button class="btn btn-sm btn-light fw-bold rounded-pill px-3" onclick="installPWA()">
+            <i class="fa-solid fa-download me-1"></i> Instala App
           </button>
-        {% endif %}
+        </div>
       </div>
     </div>
   </div>
@@ -51,20 +61,20 @@
   <!-- Live Orders Section -->
   <div id="customer-active-orders"></div>
 
-    <!-- Search & Category Filters -->
-  <div class="mb-3">
+  <!-- Search & Category Filters -->
+  <div class="mb-4">
     <div class="input-group shadow-sm mb-3">
-      <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
-      <input type="text" id="menu-search" class="form-control border-start-0 ps-0" placeholder="Buka hahan, hemu, seafood, snack..." data-i18n-placeholder="search_placeholder">
+      <span class="input-group-text bg-white border-end-0 ps-3"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+      <input type="text" id="menu-search" class="form-control border-start-0 py-2 ps-2" placeholder="Buka hahan, hemu, seafood, dessert..." data-i18n-placeholder="search_placeholder">
     </div>
 
     <!-- Category Pills -->
     <div class="d-flex gap-2 overflow-auto pb-2" style="white-space: nowrap; scrollbar-width: none;">
-      <button class="btn btn-sm btn-primary cat-pill active rounded-pill px-3" data-category="all">
+      <button class="btn btn-sm btn-primary cat-pill active rounded-pill px-3 py-2" data-category="all">
         <i class="fa-solid fa-border-all me-1"></i> <span data-i18n="all_menu">Menu Hotu</span>
       </button>
       {% for cat in categories %}
-        <button class="btn btn-sm btn-outline-secondary cat-pill rounded-pill px-3" data-category="{{ cat.slug }}">
+        <button class="btn btn-sm btn-outline-secondary cat-pill rounded-pill px-3 py-2 bg-white shadow-sm" data-category="{{ cat.slug }}">
           <i class="fa-solid fa-{{ cat.icon_name|default:'utensils' }} me-1"></i> {{ cat.name }}
         </button>
       {% endfor %}
@@ -77,14 +87,28 @@
       {% for item in cat.items.all %}
         {% if item.availability != 'INACTIVE' %}
           <div class="col-md-4 col-sm-6 menu-item-col" data-category="{{ cat.slug }}" data-name="{{ item.name }}" data-desc="{{ item.description }}">
-            <div class="menu-card">
-              <img src="{{ item.display_image }}" class="menu-card-img" alt="{{ item.name }}" onerror="this.src='/static/icons/default-food.png'">
+            <div class="menu-card shadow-sm">
+              
+              <!-- Fixed Aspect Ratio Image Container -->
+              <div class="menu-card-img-wrapper position-relative">
+                <img src="{{ item.display_image }}" class="menu-card-img" alt="{{ item.name }}" loading="lazy" onerror="this.onerror=null; this.src='/static/icons/default-food.png';">
+                {% if item.is_featured %}
+                  <span class="badge bg-warning text-dark fw-bold position-absolute top-0 start-0 m-2 rounded-pill px-2 py-1 shadow-sm">
+                    <i class="fa-solid fa-star me-1"></i> Chef's Special
+                  </span>
+                {% endif %}
+                <span class="badge bg-dark bg-opacity-75 text-white position-absolute bottom-0 end-0 m-2 rounded-pill px-2 py-1 small">
+                  <i class="fa-regular fa-clock me-1"></i> 10-15m
+                </span>
+              </div>
+
+              <!-- Card Body -->
               <div class="menu-card-body">
                 <div class="d-flex justify-content-between align-items-start mb-1">
                   <h6 class="fw-bold mb-0 text-dark">{{ item.name }}</h6>
                   <span class="badge bg-light text-secondary border small">{{ cat.name }}</span>
                 </div>
-                <p class="text-muted small mb-2 flex-grow-1" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                <p class="text-muted small mb-2 flex-grow-1" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4;">
                   {{ item.description|default:"Hidangan spesial khas Celvass Resto & Bar dengan bahan segar pilihan." }}
                 </p>
 
@@ -93,7 +117,7 @@
 
                   {% if item.availability == 'AVAILABLE' %}
                     {% if session and session.is_active %}
-                      <button class="btn btn-sm btn-primary rounded-pill px-3 fw-bold" onclick="openItemModal('{{ item.id }}', '{{ item.name|escapejs }}', '{{ item.price }}', '{{ item.display_image|escapejs }}', '{{ item.description|escapejs }}')">
+                      <button class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow-sm" onclick="openItemModal('{{ item.id }}', '{{ item.name|escapejs }}', '{{ item.price }}', '{{ item.display_image|escapejs }}', '{{ item.description|escapejs }}')">
                         <i class="fa-solid fa-plus me-1"></i> <span data-i18n="add">Aumenta</span>
                       </button>
                     {% else %}
@@ -102,10 +126,11 @@
                       </button>
                     {% endif %}
                   {% else %}
-                    <span class="badge bg-danger rounded-pill px-3 py-2" data-i18n="sold_out">Hotu Ona (Sold Out)</span>
+                    <span class="badge bg-danger rounded-pill px-3 py-2" data-i18n="sold_out">Hotu Ona</span>
                   {% endif %}
                 </div>
               </div>
+
             </div>
           </div>
         {% endif %}
@@ -118,23 +143,27 @@
 <!-- Floating Cart Bottom Bar -->
 <div id="floating-cart-bar" class="floating-cart-bar shadow-lg" style="display: none;" data-bs-toggle="offcanvas" data-bs-target="#cartOffcanvas">
   <div class="d-flex align-items-center gap-2">
-    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 38px; height: 38px;">
       <i class="fa-solid fa-bag-shopping"></i>
     </div>
-    <span class="badge bg-light text-dark fw-bold" id="cart-count-badge">0 Item</span>
+    <span class="badge bg-light text-dark fw-bold px-2 py-1 rounded-pill" id="cart-count-badge">0 Item</span>
   </div>
   <div class="d-flex align-items-center gap-3">
-    <span class="fs-5 fw-bold" id="cart-total-price">$0.00</span>
-    <span class="btn btn-sm btn-primary rounded-pill px-3 fw-bold" data-i18n="btn_view_order">Haree Pedidu →</span>
+    <span class="fs-5 fw-bold text-white" id="cart-total-price">$0.00</span>
+    <span class="btn btn-sm btn-warning text-dark rounded-pill px-3 fw-bold shadow-sm" data-i18n="btn_view_order">Haree Pedidu →</span>
   </div>
 </div>
 
 <!-- Item Customization Modal -->
 <div class="modal fade" id="itemCustomModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content rounded-4 border-0 shadow">
-      <div class="modal-body p-4">
-        <div class="d-flex justify-content-between align-items-start mb-3">
+    <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
+      
+      <!-- Modal Food Image Preview -->
+      <img id="modal-item-img" src="" class="w-100" style="height: 200px; object-fit: cover; display: none;" alt="Menu Image" onerror="this.src='/static/icons/default-food.png';">
+
+      <div class="modal-body p-4 pt-3">
+        <div class="d-flex justify-content-between align-items-start mb-2">
           <div>
             <h5 class="fw-bold mb-1" id="modal-item-name">Naran Menu</h5>
             <div class="text-primary fw-bold fs-5" id="modal-item-price">$0.00</div>
@@ -144,21 +173,21 @@
 
         <p class="text-muted small mb-3" id="modal-item-desc"></p>
 
-        <div class="mb-3">
-          <label class="form-label small fw-bold text-secondary">Kuantidade (Quantity):</label>
+        <div class="mb-3 bg-light p-3 rounded-3 border">
+          <label class="form-label small fw-bold text-secondary mb-2">Kuantidade (Quantity):</label>
           <div class="d-flex align-items-center gap-3">
-            <button class="btn btn-outline-secondary rounded-circle" style="width: 40px; height: 40px;" onclick="adjustModalQty(-1)">-</button>
-            <span class="fs-4 fw-bold" id="modal-item-qty">1</span>
-            <button class="btn btn-outline-secondary rounded-circle" style="width: 40px; height: 40px;" onclick="adjustModalQty(1)">+</button>
+            <button class="btn btn-outline-secondary rounded-circle shadow-sm" style="width: 40px; height: 40px;" onclick="adjustModalQty(-1)">-</button>
+            <span class="fs-4 fw-bold px-2" id="modal-item-qty">1</span>
+            <button class="btn btn-outline-secondary rounded-circle shadow-sm" style="width: 40px; height: 40px;" onclick="adjustModalQty(1)">+</button>
           </div>
         </div>
 
         <div class="mb-3">
           <label for="modal-item-note" class="form-label small fw-bold text-secondary" data-i18n="order_notes_label">Notasaun ba Meza / Dapur:</label>
-          <input type="text" class="form-control" id="modal-item-note" placeholder="Ezemplu: Lalika tau pimenta, kuah haketak..." data-i18n-placeholder="order_notes_placeholder">
+          <input type="text" class="form-control rounded-3" id="modal-item-note" placeholder="Ezemplu: Lalika tau pimenta, kuah haketak..." data-i18n-placeholder="order_notes_placeholder">
         </div>
 
-        <button type="button" class="btn btn-primary w-100 py-2 rounded-pill fw-bold" id="btn-add-modal-item" data-i18n="add">
+        <button type="button" class="btn btn-primary w-100 py-2 rounded-pill fw-bold shadow-sm" id="btn-add-modal-item" data-i18n="add">
           Aumenta ba Karreta
         </button>
       </div>
@@ -180,7 +209,7 @@
     <div class="border-top pt-3 mt-3">
       <div class="mb-3">
         <label for="order-customer-note" class="form-label small fw-bold text-secondary" data-i18n="order_notes_label">Notasaun ba Meza / Dapur:</label>
-        <textarea class="form-control" id="order-customer-note" rows="2" placeholder="Ezemplu: Lalika tau pimenta, kuah haketak..." data-i18n-placeholder="order_notes_placeholder"></textarea>
+        <textarea class="form-control rounded-3" id="order-customer-note" rows="2" placeholder="Ezemplu: Lalika tau pimenta, kuah haketak..." data-i18n-placeholder="order_notes_placeholder"></textarea>
       </div>
 
       <div class="d-flex justify-content-between align-items-center mb-3">
@@ -220,6 +249,17 @@
     document.getElementById('modal-item-desc').textContent = desc;
     document.getElementById('modal-item-qty').textContent = modalQty;
     document.getElementById('modal-item-note').value = '';
+
+    const modalImg = document.getElementById('modal-item-img');
+    if (modalImg) {
+      if (image && image !== '/static/icons/default-food.png') {
+        modalImg.src = image;
+        modalImg.style.display = 'block';
+      } else {
+        modalImg.src = '/static/icons/default-food.png';
+        modalImg.style.display = 'block';
+      }
+    }
 
     const modal = new bootstrap.Modal(document.getElementById('itemCustomModal'));
     modal.show();

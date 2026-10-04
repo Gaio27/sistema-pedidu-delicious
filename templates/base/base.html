@@ -60,6 +60,11 @@
         </ul>
 
         <div class="d-flex align-items-center gap-2">
+          <!-- PWA Install Quick Action -->
+          <button class="btn btn-sm btn-outline-warning fw-bold d-flex align-items-center gap-1 rounded-pill px-2" onclick="installPWA()" title="Instala Celvass PWA">
+            <i class="fa-solid fa-download"></i> <span class="d-none d-md-inline">Instala App</span>
+          </button>
+
           <!-- Language Selector -->
           <div class="dropdown">
             <button class="btn btn-sm btn-outline-light dropdown-toggle fw-bold" type="button" data-bs-toggle="dropdown" id="current-lang-label">
@@ -109,11 +114,23 @@
   </nav>
 
   <!-- PWA Install Prompt Banner -->
-  <div id="pwa-install-banner" class="bg-primary text-white py-2 px-3 text-center shadow" style="display: none;">
-    <div class="d-flex align-items-center justify-content-center gap-2">
-      <i class="fa-solid fa-download"></i>
-      <span data-i18n="install_pwa_text">Instala <strong>{{ current_restaurant.name }}</strong> iha ita-nia HP hodi asesu lais & la uza kuota!</span>
-      <button class="btn btn-sm btn-light fw-bold ms-2" onclick="installPWA()" data-i18n="install_pwa_btn">Instala PWA</button>
+  <div id="pwa-install-banner" class="pwa-banner py-2 px-3 shadow" style="display: none;">
+    <div class="container d-flex align-items-center justify-content-between gap-3">
+      <div class="d-flex align-items-center gap-2">
+        <img src="/static/icons/icon-192.png" width="38" height="38" class="rounded-2 shadow-sm" alt="Celvass App">
+        <div>
+          <div class="fw-bold small text-white"><span data-i18n="install_pwa_title">Instala Celvass Resto &amp; Bar PWA</span></div>
+          <div class="small text-white-50 d-none d-sm-block"><span data-i18n="install_pwa_text">Asesu menus lais, poupa kuota, no bele haree hahan offline!</span></div>
+        </div>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-sm btn-warning fw-bold px-3 rounded-pill shadow-sm" onclick="installPWA()">
+          <i class="fa-solid fa-download me-1"></i> <span data-i18n="install_pwa_btn">Instala PWA</span>
+        </button>
+        <button class="btn btn-sm btn-link text-white-50 p-1" onclick="dismissPwaBanner()" title="Taka">
+          <i class="fa-solid fa-xmark fs-5"></i>
+        </button>
+      </div>
     </div>
   </div>
 
