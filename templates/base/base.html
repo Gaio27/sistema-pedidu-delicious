@@ -84,13 +84,13 @@
         <!-- CONDITIONAL DOCK: CUSTOMER TABLE ORDERING VS STAFF PORTALS -->
         {% if table or qr_token %}
           <!-- CUSTOMER ORDERING DOCK (Active on Table Menu: Table Badge, Search Bar trigger, and Cart) -->
-          {% if table %}
-            <span class="badge bg-warning bg-opacity-20 border border-warning border-opacity-30 text-warning fw-bold px-2 py-1 rounded-pill me-1" style="font-size: 0.72rem;">
-              <i class="fa-solid fa-chair me-1"></i>
-              <span class="d-none d-md-inline">{{ table.display_name }}</span>
-              <span class="d-inline d-md-none">{{ table.table_code|default:table.display_name }}</span>
+          <div id="dock-table-badge-container" class="d-inline-flex align-items-center">
+            <span class="badge bg-warning bg-opacity-20 border border-warning border-opacity-30 text-warning fw-bold px-2 py-1 rounded-pill me-1 d-inline-flex align-items-center gap-1" style="font-size: 0.72rem; white-space: nowrap;">
+              <i class="fa-solid fa-chair"></i>
+              <span class="d-none d-lg-inline">{{ table.display_name|default:table.compact_name|default:"Meza" }}</span>
+              <span class="d-inline d-lg-none" id="dock-table-name-mobile">{{ table.compact_name|default:table.display_name|default:table.table_code|default:"Meza" }}</span>
             </span>
-          {% endif %}
+          </div>
 
           <button type="button" class="dock-item-btn" id="dock-btn-search" onclick="toggleDockSearch()" title="Buka Menu">
             <i class="fa-solid fa-magnifying-glass text-warning"></i>

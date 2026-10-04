@@ -46,6 +46,15 @@ class RestaurantTable(models.Model):
     def __str__(self):
         return f"{self.display_name} ({self.table_code})"
 
+    @property
+    def compact_name(self):
+        """Returns clean short table name (e.g. 'Meza 01') without long descriptions."""
+        if self.display_name:
+            base = self.display_name.split('(')[0].strip()
+            if base:
+                return base
+        return self.table_code or "Meza"
+
     def rotate_qr(self):
         self.qr_token = generate_secure_token()
         self.save(update_fields=['qr_token', 'updated_at'])

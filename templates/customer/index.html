@@ -251,6 +251,7 @@
     sessionToken: "{{ session.public_token|default:'' }}",
     qrToken: "{{ qr_token|default:'' }}",
     tableCode: "{{ table.table_code|default:'' }}",
+    tableName: "{{ table.compact_name|default:table.display_name|escapejs }}",
   });
 
   function openItemModal(id, name, price, image, desc) {

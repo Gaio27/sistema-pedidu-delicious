@@ -9,11 +9,13 @@ class CustomerApp {
     this.sessionToken = config.sessionToken;
     this.qrToken = config.qrToken;
     this.tableCode = config.tableCode;
+    this.tableName = config.tableName;
     this.deviceId = this.getOrCreateDeviceId();
     this.storageKey = `resto_cart_${this.sessionToken || 'default'}`;
     this.cart = this.loadCart();
     this.selectedItem = null;
     this.activeOrders = [];
+    this.lastOrdersJson = null;
 
     this.init();
   }
@@ -30,6 +32,19 @@ class CustomerApp {
   }
 
   init() {
+    // Ensure mobile table badge in dock has a clean compact table name
+    const mobileTableBadge = document.getElementById('dock-table-name-mobile');
+    if (mobileTableBadge) {
+      const current = mobileTableBadge.textContent.trim();
+      if (!current || current === 'None' || current === 'Meza') {
+        if (this.tableName) {
+          mobileTableBadge.textContent = this.tableName;
+        } else if (this.tableCode) {
+          mobileTableBadge.textContent = this.tableCode;
+        }
+      }
+    }
+
     this.renderCartUI();
     this.initWebSocket();
     this.loadActiveOrders();
@@ -296,9 +311,14 @@ class CustomerApp {
       const orders = await apiGet(`/api/v1/public/sessions/${this.sessionToken}/orders/list/`, {
         'X-Device-Token': this.deviceId,
       });
-      this.activeOrders = orders || [];
-      this.renderOrdersUI();
-      this.checkBillButtonEligibility();
+      const newOrders = orders || [];
+      const newJson = JSON.stringify(newOrders);
+      if (this.lastOrdersJson !== newJson) {
+        this.lastOrdersJson = newJson;
+        this.activeOrders = newOrders;
+        this.renderOrdersUI();
+        this.checkBillButtonEligibility();
+      }
     } catch (e) {
       // Session closed or inactive
     }
@@ -455,8 +475,12 @@ class CustomerApp {
       }
     });
 
-    // Fallback polling every 8 seconds
-    setInterval(() => this.loadActiveOrders(), 8000);
+    // Fallback polling every 10 seconds, only if document is visible
+    setInterval(() => {
+      if (!document.hidden) {
+        this.loadActiveOrders();
+      }
+    }, 10000);
   }
 
   scrollToActiveOrders() {
