@@ -125,10 +125,37 @@ def close_table_session(*, session: TableSession, closed_by, reason: str = "Comp
 def request_bill_for_session(*, session: TableSession, request_id: str = "") -> TableSession:
     """
     Customer or cashier requests bill for the table session.
+    Strictly validates that table has at least one order SERVED and no pending/cooking orders.
     """
     with transaction.atomic():
         locked_session = TableSession.objects.select_for_update().get(id=session.id)
         if locked_session.status == SessionStatus.OPEN:
+            from apps.ordering.models import Order, OrderStatus
+            
+            # 1. Must have at least 1 order with status SERVED
+            served_orders = Order.objects.filter(
+                table_session=locked_session,
+                status=OrderStatus.SERVED
+            )
+            if not served_orders.exists():
+                raise ValidationError(
+                    "Ita-boot seidauk bele husu konta tanba seidauk iha pedidu ne'ebé entrega tiha ona ba meza (SERVED)."
+                )
+
+            # 2. Must not have orders currently being verified or cooking in kitchen
+            cooking_orders = Order.objects.filter(
+                table_session=locked_session,
+                status__in=[
+                    OrderStatus.WAITING_CASHIER_CONFIRMATION,
+                    OrderStatus.CONFIRMED,
+                    OrderStatus.PREPARING
+                ]
+            )
+            if cooking_orders.exists():
+                raise ValidationError(
+                    "Sei iha hahan ne'ebé prepara hela iha dapur. Favór hein to'o hahan hotu to'o meza molok husu konta."
+                )
+
             locked_session.status = SessionStatus.BILL_REQUESTED
             locked_session.bill_requested_at = timezone.now()
             locked_session.save(update_fields=['status', 'bill_requested_at', 'updated_at'])

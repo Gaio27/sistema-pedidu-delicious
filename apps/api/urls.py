@@ -13,12 +13,14 @@ urlpatterns = [
 
     # Cashier API
     path('cashier/orders/', views.CashierPendingOrdersAPIView.as_view(), name='api-cashier-pending-orders'),
+    path('cashier/orders/history/', views.CashierOrdersHistoryAPIView.as_view(), name='api-cashier-orders-history'),
     path('cashier/orders/<uuid:order_id>/confirm/', views.CashierConfirmOrderAPIView.as_view(), name='api-cashier-confirm-order'),
     path('cashier/orders/<uuid:order_id>/reject/', views.CashierRejectOrderAPIView.as_view(), name='api-cashier-reject-order'),
     path('cashier/tables/', views.CashierTablesListAPIView.as_view(), name='api-cashier-tables-list'),
     path('cashier/tables/<uuid:table_id>/open-session/', views.CashierOpenTableSessionAPIView.as_view(), name='api-cashier-open-session'),
     path('cashier/table-sessions/<uuid:session_id>/close/', views.CashierCloseTableSessionAPIView.as_view(), name='api-cashier-close-session'),
     path('cashier/table-sessions/<uuid:session_id>/payments/', views.CashierPaymentAPIView.as_view(), name='api-cashier-payments'),
+    path('cashier/shift/summary/', views.CashierShiftSummaryAPIView.as_view(), name='api-cashier-shift-summary'),
 
     # Kitchen API
     path('kitchen/orders/', views.KitchenQueueAPIView.as_view(), name='api-kitchen-queue'),
@@ -29,4 +31,5 @@ urlpatterns = [
     # Admin API
     path('admin/menu-items/<uuid:item_id>/toggle-availability/', views.AdminToggleMenuItemAvailabilityAPIView.as_view(), name='api-admin-toggle-menu'),
     path('admin/tables/<uuid:table_id>/rotate-qr/', views.AdminRotateTableQRAPIView.as_view(), name='api-admin-rotate-qr'),
+    path('admin/users/create/', views.AdminUserCreateAPIView.as_view(), name='api-admin-user-create'),
 ]

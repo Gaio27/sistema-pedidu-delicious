@@ -318,3 +318,36 @@ h1, h2, h3, h4, h5, h6, .brand-font {
     padding: 1.15rem;
   }
 }
+
+/* Dark Glassmorphism Global Utilities (Zero AI-Slop) */
+.glass-card {
+  background: rgba(15, 23, 42, 0.78) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 1.25rem !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37) !important;
+}
+
+/* Custom Sleek Amber Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(7, 11, 20, 0.6);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(249, 115, 22, 0.35);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(249, 115, 22, 0.65);
+}
+
+/* Form Controls in Dark Glass Mode */
+.form-control:focus, .form-select:focus {
+  border-color: #f97316 !important;
+  box-shadow: 0 0 0 0.25rem rgba(249, 115, 22, 0.25) !important;
+}

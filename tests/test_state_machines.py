@@ -78,3 +78,35 @@ def test_order_rejection_workflow(active_session, menu_item_fish, cashier_user):
     rejected = reject_order_by_cashier(order=order, rejected_by=cashier_user, reason="Tamu tidak ada di meja")
     assert rejected.status == OrderStatus.REJECTED
     assert rejected.rejection_reason == "Tamu tidak ada di meja"
+
+@pytest.mark.django_db
+def test_bill_request_strictly_requires_served_order(active_session, menu_item_fish, cashier_user, kitchen_user):
+    from django.core.exceptions import ValidationError
+    from apps.tables.services import request_bill_for_session
+
+    # 1. Calling request_bill_for_session with 0 orders must fail
+    with pytest.raises(ValidationError) as exc:
+        request_bill_for_session(session=active_session)
+    assert "seidauk bele husu konta" in str(exc.value)
+
+    # 2. Place an order, but it is only CONFIRMED / PREPARING -> must still fail
+    order = submit_customer_order(
+        table_session=active_session,
+        items_data=[{'menu_item_id': menu_item_fish.id, 'quantity': 1}],
+        idempotency_key="bill-guard-order"
+    )
+    confirmed = confirm_order_by_cashier(order=order, confirmed_by=cashier_user)
+    with pytest.raises(ValidationError) as exc2:
+        request_bill_for_session(session=active_session)
+    assert "seidauk bele husu konta" in str(exc2.value)
+
+    # 3. Cook and Mark Served
+    preparing = start_preparing_order(order=confirmed, staff_user=kitchen_user)
+    ready = mark_order_ready(order=preparing, staff_user=kitchen_user)
+    served = mark_order_served(order=ready, staff_user=cashier_user)
+    assert served.status == OrderStatus.SERVED
+
+    # 4. Now requesting bill MUST SUCCEED
+    updated_session = request_bill_for_session(session=active_session)
+    assert updated_session.status == SessionStatus.BILL_REQUESTED
+    assert updated_session.bill_requested_at is not None

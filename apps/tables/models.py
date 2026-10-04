@@ -58,6 +58,8 @@ class TableSession(models.Model):
     public_token = models.CharField(max_length=128, unique=True, default=generate_secure_token, db_index=True)
     status = models.CharField(max_length=30, choices=SessionStatus.choices, default=SessionStatus.OPEN, db_index=True)
     guest_count = models.PositiveIntegerField(default=1)
+    primary_device_token = models.CharField(max_length=128, null=True, blank=True, db_index=True)
+    authorized_device_tokens = models.JSONField(default=list, blank=True)
     
     opened_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='opened_sessions')
     opened_at = models.DateTimeField(auto_now_add=True)

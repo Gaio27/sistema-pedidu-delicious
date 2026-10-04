@@ -126,7 +126,7 @@ def record_cash_payment(
         
         if method == PaymentMethod.CASH:
             if tendered_dec < remaining_balance:
-                raise ValidationError(f"Tendered cash (${tendered_dec}) is less than bill balance (${remaining_balance}).")
+                raise ValidationError(f"Tendered cash (${tendered_dec}) is less than bill total (${remaining_balance}).")
             change_amount = (tendered_dec - remaining_balance).quantize(Decimal('0.01'))
         else:
             tendered_dec = remaining_balance

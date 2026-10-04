@@ -54,20 +54,20 @@ class KitchenKDSApp {
     let actionBtn = '';
     if (column === 'CONFIRMED') {
       actionBtn = `
-        <button class="btn btn-warning w-100 fw-bold py-2 mt-2" onclick="kdsApp.startPreparing('${order.id}')">
-          <i class="fa-solid fa-fire me-1"></i> Mulai Memasak
+        <button class="btn btn-warning w-100 fw-bold py-2 mt-2 rounded-pill text-dark shadow" onclick="kdsApp.startPreparing('${order.id}')">
+          <i class="fa-solid fa-fire me-1"></i> Hahu Tein
         </button>
       `;
     } else if (column === 'PREPARING') {
       actionBtn = `
-        <button class="btn btn-success w-100 fw-bold py-2 mt-2" onclick="kdsApp.markReady('${order.id}')">
-          <i class="fa-solid fa-bell me-1"></i> Makanan Siap
+        <button class="btn btn-success w-100 fw-bold py-2 mt-2 rounded-pill shadow" onclick="kdsApp.markReady('${order.id}')">
+          <i class="fa-solid fa-bell me-1"></i> Hahan Prontu
         </button>
       `;
     } else if (column === 'READY') {
       actionBtn = `
-        <button class="btn btn-outline-light w-100 fw-bold py-2 mt-2" onclick="kdsApp.markServed('${order.id}')">
-          <i class="fa-solid fa-check-double me-1"></i> Selesai Disajikan
+        <button class="btn btn-outline-light w-100 fw-bold py-2 mt-2 rounded-pill shadow" onclick="kdsApp.markServed('${order.id}')">
+          <i class="fa-solid fa-check-double me-1"></i> Entrega ba Meza Ona
         </button>
       `;
     }
@@ -100,7 +100,7 @@ class KitchenKDSApp {
             .join('')}
         </ul>
 
-        ${order.customer_note ? `<div class="p-2 bg-black rounded text-danger small mb-2 border border-danger"><strong>Catatan Meja:</strong> ${order.customer_note}</div>` : ''}
+        ${order.customer_note ? `<div class="p-2 bg-black rounded text-danger small mb-2 border border-danger"><strong>Notasaun Meza:</strong> ${order.customer_note}</div>` : ''}
 
         ${actionBtn}
       </div>

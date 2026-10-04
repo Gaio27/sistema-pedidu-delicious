@@ -14,7 +14,8 @@ from apps.audit.selectors import get_recent_audit_events
 def customer_dine_in_view(request, qr_token=None):
     """
     Public customer dine-in view — requires a valid QR token to access a table.
-    Accessing the root URL '/' without a token shows only the landing page.
+    Enforces strict device-locking: only the device that opened/joined the active session
+    can order or view the table session. Foreign devices are blocked with occupied_locked.html.
     """
     # Root URL without a QR token → show neutral landing page only
     if not qr_token:
@@ -26,6 +27,29 @@ def customer_dine_in_view(request, qr_token=None):
 
     session = get_active_session_for_table(table)
     categories = get_categories(active_only=True)
+
+    # Extract device token from cookie, header, or query
+    device_token = (
+        request.COOKIES.get('celvass_device_id') or
+        request.headers.get('X-Device-Token') or
+        request.GET.get('device_id')
+    )
+
+    # If session is active, verify device lock
+    if session:
+        if session.primary_device_token:
+            # Table is locked to a device
+            if device_token and device_token != session.primary_device_token:
+                # Different device trying to access active table
+                return render(request, 'customer/occupied_locked.html', {
+                    'table': table,
+                    'session': session,
+                }, status=403)
+        elif device_token:
+            # First device to access active session claims it
+            session.primary_device_token = device_token
+            session.authorized_device_tokens = [device_token]
+            session.save(update_fields=['primary_device_token', 'authorized_device_tokens'])
 
     return render(request, 'customer/index.html', {
         'table': table,

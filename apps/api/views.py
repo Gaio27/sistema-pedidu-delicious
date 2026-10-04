@@ -107,15 +107,29 @@ class PublicOrderSubmitAPIView(APIView):
     def post(self, request, session_token):
         session = get_session_by_public_token(session_token)
         if not session:
-            return api_error("TABLE_SESSION_NOT_OPEN", "Sesi meja tidak ditemukan atau sudah ditutup.", http_status=status.HTTP_404_NOT_FOUND)
+            return api_error("TABLE_SESSION_NOT_OPEN", "Sesi meza la hetan ka taka tiha ona.", http_status=status.HTTP_404_NOT_FOUND)
+
+        # Device locking verification
+        device_token = (
+            request.headers.get('X-Device-Token') or
+            request.COOKIES.get('celvass_device_id') or
+            request.data.get('device_token')
+        )
+        if session.primary_device_token:
+            if device_token and device_token != session.primary_device_token:
+                return api_error("DEVICE_LOCKED", "Meza ne'e okupadu hela hosi telemóvel seluk. Ita-boot labele aumenta pedidu ba meza ne'e.", http_status=status.HTTP_403_FORBIDDEN)
+        elif device_token:
+            session.primary_device_token = device_token
+            session.authorized_device_tokens = [device_token]
+            session.save(update_fields=['primary_device_token', 'authorized_device_tokens'])
 
         idempotency_key = request.headers.get('Idempotency-Key') or request.data.get('idempotency_key')
         if not idempotency_key:
-            return api_error("IDEMPOTENCY_KEY_REQUIRED", "Header 'Idempotency-Key' wajib disertakan untuk submit pesanan.", http_status=status.HTTP_400_BAD_REQUEST)
+            return api_error("IDEMPOTENCY_KEY_REQUIRED", "Header 'Idempotency-Key' obrigatóriu atu haruka pedidu.", http_status=status.HTTP_400_BAD_REQUEST)
 
         serializer = OrderSubmitRequestSerializer(data=request.data)
         if not serializer.is_valid():
-            return api_error("INVALID_INPUT", "Format pesanan tidak valid.", details=serializer.errors, http_status=status.HTTP_400_BAD_REQUEST)
+            return api_error("INVALID_INPUT", "Formatu pedidu la válidu.", details=serializer.errors, http_status=status.HTTP_400_BAD_REQUEST)
 
         try:
             order = submit_customer_order(
@@ -139,7 +153,7 @@ class PublicOrderListAPIView(APIView):
     def get(self, request, session_token):
         session = get_session_by_public_token(session_token)
         if not session:
-            return api_error("TABLE_SESSION_NOT_OPEN", "Sesi meja tidak ditemukan.", http_status=status.HTTP_404_NOT_FOUND)
+            return api_error("TABLE_SESSION_NOT_OPEN", "Sesi meza la hetan.", http_status=status.HTTP_404_NOT_FOUND)
         
         orders = get_orders_for_session(session.id)
         serializer = OrderSerializer(orders, many=True)
@@ -152,7 +166,7 @@ class PublicOrderDetailAPIView(APIView):
     def get(self, request, session_token, order_code):
         order = get_order_by_code(order_code, session_token=session_token)
         if not order:
-            return api_error("RESOURCE_NOT_FOUND", "Pesanan tidak ditemukan.", http_status=status.HTTP_404_NOT_FOUND)
+            return api_error("RESOURCE_NOT_FOUND", "Pedidu la hetan.", http_status=status.HTTP_404_NOT_FOUND)
         return api_response(OrderSerializer(order).data)
 
 
@@ -162,7 +176,16 @@ class PublicRequestBillAPIView(APIView):
     def post(self, request, session_token):
         session = get_session_by_public_token(session_token)
         if not session:
-            return api_error("TABLE_SESSION_NOT_OPEN", "Sesi meja tidak ditemukan atau sudah ditutup.", http_status=status.HTTP_404_NOT_FOUND)
+            return api_error("TABLE_SESSION_NOT_OPEN", "Sesi meza la hetan ka taka tiha ona.", http_status=status.HTTP_404_NOT_FOUND)
+
+        # Device locking verification
+        device_token = (
+            request.headers.get('X-Device-Token') or
+            request.COOKIES.get('celvass_device_id') or
+            request.data.get('device_token')
+        )
+        if session.primary_device_token and device_token and device_token != session.primary_device_token:
+            return api_error("DEVICE_LOCKED", "Meza ne'e okupadu hela hosi telemóvel seluk.", http_status=status.HTTP_403_FORBIDDEN)
         
         if session.status == SessionStatus.PAID:
             bill = calculate_session_bill(session)
@@ -176,19 +199,24 @@ class PublicRequestBillAPIView(APIView):
             bill = calculate_session_bill(session)
             return api_response({
                 "status": "BILL_REQUESTED",
-                "message": "Konta husu tiha ona, favor aguarda kaixa.",
+                "message": "Konta husu tiha ona, favor hein kaixa.",
                 "bill_requested_at": session.bill_requested_at,
                 "bill": bill
             })
 
-        updated_session = request_bill_for_session(session=session)
-        bill = calculate_session_bill(updated_session)
-        return api_response({
-            "status": updated_session.status,
-            "message": "Konta haruka tiha ona ba kaixa.",
-            "bill_requested_at": updated_session.bill_requested_at,
-            "bill": bill
-        })
+        try:
+            updated_session = request_bill_for_session(session=session)
+            bill = calculate_session_bill(updated_session)
+            return api_response({
+                "status": updated_session.status,
+                "message": "Konta haruka tiha ona ba kaixa.",
+                "bill_requested_at": updated_session.bill_requested_at,
+                "bill": bill
+            })
+        except ValidationError as e:
+            return api_error("BILL_REQUEST_INVALID", str(e.message if hasattr(e, 'message') else e), http_status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return api_error("SERVER_ERROR", str(e), http_status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class PublicBillDetailAPIView(APIView):
@@ -384,7 +412,7 @@ class CashierPaymentAPIView(APIView):
 
 class KitchenQueueAPIView(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication]
-    permission_classes = [IsAuthenticated, IsKitchenOrAdmin]
+    permission_classes = [IsAuthenticated, IsKitchenOrAdmin | IsCashierRole]
 
     def get(self, request):
         queue = get_kitchen_queue_orders()
@@ -474,3 +502,91 @@ class AdminRotateTableQRAPIView(APIView):
             return api_response({"new_qr_token": new_token, "table_code": table.table_code})
         except RestaurantTable.DoesNotExist:
             return api_error("RESOURCE_NOT_FOUND", "Meja tidak ditemukan.", http_status=status.HTTP_404_NOT_FOUND)
+
+
+class CashierOrdersHistoryAPIView(APIView):
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated, IsCashierOrAdmin]
+
+    def get(self, request):
+        today = timezone.localdate()
+        orders = Order.objects.filter(
+            created_at__date=today
+        ).select_related('table_session__table').prefetch_related('items').order_by('-created_at')[:100]
+
+        data = []
+        for o in orders:
+            data.append({
+                'id': str(o.id),
+                'order_code': o.order_code,
+                'table_name': o.table_session.table.display_name,
+                'table_code': o.table_session.table.table_code,
+                'status': o.status,
+                'grand_total': str(o.grand_total),
+                'items_summary': ", ".join([f"{item.quantity}x {item.menu_name_snapshot}" for item in o.items.all()]),
+                'created_at': o.created_at.strftime("%H:%M"),
+            })
+        return api_response(data)
+
+
+class CashierShiftSummaryAPIView(APIView):
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated, IsCashierOrAdmin]
+
+    def get(self, request):
+        from django.db import models
+        today = timezone.localdate()
+        from apps.payments.models import Payment, PaymentMethod, PaymentStatus
+        payments_today = Payment.objects.filter(paid_at__date=today, status=PaymentStatus.COMPLETED)
+
+        cash_total = payments_today.filter(method=PaymentMethod.CASH).aggregate(total=models.Sum('amount'))['total'] or Decimal('0.00')
+        other_total = payments_today.exclude(method=PaymentMethod.CASH).aggregate(total=models.Sum('amount'))['total'] or Decimal('0.00')
+        grand_total = cash_total + other_total
+
+        completed_orders_count = Order.objects.filter(created_at__date=today, status=OrderStatus.COMPLETED).count()
+        paid_sessions_count = TableSession.objects.filter(paid_at__date=today).count()
+
+        return api_response({
+            'cash_total': str(cash_total.quantize(Decimal('0.01'))),
+            'other_total': str(other_total.quantize(Decimal('0.01'))),
+            'grand_total': str(grand_total.quantize(Decimal('0.01'))),
+            'payments_count': payments_today.count(),
+            'paid_sessions_count': paid_sessions_count,
+            'completed_orders_count': completed_orders_count,
+            'timestamp': timezone.now().strftime("%d/%m/%Y %H:%M"),
+        })
+
+
+class AdminUserCreateAPIView(APIView):
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminRole]
+
+    def post(self, request):
+        username = request.data.get('username', '').strip()
+        password = request.data.get('password', '').strip()
+        role = request.data.get('role', 'CASHIER').upper()
+        first_name = request.data.get('first_name', '').strip()
+
+        if not username or not password:
+            return api_error("INVALID_INPUT", "Naran-uzuáriu no liafuan xave obrigatóriu.")
+
+        if role not in ['CASHIER', 'KITCHEN', 'ADMIN']:
+            return api_error("INVALID_ROLE", "Papél la válidu.")
+
+        from apps.accounts.models import User
+        if User.objects.filter(username=username).exists():
+            return api_error("USER_EXISTS", "Naran-uzuáriu ne'e eziste ona.")
+
+        user = User.objects.create_user(
+            username=username,
+            password=password,
+            role=role,
+            first_name=first_name,
+            restaurant=getattr(request.user, 'restaurant', None)
+        )
+        return api_response({
+            'id': str(user.id),
+            'username': user.username,
+            'role': user.role,
+            'first_name': user.first_name,
+        }, http_status=status.HTTP_201_CREATED)

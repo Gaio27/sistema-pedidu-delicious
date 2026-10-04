@@ -1,5 +1,6 @@
 /**
- * Customer Dine-In PWA Controller
+ * Celvass Resto & Bar — Customer Dine-In PWA Controller
+ * Pure Tetun Interface & Device-Locked Session Security
  */
 
 class CustomerApp {
@@ -7,12 +8,24 @@ class CustomerApp {
     this.sessionToken = config.sessionToken;
     this.qrToken = config.qrToken;
     this.tableCode = config.tableCode;
+    this.deviceId = this.getOrCreateDeviceId();
     this.storageKey = `resto_cart_${this.sessionToken || 'default'}`;
     this.cart = this.loadCart();
     this.selectedItem = null;
     this.activeOrders = [];
 
     this.init();
+  }
+
+  getOrCreateDeviceId() {
+    let id = localStorage.getItem('celvass_device_id');
+    if (!id) {
+      id = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : ('dev_' + Math.random().toString(36).substring(2) + Date.now().toString(36));
+      localStorage.setItem('celvass_device_id', id);
+    }
+    // Also store in cookie for seamless server-side verification
+    document.cookie = `celvass_device_id=${id}; path=/; max-age=31536000; SameSite=Lax`;
+    return id;
   }
 
   init() {
@@ -22,7 +35,7 @@ class CustomerApp {
 
     // Category Filter
     document.querySelectorAll('.cat-pill').forEach((btn) => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', () => {
         document.querySelectorAll('.cat-pill').forEach((b) => b.classList.remove('active', 'btn-primary'));
         document.querySelectorAll('.cat-pill').forEach((b) => b.classList.add('btn-outline-secondary'));
         btn.classList.add('active', 'btn-primary');
@@ -86,7 +99,7 @@ class CustomerApp {
       });
     }
     this.saveCart();
-    showToast(`${t('added_to_cart')} ${item.name}`, 'success');
+    showToast(`Aumenta ba karreta: ${item.name}`, 'success');
   }
 
   updateQuantity(index, delta) {
@@ -134,12 +147,17 @@ class CustomerApp {
 
     if (drawerList) {
       if (this.cart.length === 0) {
-        drawerList.innerHTML = '<div class="text-center py-4 text-muted"><i class="fa-solid fa-basket-shopping fa-2x mb-2"></i><p>Keranjang Anda masih kosong.</p></div>';
+        drawerList.innerHTML = `
+          <div class="text-center py-4 text-muted">
+            <i class="fa-solid fa-basket-shopping fa-2x mb-2 text-secondary"></i>
+            <p class="mb-0">Ita-boot nia karreta mamuk hela.</p>
+          </div>
+        `;
       } else {
         drawerList.innerHTML = this.cart
           .map(
             (item, index) => `
-          <div class="d-flex align-items-center justify-content-between py-2 border-bottom">
+          <div class="d-flex align-items-center justify-content-between py-2 border-bottom border-light">
             <div>
               <div class="fw-bold">${item.name}</div>
               <div class="text-primary fw-semibold">$${(item.price * item.quantity).toFixed(2)} <span class="text-muted small">($${item.price.toFixed(2)}/item)</span></div>
@@ -160,16 +178,16 @@ class CustomerApp {
 
   async submitOrder() {
     if (this.cart.length === 0) {
-      showToast(t('cart_empty_toast'), 'warning');
+      showToast('Ita-boot nia karreta mamuk hela!', 'warning');
       return;
     }
     if (!this.sessionToken) {
-      showToast(t('session_not_open_toast'), 'error');
+      showToast('Sesi meza seidauk loke hosi kaixa.', 'error');
       return;
     }
 
     const customerNote = document.getElementById('order-customer-note')?.value || '';
-    const idempotencyKey = crypto.randomUUID();
+    const idempotencyKey = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : ('ord_' + Date.now());
 
     const payload = {
       items: this.cart.map((item) => ({
@@ -183,28 +201,29 @@ class CustomerApp {
     const submitBtn = document.getElementById('btn-submit-order');
     if (submitBtn) {
       submitBtn.disabled = true;
-      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Mengirim Pesanan...';
+      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Haruka hela pedidu...';
     }
 
     try {
       const order = await apiPost(`/api/v1/public/sessions/${this.sessionToken}/orders/`, payload, {
         'Idempotency-Key': idempotencyKey,
+        'X-Device-Token': this.deviceId,
       });
 
       this.clearCart();
-      const cartModal = bootstrap.Modal.getInstance(document.getElementById('cartOffcanvas'));
+      const cartModal = bootstrap.Offcanvas.getInstance(document.getElementById('cartOffcanvas'));
       if (cartModal) cartModal.hide();
 
-      showToast(`${t('order_sent_toast')} ${order.order_code}! ${t('waiting_cashier_toast')}`, 'success');
+      showToast(`Pedidu ${order.order_code} haruka ona! Hein konfirmasaun kaixa.`, 'success');
       SoundEffects.playSuccess();
 
       this.loadActiveOrders();
     } catch (err) {
-      showToast(t(err.message), 'error');
+      showToast(err.message, 'error');
     } finally {
       if (submitBtn) {
         submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i> Kirim Pesanan ke Kasir';
+        submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i> Haruka Pedidu ba Kaixa';
       }
     }
   }
@@ -213,11 +232,41 @@ class CustomerApp {
     if (!this.sessionToken) return;
 
     try {
-      const orders = await apiGet(`/api/v1/public/sessions/${this.sessionToken}/orders/list/`);
-      this.activeOrders = orders;
+      const orders = await apiGet(`/api/v1/public/sessions/${this.sessionToken}/orders/list/`, {
+        'X-Device-Token': this.deviceId,
+      });
+      this.activeOrders = orders || [];
       this.renderOrdersUI();
+      this.checkBillButtonEligibility();
     } catch (e) {
       console.log('No active orders or session not open');
+    }
+  }
+
+  checkBillButtonEligibility() {
+    const btn = document.getElementById('btn-request-bill');
+    if (!btn) return;
+
+    // Check if at least one order is SERVED
+    const hasServedOrder = this.activeOrders.some((o) => o.status === 'SERVED');
+    const hasCookingOrder = this.activeOrders.some((o) =>
+      ['WAITING_CASHIER_CONFIRMATION', 'CONFIRMED', 'PREPARING'].includes(o.status)
+    );
+
+    // If button already shows "Konta Husu Tiha Ona" or "Selu Tiha Ona", preserve it
+    if (btn.textContent.includes('Konta Husu') || btn.textContent.includes('Selu Tiha')) {
+      return;
+    }
+
+    if (!hasServedOrder) {
+      btn.dataset.eligible = 'false';
+      btn.title = "Presiza iha pelumenus pedidu 1 ne'ebé entrega ona (SERVED)";
+    } else if (hasCookingOrder) {
+      btn.dataset.eligible = 'cooking';
+      btn.title = "Sei iha hahan ne'ebé tein hela iha dapur";
+    } else {
+      btn.dataset.eligible = 'true';
+      btn.title = "Husu Konta (Bill)";
     }
   }
 
@@ -233,8 +282,8 @@ class CustomerApp {
     listEl.innerHTML = `
       <div class="card card-custom p-3 mb-3 border-primary shadow-sm">
         <h6 class="fw-bold mb-2 text-primary d-flex align-items-center justify-content-between">
-          <span><i class="fa-solid fa-clock-rotate-left me-1"></i> Status Pesanan Anda</span>
-          <span class="badge bg-primary">${this.activeOrders.length} Pesanan</span>
+          <span><i class="fa-solid fa-clock-rotate-left me-1"></i> Status Ita-boot nia Pedidu</span>
+          <span class="badge bg-primary">${this.activeOrders.length} Pedidu</span>
         </h6>
         ${this.activeOrders
           .map((ord) => {
@@ -249,13 +298,13 @@ class CustomerApp {
             }[ord.status] || 'bg-secondary text-white';
 
             const statusText = {
-              WAITING_CASHIER_CONFIRMATION: '⏳ Menunggu Verifikasi Kasir',
-              CONFIRMED: '✅ Dikonfirmasi Kasir',
-              PREPARING: '🍳 Sedang Dimasak',
-              READY: '🔔 Makanan Siap Disajikan',
-              SERVED: '🍽️ Sudah Disajikan',
-              COMPLETED: '🏁 Selesai',
-              REJECTED: `❌ Ditolak: ${ord.rejection_reason || ''}`,
+              WAITING_CASHIER_CONFIRMATION: '⏳ Hein Verifikasaun Kaixa',
+              CONFIRMED: '✅ Kaixa Konfirma Ona',
+              PREPARING: '🍳 Dapur Hahu Tein',
+              READY: '🔔 Hahan Prontu Ona',
+              SERVED: '🍽️ Entrega ba Meza Ona',
+              COMPLETED: '🏁 Remata Ona',
+              REJECTED: `❌ Kaixa Rekuza: ${ord.rejection_reason || ''}`,
             }[ord.status] || ord.status;
 
             return `
@@ -269,7 +318,7 @@ class CustomerApp {
               </div>
               <div class="d-flex justify-content-between small fw-bold">
                 <span>Total: $${ord.grand_total}</span>
-                <a href="/t/${this.qrToken}/order/${ord.order_code}/" class="text-primary text-decoration-none">Lihat Detail & Tracking →</a>
+                <a href="/t/${this.qrToken}/order/${ord.order_code}/" class="text-primary text-decoration-none">Haree Detalle & Rastreia →</a>
               </div>
             </div>
           `;
@@ -282,6 +331,21 @@ class CustomerApp {
   async requestBill() {
     if (!this.sessionToken) return;
 
+    // Check client eligibility before sending
+    const hasServedOrder = this.activeOrders.some((o) => o.status === 'SERVED');
+    if (!hasServedOrder) {
+      showToast("Ita-boot seidauk bele husu konta tanba seidauk iha pedidu ne'ebé entrega tiha ona ba meza (SERVED).", 'warning');
+      return;
+    }
+
+    const hasCookingOrder = this.activeOrders.some((o) =>
+      ['WAITING_CASHIER_CONFIRMATION', 'CONFIRMED', 'PREPARING'].includes(o.status)
+    );
+    if (hasCookingOrder) {
+      showToast("Sei iha hahan ne'ebé tein hela iha dapur. Favór hein to'o hahan hotu to'o meza molok husu konta.", 'warning');
+      return;
+    }
+
     const btn = document.getElementById('btn-request-bill');
     if (btn) {
       btn.disabled = true;
@@ -289,8 +353,12 @@ class CustomerApp {
     }
 
     try {
-      const res = await apiPost(`/api/v1/public/sessions/${this.sessionToken}/request-bill/`);
-      const msg = res.message || t('bill_sent_toast');
+      const res = await apiPost(
+        `/api/v1/public/sessions/${this.sessionToken}/request-bill/`,
+        {},
+        { 'X-Device-Token': this.deviceId }
+      );
+      const msg = res.message || 'Husu konta haruka ona ba kaixa.';
       showToast(msg, 'info');
       SoundEffects.playBell();
       if (btn) {
@@ -299,7 +367,7 @@ class CustomerApp {
         btn.innerHTML = '<i class="fa-solid fa-clock me-1"></i> Konta Husu Tiha Ona';
       }
     } catch (e) {
-      showToast(t(e.message), 'error');
+      showToast(e.message, 'error');
       if (btn) {
         btn.disabled = false;
         btn.innerHTML = '<i class="fa-solid fa-receipt me-1"></i> Husu Konta';
@@ -313,17 +381,17 @@ class CustomerApp {
     this.ws = new WebSocketClient(`/ws/customer/${this.sessionToken}/`, (msg) => {
       console.log('Customer WS update:', msg);
       if (msg.event === 'ORDER_CONFIRMED') {
-        showToast(`${t('order_confirmed_toast')} ${msg.data.order_code}!`, 'success');
+        showToast(`Kaixa konfirma ona pedidu ${msg.data.order_code}!`, 'success');
         SoundEffects.playSuccess();
         this.loadActiveOrders();
       } else if (msg.event === 'ORDER_REJECTED') {
-        showToast(`${t('order_rejected_toast')} ${msg.data.order_code}: ${msg.data.reason}`, 'error');
+        showToast(`Kaixa rekuza pedidu ${msg.data.order_code}: ${msg.data.reason}`, 'error');
         this.loadActiveOrders();
       } else if (msg.event === 'ORDER_PREPARING' || msg.event === 'ORDER_READY' || msg.event === 'ORDER_SERVED') {
-        showToast(`${t('order_status_toast')} ${msg.data.order_code}: ${msg.event}`, 'info');
+        showToast(`Status pedidu ${msg.data.order_code}: ${msg.event}`, 'info');
         this.loadActiveOrders();
       } else if (msg.event === 'SESSION_CLOSED') {
-        showToast(t('session_closed_toast'), 'info');
+        showToast('Sesi meza taka ona hosi kaixa. Obrigadu barak!', 'info');
         setTimeout(() => window.location.reload(), 2000);
       }
     });

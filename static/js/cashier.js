@@ -1,5 +1,6 @@
 /**
- * Cashier Command Center & POS Controller
+ * Celvass Resto & Bar — Cashier Command Center & POS Controller
+ * Pure Tetun Interface, Dark Glassmorphism, Shift Report, & Anti-Double-Click POS
  */
 
 class CashierApp {
@@ -7,10 +8,12 @@ class CashierApp {
     this.pendingOrders = [];
     this.tables = [];
     this.tableFilter = 'ALL';
+    this.todayOrdersHistory = [];
     this.selectedTableId = null;
     this.selectedOrderForReject = null;
     this.currentPaymentSessionId = null;
     this.currentBillAmount = 0;
+
     this.init();
   }
 
@@ -28,15 +31,14 @@ class CashierApp {
 
   setTableFilter(filter) {
     this.tableFilter = filter;
-    
-    // Update button states
+
     const btnAll = document.getElementById('filter-table-all');
     const btnOpen = document.getElementById('filter-table-open');
     const btnAvail = document.getElementById('filter-table-avail');
 
-    if (btnAll) btnAll.className = filter === 'ALL' ? 'btn btn-primary btn-sm px-2 fw-bold' : 'btn btn-outline-primary btn-sm px-2';
-    if (btnOpen) btnOpen.className = filter === 'OPEN' ? 'btn btn-success btn-sm px-2 fw-bold' : 'btn btn-outline-success btn-sm px-2';
-    if (btnAvail) btnAvail.className = filter === 'AVAILABLE' ? 'btn btn-secondary btn-sm px-2 fw-bold' : 'btn btn-outline-secondary btn-sm px-2';
+    if (btnAll) btnAll.className = filter === 'ALL' ? 'btn btn-warning btn-sm px-3 fw-bold rounded-start-pill text-dark' : 'btn btn-outline-warning btn-sm px-3 fw-bold rounded-start-pill text-white';
+    if (btnOpen) btnOpen.className = filter === 'OPEN' ? 'btn btn-success btn-sm px-3 fw-bold text-white' : 'btn btn-outline-success btn-sm px-3 fw-bold';
+    if (btnAvail) btnAvail.className = filter === 'AVAILABLE' ? 'btn btn-secondary btn-sm px-3 fw-bold rounded-end-pill text-white' : 'btn btn-outline-secondary btn-sm px-3 fw-bold rounded-end-pill';
 
     this.renderTablesUI();
   }
@@ -54,6 +56,7 @@ class CashierApp {
     try {
       this.tables = await apiGet('/api/v1/cashier/tables/');
       this.renderTablesUI();
+      this.updateBillAlertsUI();
     } catch (e) {
       console.error('Error loading tables:', e);
     }
@@ -68,10 +71,10 @@ class CashierApp {
 
     if (this.pendingOrders.length === 0) {
       container.innerHTML = `
-        <div class="text-center py-5 text-muted">
+        <div class="text-center py-5 text-white-50">
           <i class="fa-solid fa-circle-check fa-3x text-success mb-2"></i>
-          <h6>Semua pesanan telah diverifikasi.</h6>
-          <p class="small">Pesanan baru dari pelanggan akan muncul di sini secara real-time.</p>
+          <h6 class="text-white">Pedidu hotu verifika ona.</h6>
+          <p class="small text-white-50 mb-0">Pedidu foun hosi kliente sei mosu iha ne'e automatikamente.</p>
         </div>
       `;
       return;
@@ -80,40 +83,40 @@ class CashierApp {
     container.innerHTML = this.pendingOrders
       .map(
         (order) => `
-      <div class="card card-custom p-3 mb-3 border-start border-4 border-warning shadow-sm">
+      <div class="glass-card p-3 mb-3 border-warning border-opacity-50">
         <div class="d-flex justify-content-between align-items-start mb-2">
           <div>
-            <span class="badge bg-dark me-1">${order.table_name || order.table_code}</span>
-            <span class="fw-bold">${order.order_code}</span>
-            <span class="text-muted small ms-2"><i class="fa-regular fa-clock"></i> ${new Date(order.submitted_at).toLocaleTimeString()}</span>
+            <span class="badge bg-warning text-dark fw-bold me-1">${order.table_name || order.table_code}</span>
+            <span class="fw-bold text-white">${order.order_code}</span>
+            <span class="text-white-50 small ms-2"><i class="fa-regular fa-clock"></i> ${new Date(order.submitted_at).toLocaleTimeString()}</span>
           </div>
-          <span class="badge badge-status status-waiting">Verifikasi Kasir</span>
+          <span class="badge bg-warning bg-opacity-25 border border-warning text-warning rounded-pill">Hein Verifikasaun</span>
         </div>
 
-        <div class="border rounded p-2 bg-light mb-2">
+        <div class="border border-secondary border-opacity-25 rounded-3 p-2 bg-dark bg-opacity-50 mb-2">
           <ul class="list-unstyled mb-0 small">
             ${order.items
               .map(
                 (item) => `
-              <li class="d-flex justify-content-between py-1 border-bottom border-light">
-                <span><strong>${item.quantity}x</strong> ${item.menu_name_snapshot} ${item.note ? `<span class="badge bg-warning text-dark ms-1"><i class="fa-solid fa-pen"></i> ${item.note}</span>` : ''}</span>
-                <span class="fw-semibold">$${item.subtotal}</span>
+              <li class="d-flex justify-content-between py-1 border-bottom border-secondary border-opacity-25">
+                <span class="text-white"><strong>${item.quantity}x</strong> ${item.menu_name_snapshot} ${item.note ? `<span class="badge bg-warning text-dark ms-1"><i class="fa-solid fa-pen"></i> ${item.note}</span>` : ''}</span>
+                <span class="fw-semibold text-warning">$${item.subtotal}</span>
               </li>
             `
               )
               .join('')}
           </ul>
-          ${order.customer_note ? `<div class="mt-2 p-1 bg-white rounded small text-danger"><strong>Catatan Pelanggan:</strong> ${order.customer_note}</div>` : ''}
+          ${order.customer_note ? `<div class="mt-2 p-1 bg-danger bg-opacity-20 border border-danger border-opacity-25 rounded small text-danger"><strong>Notasaun Bainaka:</strong> ${order.customer_note}</div>` : ''}
         </div>
 
         <div class="d-flex justify-content-between align-items-center">
-          <div class="fw-bold fs-5 text-primary">Total: $${order.grand_total}</div>
+          <div class="fw-bold fs-5 text-warning">Totál: $${order.grand_total}</div>
           <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-outline-danger" onclick="cashierApp.promptReject('${order.id}', '${order.order_code}')">
-              <i class="fa-solid fa-xmark me-1"></i> Tolak
+            <button class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="cashierApp.promptReject('${order.id}', '${order.order_code}')">
+              <i class="fa-solid fa-xmark me-1"></i> Rekuza
             </button>
-            <button class="btn btn-sm btn-success px-3 fw-bold" onclick="cashierApp.confirmOrder('${order.id}')">
-              <i class="fa-solid fa-check me-1"></i> Konfirmasi & Kirim Dapur
+            <button class="btn btn-sm btn-success rounded-pill px-3 fw-bold shadow" onclick="cashierApp.confirmOrder('${order.id}')">
+              <i class="fa-solid fa-check me-1"></i> Konfirma &amp; Haruka Dapur
             </button>
           </div>
         </div>
@@ -127,7 +130,6 @@ class CashierApp {
     const container = document.getElementById('tables-grid-container');
     if (!container) return;
 
-    // Filter tables based on user selection
     let filteredTables = this.tables;
     if (this.tableFilter === 'OPEN') {
       filteredTables = this.tables.filter((t) => t.active_session !== null);
@@ -137,9 +139,9 @@ class CashierApp {
 
     if (filteredTables.length === 0) {
       container.innerHTML = `
-        <div class="col-12 text-center py-5 text-muted">
+        <div class="col-12 text-center py-5 text-white-50">
           <i class="fa-solid fa-chair fa-3x mb-2 text-secondary"></i>
-          <h6>La iha meza tuir filtru ne'e.</h6>
+          <h6 class="text-white">La iha meza tuir filtru ne'e.</h6>
         </div>
       `;
       return;
@@ -155,36 +157,36 @@ class CashierApp {
         let sessionBadge = '';
         if (session) {
           if (isPaid) {
-            sessionBadge = '<span class="badge bg-success text-white"><i class="fa-solid fa-check-circle me-1"></i> PAID</span>';
+            sessionBadge = '<span class="badge bg-success text-white rounded-pill"><i class="fa-solid fa-check-circle me-1"></i> PAID</span>';
           } else if (session.status === 'BILL_REQUESTED') {
-            sessionBadge = '<span class="badge bg-danger text-white pulse"><i class="fa-solid fa-receipt me-1"></i> Husu Konta</span>';
+            sessionBadge = '<span class="badge bg-danger text-white rounded-pill pulse"><i class="fa-solid fa-receipt me-1"></i> Husu Konta</span>';
           } else {
-            sessionBadge = '<span class="badge bg-info text-dark">Sesi Loke</span>';
+            sessionBadge = '<span class="badge bg-info bg-opacity-25 border border-info text-info rounded-pill">Sesi Loke</span>';
           }
         }
 
         return `
         <div class="col-md-6 mb-3">
-          <div class="card card-custom p-3 h-100 ${isOccupied ? (isPaid ? 'border-success' : 'border-primary') : ''}">
+          <div class="glass-card p-3 h-100 ${isOccupied ? (isPaid ? 'border-success' : (session.status === 'BILL_REQUESTED' ? 'border-danger' : 'border-primary')) : 'border-secondary border-opacity-25'}">
             <div class="d-flex justify-content-between align-items-start mb-1">
               <div>
-                <h5 class="fw-bold mb-0 text-dark">${table.display_name}</h5>
-                <span class="text-muted small">${table.table_code} | Kapasidade: ${table.capacity || 4} Kursi</span>
+                <h5 class="fw-bold mb-0 text-white">${table.display_name}</h5>
+                <span class="text-white-50 small">${table.table_code} &bull; Kapasidade: ${table.capacity || 4} Kursi</span>
               </div>
-              <div>${isOccupied ? sessionBadge : '<span class="badge bg-light text-secondary border">Mamuk</span>'}</div>
+              <div>${isOccupied ? sessionBadge : '<span class="badge bg-secondary bg-opacity-25 border border-secondary text-secondary rounded-pill">Mamuk</span>'}</div>
             </div>
 
             ${
               isOccupied
                 ? `
-              <div class="p-2 bg-light rounded small my-2 border">
+              <div class="p-2 bg-dark bg-opacity-50 rounded-3 small my-2 border border-secondary border-opacity-25">
                 <div class="d-flex justify-content-between align-items-center mb-1">
-                  <span>Bainaka: <strong>${session.guest_count} Ema</strong></span>
-                  <span>Pedidu: <strong>${session.orders_count}</strong></span>
+                  <span class="text-white-50">Bainaka: <strong class="text-white">${session.guest_count} Ema</strong></span>
+                  <span class="text-white-50">Pedidu: <strong class="text-white">${session.orders_count}</strong></span>
                 </div>
-                <div class="d-flex justify-content-between align-items-center border-top pt-1">
-                  <span class="text-muted">Konta Totál:</span>
-                  <span class="fw-bold fs-6 ${isPaid ? 'text-success' : 'text-primary'}">
+                <div class="d-flex justify-content-between align-items-center border-top border-secondary border-opacity-25 pt-1">
+                  <span class="text-white-50">Konta Totál:</span>
+                  <span class="fw-bold fs-6 ${isPaid ? 'text-success' : 'text-warning'}">
                     $${session.bill_total}
                     ${isPaid ? ' <span class="badge bg-success-subtle text-success small">Selu Tiha Ona</span>' : (remaining < parseFloat(session.bill_total) ? ` <small class="text-danger">($${remaining.toFixed(2)} resta)</small>` : '')}
                   </span>
@@ -195,35 +197,35 @@ class CashierApp {
                 ${
                   isPaid
                     ? `
-                  <button class="btn btn-sm btn-success flex-fill fw-bold" onclick="cashierApp.viewReceiptForSession('${session.id}')" title="Haree Resibu Pagamentu">
+                  <button class="btn btn-sm btn-success flex-fill fw-bold rounded-pill" onclick="cashierApp.viewReceiptForSession('${session.id}')" title="Haree Resibu Pagamentu">
                     <i class="fa-solid fa-receipt me-1"></i> Resibu (Selu Tiha)
                   </button>
                 `
                     : `
-                  <button class="btn btn-sm btn-primary flex-fill fw-bold" onclick="cashierApp.openPaymentModal('${session.id}', '${table.display_name}')">
+                  <button class="btn btn-sm btn-warning flex-fill fw-bold rounded-pill text-dark shadow" onclick="cashierApp.openPaymentModal('${session.id}', '${table.display_name}')">
                     <i class="fa-solid fa-cash-register me-1"></i> Selu Bill ($${remaining.toFixed(2)})
                   </button>
                 `
                 }
                 
-                <a href="/t/${table.qr_token}/" target="_blank" class="btn btn-sm btn-outline-info" title="Loke Menu Dine-in Meza Ne'e">
-                  <i class="fa-solid fa-qrcode me-1"></i> Menu
+                <a href="/t/${table.qr_token}/" target="_blank" class="btn btn-sm btn-outline-info rounded-circle" title="Loke Menu Meza Ne'e">
+                  <i class="fa-solid fa-qrcode"></i>
                 </a>
 
-                <button class="btn btn-sm btn-outline-danger" title="Tutup / Taka Meza" onclick="cashierApp.handleCloseSession('${session.id}', '${table.display_name}')">
+                <button class="btn btn-sm btn-outline-danger rounded-circle" title="Taka Sesi Meza" onclick="cashierApp.handleCloseSession('${session.id}', '${table.display_name}')">
                   <i class="fa-solid fa-lock"></i>
                 </button>
               </div>
             `
                 : `
-              <div class="text-center py-3 text-muted small">
-                Meza Mamuk / Prontu atu simu bainaka
+              <div class="text-center py-3 text-white-50 small">
+                Meza Mamuk &bull; Prontu atu simu bainaka
               </div>
               <div class="d-flex gap-2 mt-auto">
-                <button class="btn btn-sm btn-outline-primary flex-fill fw-bold" onclick="cashierApp.openSessionModal('${table.id}', '${table.display_name}')">
+                <button class="btn btn-sm btn-outline-warning flex-fill fw-bold rounded-pill" onclick="cashierApp.openSessionModal('${table.id}', '${table.display_name}')">
                   <i class="fa-solid fa-door-open me-1"></i> Loke Sesi Meza
                 </button>
-                <a href="/t/${table.qr_token}/" target="_blank" class="btn btn-sm btn-outline-secondary" title="Haree Menu">
+                <a href="/t/${table.qr_token}/" target="_blank" class="btn btn-sm btn-outline-secondary rounded-circle" title="Haree Menu">
                   <i class="fa-solid fa-qrcode"></i>
                 </a>
               </div>
@@ -236,15 +238,210 @@ class CashierApp {
       .join('');
   }
 
+  updateBillAlertsUI() {
+    const alertsContainer = document.getElementById('bill-alerts-container');
+    const badge = document.getElementById('bill-alerts-count');
+
+    const billTables = this.tables.filter((t) => t.active_session && t.active_session.status === 'BILL_REQUESTED');
+
+    if (badge) {
+      if (billTables.length > 0) {
+        badge.textContent = billTables.length;
+        badge.style.display = 'inline-block';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    if (!alertsContainer) return;
+
+    if (billTables.length === 0) {
+      alertsContainer.innerHTML = `
+        <div class="col-12 text-center py-5 text-white-50">
+          <i class="fa-solid fa-bell-slash fa-3x mb-2 text-secondary"></i>
+          <h6 class="text-white">Laiha meza ne'ebé husu konta agora dadaun.</h6>
+        </div>
+      `;
+      return;
+    }
+
+    alertsContainer.innerHTML = billTables
+      .map(
+        (t) => `
+      <div class="col-md-6 col-lg-4">
+        <div class="glass-card p-3 border-danger border-opacity-75">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div>
+              <h5 class="fw-bold mb-0 text-white">${t.display_name}</h5>
+              <small class="text-white-50">${t.table_code} &bull; ${t.active_session.guest_count} Ema</small>
+            </div>
+            <span class="badge bg-danger rounded-pill pulse">Husu Konta!</span>
+          </div>
+          <div class="fs-4 fw-bold text-warning mb-3">Totál: $${t.active_session.bill_total}</div>
+          <button class="btn btn-warning w-100 fw-bold rounded-pill text-dark shadow" onclick="cashierApp.openPaymentModal('${t.active_session.id}', '${t.display_name}')">
+            <i class="fa-solid fa-cash-register me-1"></i> Prosesu Pagamentu Agora
+          </button>
+        </div>
+      </div>
+    `
+      )
+      .join('');
+  }
+
+  async loadTodayOrdersHistory() {
+    const tbody = document.getElementById('orders-history-tbody');
+    if (!tbody) return;
+
+    try {
+      const orders = await apiGet('/api/v1/cashier/orders/history/');
+      this.todayOrdersHistory = orders || [];
+      this.renderOrdersHistoryTable(this.todayOrdersHistory);
+    } catch (e) {
+      tbody.innerHTML = '<tr><td colspan="7" class="text-center py-3 text-danger">Erro karga istóriku pedidu.</td></tr>';
+    }
+  }
+
+  filterOrdersHistory() {
+    const q = (document.getElementById('order-history-search')?.value || '').toLowerCase().trim();
+    if (!q) {
+      this.renderOrdersHistoryTable(this.todayOrdersHistory);
+      return;
+    }
+    const filtered = this.todayOrdersHistory.filter(
+      (o) => o.order_code.toLowerCase().includes(q) || o.table_name.toLowerCase().includes(q) || o.items_summary.toLowerCase().includes(q)
+    );
+    this.renderOrdersHistoryTable(filtered);
+  }
+
+  renderOrdersHistoryTable(orders) {
+    const tbody = document.getElementById('orders-history-tbody');
+    if (!tbody) return;
+
+    if (orders.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-white-50">Laiha pedidu tuir peskiza ne\'e.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = orders
+      .map(
+        (o) => `
+      <tr>
+        <td class="text-white-50">${o.created_at}</td>
+        <td><strong class="text-white">${o.order_code}</strong></td>
+        <td><span class="badge bg-dark border border-secondary">${o.table_name}</span></td>
+        <td class="text-white-50">${o.items_summary}</td>
+        <td class="fw-bold text-warning">$${o.grand_total}</td>
+        <td><span class="badge bg-secondary">${o.status}</span></td>
+        <td class="text-end">
+          <span class="text-info small"><i class="fa-solid fa-check"></i></span>
+        </td>
+      </tr>
+    `
+      )
+      .join('');
+  }
+
+  async loadShiftSummary() {
+    try {
+      const data = await apiGet('/api/v1/cashier/shift/summary/');
+      const cashEl = document.getElementById('shift-cash-total');
+      const otherEl = document.getElementById('shift-other-total');
+      const grandEl = document.getElementById('shift-grand-total');
+      const paidSessionsEl = document.getElementById('shift-paid-sessions-count');
+      const completedOrdersEl = document.getElementById('shift-completed-orders-count');
+      const timeEl = document.getElementById('shift-report-timestamp');
+
+      if (cashEl) cashEl.textContent = `$${data.cash_total}`;
+      if (otherEl) otherEl.textContent = `$${data.other_total}`;
+      if (grandEl) grandEl.textContent = `$${data.grand_total}`;
+      if (paidSessionsEl) paidSessionsEl.textContent = `${data.paid_sessions_count} Meza`;
+      if (completedOrdersEl) completedOrdersEl.textContent = `${data.completed_orders_count} Pedidu`;
+      if (timeEl) timeEl.textContent = data.timestamp;
+
+      this.currentShiftData = data;
+    } catch (e) {
+      console.error('Error loading shift summary:', e);
+    }
+  }
+
+  printShiftReport() {
+    const data = this.currentShiftData || {};
+    const printWindow = window.open('', '_blank', 'width=380,height=600');
+    if (!printWindow) {
+      window.print();
+      return;
+    }
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Z-Report Shift Close - Celvass Resto &amp; Bar</title>
+        <style>
+          @page { size: 80mm auto; margin: 0mm; }
+          html, body {
+            margin: 0; padding: 6px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 11px; line-height: 1.25;
+            background: #fff; color: #000;
+            width: 76mm; max-width: 100%;
+          }
+          .text-center { text-align: center; }
+          .text-start { text-align: left; }
+          .text-end { text-align: right; }
+          .fw-bold { font-weight: bold; }
+          .d-flex { display: flex; justify-content: space-between; }
+          .border-top { border-top: 1px dashed #000; }
+          .border-bottom { border-bottom: 1px dashed #000; }
+          .my-1 { margin: 4px 0; }
+          .my-2 { margin: 8px 0; }
+        </style>
+      </head>
+      <body>
+        <div class="text-center">
+          <h4 style="margin: 0; font-weight: bold;">CELVASS RESTO &amp; BAR</h4>
+          <small>Praia dos Coqueiros, Dili</small><br>
+          <strong style="display: block; margin-top: 4px;">*** RELATÓRIU FECHU KAIXA (Z-REPORT) ***</strong>
+        </div>
+        <div class="border-top border-bottom my-2 text-start">
+          <div><strong>Data:</strong> ${data.timestamp || new Date().toLocaleString()}</div>
+          <div><strong>Status:</strong> FECHU OFISIÁL</div>
+        </div>
+        <div class="my-2">
+          <div class="d-flex"><span>OSAN-MARAN (CASH):</span><strong class="text-end">$${data.cash_total || '0.00'}</strong></div>
+          <div class="d-flex"><span>KARTAUN / OUTROS:</span><strong class="text-end">$${data.other_total || '0.00'}</strong></div>
+          <div class="border-top my-1"></div>
+          <div class="d-flex fw-bold"><span>TOTÁL RENDIMENTU:</span><strong class="text-end">$${data.grand_total || '0.00'}</strong></div>
+        </div>
+        <div class="border-top my-2 text-start">
+          <div class="d-flex"><span>Meza ne'ebé Selu:</span><span>${data.paid_sessions_count || 0}</span></div>
+          <div class="d-flex"><span>Pedidu ne'ebé Remata:</span><span>${data.completed_orders_count || 0}</span></div>
+          <div class="d-flex"><span>Totál Transasaun:</span><span>${data.payments_count || 0}</span></div>
+        </div>
+        <div class="text-center my-2" style="font-size: 10px; color: #555;">
+          <p>Verifikadu &amp; Arkivadu ho Susesu.<br>Sistema PWA Celvass Resto &amp; Bar</p>
+        </div>
+        <script>
+          window.onload = function() {
+            window.print();
+            setTimeout(function() { window.close(); }, 500);
+          };
+        <\/script>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
+  }
+
   async confirmOrder(orderId) {
     try {
       await apiPost(`/api/v1/cashier/orders/${orderId}/confirm/`);
       this.loadPendingOrders();
       this.loadTables();
-      showToast(t('order_confirmed_success'), 'success');
+      showToast('Pedidu konfirma no haruka ba KDS Dapur!', 'success');
       SoundEffects.playSuccess();
     } catch (e) {
-      showToast(t(e.message), 'error');
+      showToast(e.message, 'error');
     }
   }
 
@@ -259,7 +456,7 @@ class CashierApp {
   async submitRejectOrder() {
     const reason = document.getElementById('reject-reason-input').value.trim();
     if (!reason) {
-      showToast(t('reason_required'), 'warning');
+      showToast('Favór fó razaun rekuza!', 'warning');
       return;
     }
 
@@ -267,10 +464,10 @@ class CashierApp {
       await apiPost(`/api/v1/cashier/orders/${this.selectedOrderForReject}/reject/`, { reason });
       bootstrap.Modal.getInstance(document.getElementById('rejectOrderModal')).hide();
       this.loadPendingOrders();
-      showToast(t('order_rejected_success'), 'info');
+      showToast('Pedidu rekuza ona no la prosesa iha dapur.', 'info');
       SoundEffects.playError();
     } catch (e) {
-      showToast(t(e.message), 'error');
+      showToast(e.message, 'error');
     }
   }
 
@@ -290,17 +487,16 @@ class CashierApp {
       });
       bootstrap.Modal.getInstance(document.getElementById('openSessionModal')).hide();
       this.loadTables();
-      showToast(t('session_opened_success'), 'success');
+      showToast('Sesi meza loke ho susesu!', 'success');
       SoundEffects.playSuccess();
     } catch (e) {
-      showToast(t(e.message), 'error');
+      showToast(e.message, 'error');
     }
   }
 
   openPaymentModal(sessionId, tableName) {
     this.currentPaymentSessionId = sessionId;
 
-    // Find table & active session details
     const table = this.tables.find((t) => t.active_session && t.active_session.id === sessionId);
     const session = table ? table.active_session : null;
 
@@ -326,15 +522,14 @@ class CashierApp {
       }
     }
 
-    // Populate itemized order breakdown
     const itemsContainer = document.getElementById('pos-order-items-container');
     if (itemsContainer) {
       if (!session.items || session.items.length === 0) {
-        itemsContainer.innerHTML = '<div class="text-center py-3 text-muted small">La iha item pedidu atu selu.</div>';
+        itemsContainer.innerHTML = '<div class="text-center py-3 text-white-50 small">Laiha item pedidu atu selu.</div>';
       } else {
         itemsContainer.innerHTML = `
-          <table class="table table-sm table-borderless mb-0 small">
-            <thead class="border-bottom text-muted">
+          <table class="table table-sm table-dark table-borderless mb-0 small">
+            <thead class="border-bottom border-secondary text-white-50">
               <tr>
                 <th>Item</th>
                 <th class="text-center">Qtd</th>
@@ -346,15 +541,15 @@ class CashierApp {
               ${session.items
                 .map(
                   (item) => `
-                <tr class="border-bottom border-light">
+                <tr class="border-bottom border-secondary border-opacity-25">
                   <td>
-                    <strong>${item.name}</strong>
+                    <strong class="text-white">${item.name}</strong>
                     ${item.note ? `<div class="badge bg-warning text-dark"><i class="fa-solid fa-pen small"></i> ${item.note}</div>` : ''}
-                    <div class="text-muted" style="font-size: 0.75rem;">${item.order_code}</div>
+                    <div class="text-white-50" style="font-size: 0.75rem;">${item.order_code}</div>
                   </td>
-                  <td class="text-center fw-bold">${item.quantity}</td>
-                  <td class="text-end text-muted">$${item.unit_price}</td>
-                  <td class="text-end fw-bold text-dark">$${item.subtotal}</td>
+                  <td class="text-center fw-bold text-white">${item.quantity}</td>
+                  <td class="text-end text-white-50">$${item.unit_price}</td>
+                  <td class="text-end fw-bold text-warning">$${item.subtotal}</td>
                 </tr>
               `
                 )
@@ -365,7 +560,6 @@ class CashierApp {
       }
     }
 
-    // Ensure submit button is enabled and reset
     const payBtn = document.getElementById('btn-submit-payment');
     if (payBtn) {
       payBtn.disabled = false;
@@ -389,7 +583,7 @@ class CashierApp {
 
     if (changeEl) {
       if (change < 0) {
-        changeEl.textContent = `Osan Kurang $${Math.abs(change).toFixed(2)}`;
+        changeEl.textContent = `Osan Seidauk To'o $${Math.abs(change).toFixed(2)}`;
         changeEl.className = 'fw-bold fs-5 text-danger';
         if (payBtn) payBtn.disabled = true;
       } else {
@@ -401,31 +595,33 @@ class CashierApp {
   }
 
   async processPayment() {
+    const payBtn = document.getElementById('btn-submit-payment');
+    if (payBtn) {
+      if (payBtn.disabled) return;
+      payBtn.disabled = true;
+      payBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> Prosesu Hela Pagamentu...';
+    }
+
     const tendered = parseFloat(document.getElementById('pos-tendered-amount').value) || 0;
     const method = document.getElementById('pos-payment-method').value;
-    const payBtn = document.getElementById('btn-submit-payment');
-
-    if (payBtn) {
-      payBtn.disabled = true;
-      payBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Prosesu Hela...';
-    }
 
     try {
       const payment = await apiPost(`/api/v1/cashier/table-sessions/${this.currentPaymentSessionId}/payments/`, {
         tendered_amount: tendered,
         method: method,
-        idempotency_key: crypto.randomUUID(),
+        idempotency_key: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : ('pay_' + Date.now()),
       });
 
       bootstrap.Modal.getInstance(document.getElementById('paymentModal')).hide();
       this.loadTables();
 
-      showToast(`${t('payment_success')} $${payment.amount}! ${t('change_label')} $${payment.change_amount}`, 'success');
+      showToast(`Pagamentu susesu $${payment.amount}! Troku $${payment.change_amount}`, 'success');
       SoundEffects.playSuccess();
 
       this.showReceiptModal(payment);
     } catch (e) {
-      showToast(t(e.message), 'error');
+      showToast(e.message, 'error');
+    } finally {
       if (payBtn) {
         payBtn.disabled = false;
         payBtn.innerHTML = '<i class="fa-solid fa-check-circle me-1"></i> Kompleta Pagamentu';
@@ -438,7 +634,7 @@ class CashierApp {
       const payment = await apiGet(`/api/v1/cashier/table-sessions/${sessionId}/payments/`);
       this.showReceiptModal(payment);
     } catch (e) {
-      showToast(t(e.message) || 'Resibu la hetan.', 'error');
+      showToast(e.message || 'Resibu la hetan.', 'error');
     }
   }
 
@@ -515,7 +711,6 @@ class CashierApp {
       return;
     }
 
-    // Open an isolated print window strictly formatted for 1-page 80mm thermal receipt
     const printWindow = window.open('', '_blank', 'width=380,height=600');
     if (!printWindow) {
       window.print();
@@ -530,11 +725,11 @@ class CashierApp {
         <style>
           @page {
             size: 80mm auto;
-            margin: 0mm;
+            margin: 0mm !important;
           }
           html, body {
             margin: 0;
-            padding: 8px;
+            padding: 6px;
             font-family: 'Courier New', Courier, monospace;
             font-size: 11px;
             line-height: 1.25;
@@ -581,14 +776,14 @@ class CashierApp {
   }
 
   async handleCloseSession(sessionId, tableName) {
-    if (!confirm(`Tutup sesi untuk ${tableName}? (Pastikan semua pembayaran selesai)`)) return;
+    if (!confirm(`Taka sesi meza ba ${tableName}? (Garante katak pagamentu hotu remata ona)`)) return;
     try {
       await apiPost(`/api/v1/cashier/table-sessions/${sessionId}/close/`);
       this.loadTables();
-      showToast(`${t('session_closed')} ${tableName}.`, 'info');
+      showToast(`Sesi taka ona ba ${tableName}.`, 'info');
       SoundEffects.playBell();
     } catch (e) {
-      showToast(t(e.message), 'error');
+      showToast(e.message, 'error');
     }
   }
 
@@ -597,11 +792,11 @@ class CashierApp {
       console.log('Cashier WS update:', msg);
       if (msg.event === 'NEW_ORDER_WAITING') {
         SoundEffects.playBell();
-        showToast(`🔔 ${t('new_order_toast')} ${msg.data.order_code} - ${msg.data.table_name || msg.data.table_code}!`, 'warning');
+        showToast(`🔔 Pedidu foun ${msg.data.order_code} - ${msg.data.table_name || msg.data.table_code}!`, 'warning');
         this.loadPendingOrders();
       } else if (msg.event === 'BILL_REQUESTED') {
         SoundEffects.playBell();
-        showToast(`💳 ${t('bill_request_toast')} ${msg.data.table_name || msg.data.table_code}!`, 'info');
+        showToast(`💳 Husu konta hosi ${msg.data.table_name || msg.data.table_code}!`, 'info');
         this.loadTables();
       } else if (msg.event === 'SESSION_OPENED' || msg.event === 'SESSION_CLOSED' || msg.event === 'PAYMENT_COMPLETED') {
         this.loadTables();
