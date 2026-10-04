@@ -21,45 +21,45 @@
     <div class="p-3 bg-dark bg-opacity-40 rounded-4 mb-4 border border-secondary border-opacity-25">
       <h6 class="fw-bold mb-3 text-warning text-uppercase small" data-i18n="order_progress">Progresu Pedidu:</h6>
 
-      <div class="d-flex justify-content-between position-relative mb-2">
+      <div class="d-flex justify-content-between position-relative mb-2 tracker-stepper-container">
         <!-- Step 1: Sent -->
-        <div class="text-center" style="z-index: 2;">
-          <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-1 {% if order.status == 'WAITING_CASHIER_CONFIRMATION' %}bg-warning text-dark status-waiting{% else %}bg-success text-white{% endif %}" style="width: 44px; height: 44px;">
+        <div class="text-center tracker-step-col" style="z-index: 2;">
+          <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-1 tracker-step-node {% if order.status == 'WAITING_CASHIER_CONFIRMATION' %}bg-warning text-dark status-waiting{% else %}bg-success text-white{% endif %}">
             <i class="fa-solid fa-paper-plane"></i>
           </div>
-          <small class="fw-bold d-block text-white" data-i18n="status_sent">Haruka Ona</small>
+          <small class="fw-bold d-block text-white tracker-step-label" data-i18n="status_sent">Haruka Ona</small>
         </div>
 
         <!-- Step 2: Confirmed -->
-        <div class="text-center" style="z-index: 2;">
-          <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-1 {% if order.status in 'CONFIRMED,PREPARING,READY,SERVED,COMPLETED' %}bg-success text-white{% elif order.status == 'WAITING_CASHIER_CONFIRMATION' %}bg-secondary text-white opacity-40{% else %}bg-danger text-white{% endif %}" style="width: 44px; height: 44px;">
+        <div class="text-center tracker-step-col" style="z-index: 2;">
+          <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-1 tracker-step-node {% if order.status in 'CONFIRMED,PREPARING,READY,SERVED,COMPLETED' %}bg-success text-white{% elif order.status == 'WAITING_CASHIER_CONFIRMATION' %}bg-secondary text-white opacity-40{% else %}bg-danger text-white{% endif %}">
             <i class="fa-solid fa-check"></i>
           </div>
-          <small class="fw-bold d-block text-white" data-i18n="status_confirmed_short">Konfirmadu</small>
+          <small class="fw-bold d-block text-white tracker-step-label" data-i18n="status_confirmed_short">Konfirmadu</small>
         </div>
 
         <!-- Step 3: Cooking -->
-        <div class="text-center" style="z-index: 2;">
-          <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-1 {% if order.status in 'PREPARING,READY,SERVED,COMPLETED' %}bg-success text-white{% elif order.status == 'CONFIRMED' %}bg-warning text-dark status-waiting{% else %}bg-secondary text-white opacity-40{% endif %}" style="width: 44px; height: 44px;">
+        <div class="text-center tracker-step-col" style="z-index: 2;">
+          <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-1 tracker-step-node {% if order.status in 'PREPARING,READY,SERVED,COMPLETED' %}bg-success text-white{% elif order.status == 'CONFIRMED' %}bg-warning text-dark status-waiting{% else %}bg-secondary text-white opacity-40{% endif %}">
             <i class="fa-solid fa-fire-burner"></i>
           </div>
-          <small class="fw-bold d-block text-white" data-i18n="status_cooking_short">Tein Hela</small>
+          <small class="fw-bold d-block text-white tracker-step-label" data-i18n="status_cooking_short">Tein Hela</small>
         </div>
 
         <!-- Step 4: Ready -->
-        <div class="text-center" style="z-index: 2;">
-          <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-1 {% if order.status in 'READY,SERVED,COMPLETED' %}bg-success text-white{% elif order.status == 'PREPARING' %}bg-warning text-dark status-waiting{% else %}bg-secondary text-white opacity-40{% endif %}" style="width: 44px; height: 44px;">
+        <div class="text-center tracker-step-col" style="z-index: 2;">
+          <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-1 tracker-step-node {% if order.status in 'READY,SERVED,COMPLETED' %}bg-success text-white{% elif order.status == 'PREPARING' %}bg-warning text-dark status-waiting{% else %}bg-secondary text-white opacity-40{% endif %}">
             <i class="fa-solid fa-bell-concierge"></i>
           </div>
-          <small class="fw-bold d-block text-white" data-i18n="status_ready_short">Prontu</small>
+          <small class="fw-bold d-block text-white tracker-step-label" data-i18n="status_ready_short">Prontu</small>
         </div>
 
         <!-- Step 5: Served -->
-        <div class="text-center" style="z-index: 2;">
-          <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-1 {% if order.status in 'SERVED,COMPLETED' %}bg-success text-white{% else %}bg-secondary text-white opacity-40{% endif %}" style="width: 44px; height: 44px;">
+        <div class="text-center tracker-step-col" style="z-index: 2;">
+          <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-1 tracker-step-node {% if order.status in 'SERVED,COMPLETED' %}bg-success text-white{% else %}bg-secondary text-white opacity-40{% endif %}">
             <i class="fa-solid fa-utensils"></i>
           </div>
-          <small class="fw-bold d-block text-white" data-i18n="status_served_short">Entrega Ona</small>
+          <small class="fw-bold d-block text-white tracker-step-label" data-i18n="status_served_short">Entrega Ona</small>
         </div>
       </div>
     </div>

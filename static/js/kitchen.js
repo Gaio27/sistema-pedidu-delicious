@@ -5,6 +5,7 @@
 class KitchenKDSApp {
   constructor() {
     this.orders = [];
+    this.activeMobileTab = 'CONFIRMED';
     this.init();
   }
 
@@ -13,6 +14,7 @@ class KitchenKDSApp {
     this.initWebSocket();
 
     window.addEventListener('languageChanged', () => this.renderKDS());
+    window.addEventListener('resize', () => this.applyMobileVisibility());
 
     // Ticker timer update every second
     setInterval(() => this.updateElapsedTimers(), 1000);
@@ -45,9 +47,59 @@ class KitchenKDSApp {
     document.getElementById('count-preparing').textContent = preparingOrders.length;
     document.getElementById('count-ready').textContent = readyOrders.length;
 
+    const countConfirmedM = document.getElementById('count-confirmed-m');
+    const countPreparingM = document.getElementById('count-preparing-m');
+    const countReadyM = document.getElementById('count-ready-m');
+    if (countConfirmedM) countConfirmedM.textContent = confirmedOrders.length;
+    if (countPreparingM) countPreparingM.textContent = preparingOrders.length;
+    if (countReadyM) countReadyM.textContent = readyOrders.length;
+
     colConfirmed.innerHTML = confirmedOrders.map((o) => this.renderCard(o, 'CONFIRMED')).join('');
     colPreparing.innerHTML = preparingOrders.map((o) => this.renderCard(o, 'PREPARING')).join('');
     colReady.innerHTML = readyOrders.map((o) => this.renderCard(o, 'READY')).join('');
+
+    this.applyMobileVisibility();
+  }
+
+  switchMobileTab(status) {
+    this.activeMobileTab = status;
+    this.applyMobileVisibility();
+  }
+
+  applyMobileVisibility() {
+    const colConf = document.getElementById('kds-col-wrapper-confirmed');
+    const colPrep = document.getElementById('kds-col-wrapper-preparing');
+    const colRdy = document.getElementById('kds-col-wrapper-ready');
+
+    const btnConf = document.getElementById('btn-tab-confirmed');
+    const btnPrep = document.getElementById('btn-tab-preparing');
+    const btnRdy = document.getElementById('btn-tab-ready');
+
+    if (window.innerWidth < 768) {
+      if (colConf) colConf.style.display = this.activeMobileTab === 'CONFIRMED' ? 'block' : 'none';
+      if (colPrep) colPrep.style.display = this.activeMobileTab === 'PREPARING' ? 'block' : 'none';
+      if (colRdy) colRdy.style.display = this.activeMobileTab === 'READY' ? 'block' : 'none';
+
+      if (btnConf) {
+        btnConf.className = this.activeMobileTab === 'CONFIRMED'
+          ? 'btn btn-sm btn-warning flex-fill active fw-bold rounded-pill text-dark shadow'
+          : 'btn btn-sm btn-outline-warning flex-fill fw-bold rounded-pill';
+      }
+      if (btnPrep) {
+        btnPrep.className = this.activeMobileTab === 'PREPARING'
+          ? 'btn btn-sm btn-info flex-fill active fw-bold rounded-pill text-dark shadow'
+          : 'btn btn-sm btn-outline-info flex-fill fw-bold rounded-pill';
+      }
+      if (btnRdy) {
+        btnRdy.className = this.activeMobileTab === 'READY'
+          ? 'btn btn-sm btn-success flex-fill active fw-bold rounded-pill text-white shadow'
+          : 'btn btn-sm btn-outline-success flex-fill fw-bold rounded-pill';
+      }
+    } else {
+      if (colConf) colConf.style.display = 'block';
+      if (colPrep) colPrep.style.display = 'block';
+      if (colRdy) colRdy.style.display = 'block';
+    }
   }
 
   renderCard(order, column) {

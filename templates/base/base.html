@@ -3,7 +3,7 @@
 <html lang="tet">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>{% block title %}{{ current_restaurant.name }} — Dine-In PWA{% endblock %}</title>
   
   <!-- PWA Meta -->
@@ -189,6 +189,45 @@
   <main class="container-fluid py-3 position-relative" style="z-index: 1;">
     {% block content %}{% endblock %}
   </main>
+
+  <!-- Mobile Bottom Navigation Dock (Gojek/Tokopedia/Instagram Style) -->
+  {% if not user.is_authenticated %}
+  <nav class="mobile-bottom-dock" id="mobileBottomDock" aria-label="Navegasaun Telemóvel">
+    <ul class="mobile-dock-items">
+      <li class="mobile-dock-item">
+        <a href="{% if qr_token %}/t/{{ qr_token }}/{% else %}/{% endif %}" class="mobile-dock-link active" id="dock-menu-link">
+          <i class="fa-solid fa-utensils"></i>
+          <span data-i18n="all_menu">Menu</span>
+        </a>
+      </li>
+      <li class="mobile-dock-item">
+        <a href="javascript:void(0)" onclick="const s = document.getElementById('menu-search'); if (s) { s.scrollIntoView({behavior:'smooth', block:'center'}); s.focus(); }" class="mobile-dock-link" id="dock-search-link">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <span data-i18n="search">Buka</span>
+        </a>
+      </li>
+      <li class="mobile-dock-item">
+        <a href="javascript:void(0)" data-bs-toggle="offcanvas" data-bs-target="#cartOffcanvas" class="mobile-dock-link position-relative" id="dock-cart-link">
+          <i class="fa-solid fa-basket-shopping text-warning"></i>
+          <span class="mobile-dock-badge" id="dock-cart-badge" style="display: none;">0</span>
+          <span data-i18n="cart_title">Karreta</span>
+        </a>
+      </li>
+      <li class="mobile-dock-item">
+        <a href="javascript:void(0)" onclick="if (typeof customerApp !== 'undefined' && customerApp.scrollToActiveOrders) customerApp.scrollToActiveOrders();" class="mobile-dock-link" id="dock-status-link">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+          <span data-i18n="status">Status</span>
+        </a>
+      </li>
+      <li class="mobile-dock-item">
+        <a href="javascript:void(0)" onclick="if (typeof customerApp !== 'undefined' && customerApp.requestBill) customerApp.requestBill();" class="mobile-dock-link" id="dock-bill-link">
+          <i class="fa-solid fa-receipt"></i>
+          <span data-i18n="request_bill">Konta</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+  {% endif %}
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

@@ -138,6 +138,7 @@ class CustomerApp {
     const bar = document.getElementById('floating-cart-bar');
     const badge = document.getElementById('cart-count-badge');
     const totalEl = document.getElementById('cart-total-price');
+    const dockBadge = document.getElementById('dock-cart-badge');
 
     if (bar && count > 0) {
       bar.style.display = 'flex';
@@ -145,6 +146,15 @@ class CustomerApp {
       if (totalEl) totalEl.textContent = `$${total.toFixed(2)}`;
     } else if (bar) {
       bar.style.display = 'none';
+    }
+
+    if (dockBadge) {
+      if (count > 0) {
+        dockBadge.textContent = count;
+        dockBadge.style.display = 'block';
+      } else {
+        dockBadge.style.display = 'none';
+      }
     }
 
     const drawerList = document.getElementById('cart-items-list');
@@ -409,5 +419,14 @@ class CustomerApp {
 
     // Fallback polling every 8 seconds
     setInterval(() => this.loadActiveOrders(), 8000);
+  }
+
+  scrollToActiveOrders() {
+    const el = document.getElementById('customer-active-orders');
+    if (el && el.children.length > 0) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      showToast(t('alert_waiting_desc') || "Seidauk iha pedidu ativu ba sesi meza ne'e.", 'info');
+    }
   }
 }
