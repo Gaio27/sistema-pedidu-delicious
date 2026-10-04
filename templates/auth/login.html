@@ -1,0 +1,80 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Login Staff - {{ current_restaurant.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width: 480px;">
+  
+  <div class="card card-custom p-4 bg-white shadow-lg border-0 rounded-4">
+    <div class="text-center mb-4">
+      <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2 shadow" style="width: 60px; height: 60px; font-size: 1.5rem;">
+        <i class="fa-solid fa-utensils"></i>
+      </div>
+      <h3 class="fw-bold mb-0 text-dark">{{ current_restaurant.name }}</h3>
+      <p class="text-muted small">Portal Masuk Staff Restoran & Kasir</p>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-danger py-2 small mb-3">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <!-- 1-Click Quick Demo Login Switcher -->
+    <div class="p-3 bg-light rounded-4 mb-4 border">
+      <div class="fw-bold small text-secondary mb-2 text-uppercase text-center">
+        <i class="fa-solid fa-bolt text-warning me-1"></i> Login Cepat Akun Demo (1-Click):
+      </div>
+      <div class="d-grid gap-2">
+        <a href="{% url 'demo-login' 'ADMIN' %}" class="btn btn-outline-danger btn-sm text-start fw-bold d-flex justify-content-between align-items-center">
+          <span><i class="fa-solid fa-shield-halved me-2"></i> Administrator</span>
+          <span class="badge bg-danger">Full Access</span>
+        </a>
+        <a href="{% url 'demo-login' 'CASHIER' %}" class="btn btn-outline-warning btn-sm text-start fw-bold text-dark d-flex justify-content-between align-items-center">
+          <span><i class="fa-solid fa-cash-register me-2"></i> Kasir (Cashier Gate & POS)</span>
+          <span class="badge bg-warning text-dark">Gatekeeper</span>
+        </a>
+        <a href="{% url 'demo-login' 'KITCHEN' %}" class="btn btn-outline-info btn-sm text-start fw-bold text-dark d-flex justify-content-between align-items-center">
+          <span><i class="fa-solid fa-fire-burner me-2"></i> Dapur (Kitchen Display KDS)</span>
+          <span class="badge bg-info text-dark">Cooking</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="position-relative text-center my-3">
+      <hr class="text-muted">
+      <span class="position-absolute top-50 start-50 translate-middle bg-white px-2 small text-muted">atau masuk dengan kredensial</span>
+    </div>
+
+    <!-- Regular Login Form -->
+    <form method="POST" action="{% url 'login' %}">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label for="username" class="form-label small fw-bold">Username / Email:</label>
+        <div class="input-group">
+          <span class="input-group-text bg-light"><i class="fa-solid fa-user text-muted"></i></span>
+          <input type="text" class="form-control" id="username" name="username" placeholder="Masukkan username" required autofocus>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label for="password" class="form-label small fw-bold">Password:</label>
+        <div class="input-group">
+          <span class="input-group-text bg-light"><i class="fa-solid fa-lock text-muted"></i></span>
+          <input type="password" class="form-control" id="password" name="password" placeholder="Masukkan password" required>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100 py-2 rounded-pill fw-bold shadow">
+        <i class="fa-solid fa-right-to-bracket me-1"></i> Masuk ke Sistem
+      </button>
+    </form>
+
+  </div>
+
+</div>
+{% endblock %}

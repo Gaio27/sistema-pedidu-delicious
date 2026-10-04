@@ -1,0 +1,241 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}{{ table.display_name|default:"Pilih Meja" }} - {{ current_restaurant.name }}{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 900px; padding-bottom: 90px;">
+
+  <!-- Table Header / Session Banner -->
+  <div class="card card-custom p-3 mb-3 bg-white shadow-sm border-0">
+    <div class="d-flex justify-content-between align-items-center">
+      <div class="d-flex align-items-center gap-3">
+        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; font-size: 1.25rem;">
+          <i class="fa-solid fa-chair"></i>
+        </div>
+        <div>
+          <h5 class="fw-bold mb-0">{{ table.display_name|default:"Meza Seidauk Hili" }}</h5>
+          <div class="small text-muted">
+            {% if session and session.is_active %}
+              <span class="text-success fw-bold"><i class="fa-solid fa-circle-check"></i> <span data-i18n="active_session">Sesi Ativu</span></span> (<span data-i18n="guests">Tamu</span>: {{ session.guest_count }} <span data-i18n="people">Ema</span>)
+            {% else %}
+              <span class="text-warning fw-bold"><i class="fa-solid fa-circle-exclamation"></i> <span data-i18n="session_not_opened">Sesi Seidauk Loke hosi Kaixa</span></span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex gap-2">
+        <!-- Switch Table Dropdown -->
+        <div class="dropdown">
+          <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" data-i18n="switch_table">
+            <i class="fa-solid fa-qrcode me-1"></i> Troka Meza
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end shadow">
+            <li><h6 class="dropdown-header" data-i18n="select_table">Hili Meza Dine-In</h6></li>
+            {% for t in all_tables %}
+              <li><a class="dropdown-item {% if t.id == table.id %}active fw-bold{% endif %}" href="/t/{{ t.qr_token }}/">{{ t.display_name }} ({{ t.status }})</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+
+        {% if session and session.is_active %}
+          <button class="btn btn-sm btn-outline-primary fw-bold" onclick="customerApp.requestBill()" data-i18n="request_bill">
+            <i class="fa-solid fa-receipt me-1"></i> Husu Konta (Bill)
+          </button>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Live Orders Section -->
+  <div id="customer-active-orders"></div>
+
+    <!-- Search & Category Filters -->
+  <div class="mb-3">
+    <div class="input-group shadow-sm mb-3">
+      <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+      <input type="text" id="menu-search" class="form-control border-start-0 ps-0" placeholder="Buka hahan, hemu, seafood, snack..." data-i18n-placeholder="search_placeholder">
+    </div>
+
+    <!-- Category Pills -->
+    <div class="d-flex gap-2 overflow-auto pb-2" style="white-space: nowrap; scrollbar-width: none;">
+      <button class="btn btn-sm btn-primary cat-pill active rounded-pill px-3" data-category="all">
+        <i class="fa-solid fa-border-all me-1"></i> <span data-i18n="all_menu">Menu Hotu</span>
+      </button>
+      {% for cat in categories %}
+        <button class="btn btn-sm btn-outline-secondary cat-pill rounded-pill px-3" data-category="{{ cat.slug }}">
+          <i class="fa-solid fa-{{ cat.icon_name|default:'utensils' }} me-1"></i> {{ cat.name }}
+        </button>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Menu Items Catalog Grid -->
+  <div class="row g-3" id="menu-grid">
+    {% for cat in categories %}
+      {% for item in cat.items.all %}
+        {% if item.availability != 'INACTIVE' %}
+          <div class="col-md-4 col-sm-6 menu-item-col" data-category="{{ cat.slug }}" data-name="{{ item.name }}" data-desc="{{ item.description }}">
+            <div class="menu-card">
+              <img src="{{ item.display_image }}" class="menu-card-img" alt="{{ item.name }}" onerror="this.src='/static/icons/default-food.png'">
+              <div class="menu-card-body">
+                <div class="d-flex justify-content-between align-items-start mb-1">
+                  <h6 class="fw-bold mb-0 text-dark">{{ item.name }}</h6>
+                  <span class="badge bg-light text-secondary border small">{{ cat.name }}</span>
+                </div>
+                <p class="text-muted small mb-2 flex-grow-1" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                  {{ item.description|default:"Hidangan spesial khas Celvass Resto & Bar dengan bahan segar pilihan." }}
+                </p>
+
+                <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
+                  <div class="menu-card-price">${{ item.price }}</div>
+
+                  {% if item.availability == 'AVAILABLE' %}
+                    {% if session and session.is_active %}
+                      <button class="btn btn-sm btn-primary rounded-pill px-3 fw-bold" onclick="openItemModal('{{ item.id }}', '{{ item.name|escapejs }}', '{{ item.price }}', '{{ item.display_image|escapejs }}', '{{ item.description|escapejs }}')">
+                        <i class="fa-solid fa-plus me-1"></i> <span data-i18n="add">Aumenta</span>
+                      </button>
+                    {% else %}
+                      <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="showToast('Sesi meja belum dibuka oleh kasir.', 'warning')">
+                        <i class="fa-solid fa-lock me-1"></i> <span data-i18n="locked">Xave Hela</span>
+                      </button>
+                    {% endif %}
+                  {% else %}
+                    <span class="badge bg-danger rounded-pill px-3 py-2" data-i18n="sold_out">Hotu Ona (Sold Out)</span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endfor %}
+  </div>
+
+</div>
+
+<!-- Floating Cart Bottom Bar -->
+<div id="floating-cart-bar" class="floating-cart-bar shadow-lg" style="display: none;" data-bs-toggle="offcanvas" data-bs-target="#cartOffcanvas">
+  <div class="d-flex align-items-center gap-2">
+    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+      <i class="fa-solid fa-bag-shopping"></i>
+    </div>
+    <span class="badge bg-light text-dark fw-bold" id="cart-count-badge">0 Item</span>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <span class="fs-5 fw-bold" id="cart-total-price">$0.00</span>
+    <span class="btn btn-sm btn-primary rounded-pill px-3 fw-bold" data-i18n="btn_view_order">Haree Pedidu →</span>
+  </div>
+</div>
+
+<!-- Item Customization Modal -->
+<div class="modal fade" id="itemCustomModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 border-0 shadow">
+      <div class="modal-body p-4">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <div>
+            <h5 class="fw-bold mb-1" id="modal-item-name">Naran Menu</h5>
+            <div class="text-primary fw-bold fs-5" id="modal-item-price">$0.00</div>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <p class="text-muted small mb-3" id="modal-item-desc"></p>
+
+        <div class="mb-3">
+          <label class="form-label small fw-bold text-secondary">Kuantidade (Quantity):</label>
+          <div class="d-flex align-items-center gap-3">
+            <button class="btn btn-outline-secondary rounded-circle" style="width: 40px; height: 40px;" onclick="adjustModalQty(-1)">-</button>
+            <span class="fs-4 fw-bold" id="modal-item-qty">1</span>
+            <button class="btn btn-outline-secondary rounded-circle" style="width: 40px; height: 40px;" onclick="adjustModalQty(1)">+</button>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="modal-item-note" class="form-label small fw-bold text-secondary" data-i18n="order_notes_label">Notasaun ba Meza / Dapur:</label>
+          <input type="text" class="form-control" id="modal-item-note" placeholder="Ezemplu: Lalika tau pimenta, kuah haketak..." data-i18n-placeholder="order_notes_placeholder">
+        </div>
+
+        <button type="button" class="btn btn-primary w-100 py-2 rounded-pill fw-bold" id="btn-add-modal-item" data-i18n="add">
+          Aumenta ba Karreta
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Cart Offcanvas Drawer -->
+<div class="offcanvas offcanvas-bottom rounded-top-4" tabindex="-1" id="cartOffcanvas" style="height: 80vh;">
+  <div class="offcanvas-header border-bottom">
+    <h5 class="offcanvas-title fw-bold">
+      <i class="fa-solid fa-basket-shopping text-primary me-2"></i> <span data-i18n="cart_title">Karreta Pedidu</span> ({{ table.display_name }})
+    </h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+  </div>
+  <div class="offcanvas-body d-flex flex-column">
+    <div id="cart-items-list" class="flex-grow-1 overflow-auto pe-1"></div>
+
+    <div class="border-top pt-3 mt-3">
+      <div class="mb-3">
+        <label for="order-customer-note" class="form-label small fw-bold text-secondary" data-i18n="order_notes_label">Notasaun ba Meza / Dapur:</label>
+        <textarea class="form-control" id="order-customer-note" rows="2" placeholder="Ezemplu: Lalika tau pimenta, kuah haketak..." data-i18n-placeholder="order_notes_placeholder"></textarea>
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <span class="text-muted" data-i18n="estimated_total">Total Estimadu:</span>
+        <span class="fs-4 fw-bold text-primary" id="cart-drawer-total">$0.00</span>
+      </div>
+
+      <div class="alert alert-warning small py-2 mb-3" data-i18n="gatekeeper_warning">
+        <i class="fa-solid fa-shield-halved me-1"></i> Pedidu sei hetan verifikasaun uluk hosi Kaixa molok tein iha dapur.
+      </div>
+
+      <button class="btn btn-primary w-100 py-3 rounded-pill fw-bold fs-6 shadow" id="btn-submit-order" onclick="customerApp.submitOrder()" data-i18n="btn_submit_order">
+        <i class="fa-solid fa-paper-plane me-1"></i> Haruka Pedidu ba Kaixa
+      </button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/customer.js' %}"></script>
+<script>
+  let currentModalItem = null;
+  let modalQty = 1;
+
+  const customerApp = new CustomerApp({
+    sessionToken: "{{ session.public_token|default:'' }}",
+    qrToken: "{{ qr_token|default:'' }}",
+    tableCode: "{{ table.table_code|default:'' }}",
+  });
+
+  function openItemModal(id, name, price, image, desc) {
+    currentModalItem = { id, name, price, image };
+    modalQty = 1;
+    document.getElementById('modal-item-name').textContent = name;
+    document.getElementById('modal-item-price').textContent = `$${parseFloat(price).toFixed(2)}`;
+    document.getElementById('modal-item-desc').textContent = desc;
+    document.getElementById('modal-item-qty').textContent = modalQty;
+    document.getElementById('modal-item-note').value = '';
+
+    const modal = new bootstrap.Modal(document.getElementById('itemCustomModal'));
+    modal.show();
+  }
+
+  function adjustModalQty(delta) {
+    modalQty = Math.max(1, modalQty + delta);
+    document.getElementById('modal-item-qty').textContent = modalQty;
+  }
+
+  document.getElementById('btn-add-modal-item').addEventListener('click', () => {
+    if (currentModalItem) {
+      const note = document.getElementById('modal-item-note').value.trim();
+      customerApp.addToCart(currentModalItem, modalQty, note);
+      bootstrap.Modal.getInstance(document.getElementById('itemCustomModal')).hide();
+    }
+  });
+</script>
+{% endblock %}
