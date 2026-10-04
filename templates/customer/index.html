@@ -12,14 +12,14 @@
       <div class="col-md-7">
         <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
           <span class="badge bg-warning bg-opacity-25 border border-warning border-opacity-50 text-warning fw-bold px-2 py-1 rounded-pill">
-            <i class="fa-solid fa-star me-1"></i> 4.9 (500+ Avaliasaun)
+            <i class="fa-solid fa-star me-1"></i> 4.9 (<span data-i18n="reviews_count">500+ Avaliasaun</span>)
           </span>
           <span class="badge bg-white bg-opacity-10 border border-white border-opacity-15 text-white px-2 py-1 rounded-pill">
             <i class="fa-solid fa-location-dot me-1 text-danger"></i> Praia dos Coqueiros, Dili
           </span>
         </div>
         <h3 class="fw-bold mb-1 text-white">{{ current_restaurant.name }}</h3>
-        <p class="text-white-50 small mb-2">Esperiénsia gastronómika modernu iha tasi-ibun Dili ho vizaun tasi furak no pedidu dixital PWA.</p>
+        <p class="text-white-50 small mb-2" data-i18n="resto_tagline">Esperiénsia gastronómika modernu iha tasi-ibun Dili ho vizaun tasi furak no pedidu dixital PWA.</p>
         
         <!-- Table & Session Status Badge -->
         <div class="d-inline-flex flex-wrap align-items-center gap-2 bg-white bg-opacity-10 rounded-3 px-2 py-1 mt-1 border border-white border-opacity-10" style="max-width: 100%;">
@@ -106,7 +106,7 @@
                   </span>
                 {% endif %}
                 <span class="badge bg-black bg-opacity-75 text-white position-absolute bottom-0 end-0 m-2 rounded-pill px-2 py-1 small" style="font-size: 0.65rem;">
-                  <i class="fa-regular fa-clock me-1 text-warning"></i> 10-15m
+                  <i class="fa-regular fa-clock me-1 text-warning"></i> <span data-i18n="prep_time">10-15m</span>
                 </span>
               </div>
 
@@ -198,7 +198,7 @@
         </div>
 
         <button type="button" class="btn btn-warning text-dark w-100 py-3 rounded-pill fw-bold shadow" id="btn-add-modal-item">
-          <i class="fa-solid fa-plus me-1"></i> <span data-i18n="add">Aumenta ba Karreta</span>
+          <i class="fa-solid fa-plus me-1"></i> <span data-i18n="add_to_cart_btn">Aumenta ba Karreta</span>
         </button>
       </div>
     </div>

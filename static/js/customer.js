@@ -393,7 +393,7 @@ class CustomerApp {
 
     const hasServedOrder = this.activeOrders.some((o) => o.status === 'SERVED');
     if (!hasServedOrder) {
-      showToast(t('alert_waiting_desc') || "Presiza iha pelumenus pedidu 1 ne'ebé entrega tiha ona ba meza (SERVED).", 'warning');
+      showToast(t('bill_need_served'), 'warning');
       return;
     }
 
@@ -401,7 +401,7 @@ class CustomerApp {
       ['WAITING_CASHIER_CONFIRMATION', 'CONFIRMED', 'PREPARING'].includes(o.status)
     );
     if (hasCookingOrder) {
-      showToast("Sei iha hahan ne'ebé tein hela iha dapur. Favór hein to'o hahan hotu to'o meza molok husu konta.", 'warning');
+      showToast(t('bill_still_cooking'), 'warning');
       return;
     }
 

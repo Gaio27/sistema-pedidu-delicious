@@ -78,8 +78,8 @@ class CashierApp {
       container.innerHTML = `
         <div class="text-center py-5 text-white-50">
           <i class="fa-solid fa-circle-check fa-3x text-success mb-2"></i>
-          <h6 class="text-white">Pedidu hotu verifika ona.</h6>
-          <p class="small text-white-50 mb-0">Pedidu foun hosi kliente sei mosu iha ne'e automatikamente.</p>
+          <h6 class="text-white">${t('all_verified')}</h6>
+          <p class="small text-white-50 mb-0">${t('new_orders_appear_here')}</p>
         </div>
       `;
       return;
@@ -95,7 +95,7 @@ class CashierApp {
             <span class="fw-bold text-white">${order.order_code}</span>
             <span class="text-white-50 small ms-2"><i class="fa-regular fa-clock"></i> ${new Date(order.submitted_at).toLocaleTimeString()}</span>
           </div>
-          <span class="badge bg-warning bg-opacity-25 border border-warning text-warning rounded-pill">Hein Verifikasaun</span>
+          <span class="badge bg-warning bg-opacity-25 border border-warning text-warning rounded-pill">${t('status_waiting')}</span>
         </div>
 
         <div class="border border-secondary border-opacity-25 rounded-3 p-2 bg-dark bg-opacity-50 mb-2">
@@ -111,17 +111,17 @@ class CashierApp {
               )
               .join('')}
           </ul>
-          ${order.customer_note ? `<div class="mt-2 p-1 bg-danger bg-opacity-20 border border-danger border-opacity-25 rounded small text-danger"><strong>Notasaun Bainaka:</strong> ${order.customer_note}</div>` : ''}
+          ${order.customer_note ? `<div class="mt-2 p-1 bg-danger bg-opacity-20 border border-danger border-opacity-25 rounded small text-danger"><strong>${t('customer_notes')}</strong> ${order.customer_note}</div>` : ''}
         </div>
 
         <div class="d-flex justify-content-between align-items-center">
-          <div class="fw-bold fs-5 text-warning">Totál: $${order.grand_total}</div>
+          <div class="fw-bold fs-5 text-warning">${t('total')}: $${order.grand_total}</div>
           <div class="d-flex gap-2">
             <button class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="cashierApp.promptReject('${order.id}', '${order.order_code}')">
-              <i class="fa-solid fa-xmark me-1"></i> Rekuza
+              <i class="fa-solid fa-xmark me-1"></i> ${t('btn_reject')}
             </button>
             <button class="btn btn-sm btn-success rounded-pill px-3 fw-bold shadow" onclick="cashierApp.confirmOrder('${order.id}')">
-              <i class="fa-solid fa-check me-1"></i> Konfirma &amp; Haruka Dapur
+              <i class="fa-solid fa-check me-1"></i> ${t('btn_confirm_send')}
             </button>
           </div>
         </div>
@@ -146,7 +146,7 @@ class CashierApp {
       container.innerHTML = `
         <div class="col-12 text-center py-5 text-white-50">
           <i class="fa-solid fa-chair fa-3x mb-2 text-secondary"></i>
-          <h6 class="text-white">La iha meza tuir filtru ne'e.</h6>
+          <h6 class="text-white">${t('no_orders_history')}</h6>
         </div>
       `;
       return;
@@ -162,11 +162,11 @@ class CashierApp {
         let sessionBadge = '';
         if (session) {
           if (isPaid) {
-            sessionBadge = '<span class="badge bg-success text-white rounded-pill"><i class="fa-solid fa-check-circle me-1"></i> PAID</span>';
+            sessionBadge = `<span class="badge bg-success text-white rounded-pill"><i class="fa-solid fa-check-circle me-1"></i> ${t('paid_status')}</span>`;
           } else if (session.status === 'BILL_REQUESTED') {
-            sessionBadge = '<span class="badge bg-danger text-white rounded-pill pulse"><i class="fa-solid fa-receipt me-1"></i> Husu Konta</span>';
+            sessionBadge = `<span class="badge bg-danger text-white rounded-pill pulse"><i class="fa-solid fa-receipt me-1"></i> ${t('request_bill')}</span>`;
           } else {
-            sessionBadge = '<span class="badge bg-info bg-opacity-25 border border-info text-info rounded-pill">Sesi Loke</span>';
+            sessionBadge = `<span class="badge bg-info bg-opacity-25 border border-info text-info rounded-pill">${t('active_session')}</span>`;
           }
         }
 
@@ -176,9 +176,9 @@ class CashierApp {
             <div class="d-flex justify-content-between align-items-start mb-1">
               <div>
                 <h5 class="fw-bold mb-0 text-white">${table.display_name}</h5>
-                <span class="text-white-50 small">${table.table_code} &bull; Kapasidade: ${table.capacity || 4} Kursi</span>
+                <span class="text-white-50 small">${table.table_code} &bull; ${t('th_capacity')}: ${table.capacity || 4}</span>
               </div>
-              <div>${isOccupied ? sessionBadge : '<span class="badge bg-secondary bg-opacity-25 border border-secondary text-secondary rounded-pill">Mamuk</span>'}</div>
+              <div>${isOccupied ? sessionBadge : `<span class="badge bg-secondary bg-opacity-25 border border-secondary text-secondary rounded-pill">${t('filter_avail_tables')}</span>`}</div>
             </div>
 
             ${
@@ -186,14 +186,14 @@ class CashierApp {
                 ? `
               <div class="p-2 bg-dark bg-opacity-50 rounded-3 small my-2 border border-secondary border-opacity-25">
                 <div class="d-flex justify-content-between align-items-center mb-1">
-                  <span class="text-white-50">Bainaka: <strong class="text-white">${session.guest_count} Ema</strong></span>
-                  <span class="text-white-50">Pedidu: <strong class="text-white">${session.orders_count}</strong></span>
+                  <span class="text-white-50">${t('guests')}: <strong class="text-white">${session.guest_count} ${t('people')}</strong></span>
+                  <span class="text-white-50">${t('total_orders')}: <strong class="text-white">${session.orders_count}</strong></span>
                 </div>
                 <div class="d-flex justify-content-between align-items-center border-top border-secondary border-opacity-25 pt-1">
-                  <span class="text-white-50">Konta Totál:</span>
+                  <span class="text-white-50">${t('remaining_bill')}:</span>
                   <span class="fw-bold fs-6 ${isPaid ? 'text-success' : 'text-warning'}">
                     $${session.bill_total}
-                    ${isPaid ? ' <span class="badge bg-success-subtle text-success small">Selu Tiha Ona</span>' : (remaining < parseFloat(session.bill_total) ? ` <small class="text-danger">($${remaining.toFixed(2)} resta)</small>` : '')}
+                    ${isPaid ? ` <span class="badge bg-success-subtle text-success small">${t('paid_status')}</span>` : (remaining < parseFloat(session.bill_total) ? ` <small class="text-danger">($${remaining.toFixed(2)} resta)</small>` : '')}
                   </span>
                 </div>
               </div>
@@ -202,35 +202,35 @@ class CashierApp {
                 ${
                   isPaid
                     ? `
-                  <button class="btn btn-sm btn-success flex-fill fw-bold rounded-pill" onclick="cashierApp.viewReceiptForSession('${session.id}')" title="Haree Resibu Pagamentu">
-                    <i class="fa-solid fa-receipt me-1"></i> Resibu (Selu Tiha)
+                  <button class="btn btn-sm btn-success flex-fill fw-bold rounded-pill" onclick="cashierApp.viewReceiptForSession('${session.id}')" title="${t('receipt_title')}">
+                    <i class="fa-solid fa-receipt me-1"></i> ${t('receipt_title')} (${t('paid_status')})
                   </button>
                 `
                     : `
                   <button class="btn btn-sm btn-warning flex-fill fw-bold rounded-pill text-dark shadow" onclick="cashierApp.openPaymentModal('${session.id}', '${table.display_name}')">
-                    <i class="fa-solid fa-cash-register me-1"></i> Selu Bill ($${remaining.toFixed(2)})
+                    <i class="fa-solid fa-cash-register me-1"></i> ${t('btn_pay_pos')} ($${remaining.toFixed(2)})
                   </button>
                 `
                 }
                 
-                <a href="/t/${table.qr_token}/" target="_blank" class="btn btn-sm btn-outline-info rounded-circle" title="Loke Menu Meza Ne'e">
+                <a href="/t/${table.qr_token}/" target="_blank" class="btn btn-sm btn-outline-info rounded-circle" title="QR Menu">
                   <i class="fa-solid fa-qrcode"></i>
                 </a>
 
-                <button class="btn btn-sm btn-outline-danger rounded-circle" title="Taka Sesi Meza" onclick="cashierApp.handleCloseSession('${session.id}', '${table.display_name}')">
+                <button class="btn btn-sm btn-outline-danger rounded-circle" title="${t('close')}" onclick="cashierApp.handleCloseSession('${session.id}', '${table.display_name}')">
                   <i class="fa-solid fa-lock"></i>
                 </button>
               </div>
             `
                 : `
               <div class="text-center py-3 text-white-50 small">
-                Meza Mamuk &bull; Prontu atu simu bainaka
+                ${t('table_empty')}
               </div>
               <div class="d-flex gap-2 mt-auto">
                 <button class="btn btn-sm btn-outline-warning flex-fill fw-bold rounded-pill" onclick="cashierApp.openSessionModal('${table.id}', '${table.display_name}')">
-                  <i class="fa-solid fa-door-open me-1"></i> Loke Sesi Meza
+                  <i class="fa-solid fa-door-open me-1"></i> ${t('btn_open_session')}
                 </button>
-                <a href="/t/${table.qr_token}/" target="_blank" class="btn btn-sm btn-outline-secondary rounded-circle" title="Haree Menu">
+                <a href="/t/${table.qr_token}/" target="_blank" class="btn btn-sm btn-outline-secondary rounded-circle" title="QR">
                   <i class="fa-solid fa-qrcode"></i>
                 </a>
               </div>
@@ -264,7 +264,7 @@ class CashierApp {
       alertsContainer.innerHTML = `
         <div class="col-12 text-center py-5 text-white-50">
           <i class="fa-solid fa-bell-slash fa-3x mb-2 text-secondary"></i>
-          <h6 class="text-white">Laiha meza ne'ebé husu konta agora dadaun.</h6>
+          <h6 class="text-white">${t('no_bill_alerts')}</h6>
         </div>
       `;
       return;
@@ -278,13 +278,13 @@ class CashierApp {
           <div class="d-flex justify-content-between align-items-start mb-2">
             <div>
               <h5 class="fw-bold mb-0 text-white">${t.display_name}</h5>
-              <small class="text-white-50">${t.table_code} &bull; ${t.active_session.guest_count} Ema</small>
+              <small class="text-white-50">${t.table_code} &bull; ${t.active_session.guest_count} ${t('people')}</small>
             </div>
-            <span class="badge bg-danger rounded-pill pulse">Husu Konta!</span>
+            <span class="badge bg-danger rounded-pill pulse">${t('request_bill')}!</span>
           </div>
-          <div class="fs-4 fw-bold text-warning mb-3">Totál: $${t.active_session.bill_total}</div>
+          <div class="fs-4 fw-bold text-warning mb-3">${t('total')}: $${t.active_session.bill_total}</div>
           <button class="btn btn-warning w-100 fw-bold rounded-pill text-dark shadow" onclick="cashierApp.openPaymentModal('${t.active_session.id}', '${t.display_name}')">
-            <i class="fa-solid fa-cash-register me-1"></i> Prosesu Pagamentu Agora
+            <i class="fa-solid fa-cash-register me-1"></i> ${t('btn_pay_pos')}
           </button>
         </div>
       </div>

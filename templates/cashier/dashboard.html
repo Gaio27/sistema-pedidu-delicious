@@ -13,14 +13,14 @@
     <div>
       <h3 class="fw-bold mb-0 text-white d-flex align-items-center">
         <i class="fa-solid fa-cash-register text-warning me-2"></i>
-        <span>Sentru Kontrolu Kaixa &amp; POS</span>
+        <span data-i18n="cashier_title">Sentru Kontrolu Kaixa &amp; POS</span>
       </h3>
-      <small class="text-white-50">Portaun Verifikasaun Pedidu, Sesi Meza, &amp; Pagamentu POS Real-time</small>
+      <small class="text-white-50" data-i18n="cashier_subtitle">Portaun Verifikasaun Pedidu, Sesi Meza, &amp; Pagamentu POS Real-time</small>
     </div>
 
     <div>
       <button class="btn btn-sm btn-outline-warning rounded-pill px-3 fw-semibold" onclick="cashierApp.loadPendingOrders(); cashierApp.loadTables();">
-        <i class="fa-solid fa-rotate me-1"></i> Refresh
+        <i class="fa-solid fa-rotate me-1"></i> <span data-i18n="refresh">Refresh</span>
       </button>
     </div>
   </div>
@@ -36,9 +36,9 @@
           <div class="glass-card p-3 h-100 border-warning border-opacity-50">
             <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-white border-opacity-10">
               <h5 class="fw-bold mb-0 text-warning d-flex align-items-center">
-                <i class="fa-solid fa-hourglass-half me-2"></i> Fila Verifikasaun Tama
+                <i class="fa-solid fa-hourglass-half me-2"></i> <span data-i18n="pending_queue_title">Fila Verifikasaun Tama</span>
               </h5>
-              <span class="badge bg-warning bg-opacity-20 text-warning border border-warning border-opacity-25 rounded-pill small">
+              <span class="badge bg-warning bg-opacity-20 text-warning border border-warning border-opacity-25 rounded-pill small" data-i18n="pending_gate_badge">
                 Portaun Kaixa
               </span>
             </div>
@@ -54,12 +54,12 @@
           <div class="glass-card p-3 h-100">
             <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-white border-opacity-10 flex-wrap gap-2">
               <h5 class="fw-bold mb-0 text-white d-flex align-items-center">
-                <i class="fa-solid fa-chair text-primary me-2"></i> Status Meza &amp; Pagamentu POS
+                <i class="fa-solid fa-chair text-primary me-2"></i> <span data-i18n="tables_pos_title">Status Meza &amp; Pagamentu POS</span>
               </h5>
               <div class="btn-group btn-group-sm" role="group">
-                <button type="button" class="btn btn-warning btn-sm px-3 fw-bold rounded-start-pill text-dark" id="filter-table-all" onclick="cashierApp.setTableFilter('ALL')">Meza Hotu</button>
-                <button type="button" class="btn btn-outline-success btn-sm px-3 fw-bold" id="filter-table-open" onclick="cashierApp.setTableFilter('OPEN')">🟢 Sesi Loke</button>
-                <button type="button" class="btn btn-outline-secondary btn-sm px-3 fw-bold rounded-end-pill" id="filter-table-avail" onclick="cashierApp.setTableFilter('AVAILABLE')">⚪ Mamuk</button>
+                <button type="button" class="btn btn-warning btn-sm px-3 fw-bold rounded-start-pill text-dark" id="filter-table-all" onclick="cashierApp.setTableFilter('ALL')" data-i18n="filter_all_tables">Meza Hotu</button>
+                <button type="button" class="btn btn-outline-success btn-sm px-3 fw-bold" id="filter-table-open" onclick="cashierApp.setTableFilter('OPEN')" data-i18n="filter_open_tables">🟢 Sesi Loke</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm px-3 fw-bold rounded-end-pill" id="filter-table-avail" onclick="cashierApp.setTableFilter('AVAILABLE')" data-i18n="filter_avail_tables">⚪ Mamuk</button>
               </div>
             </div>
 
@@ -76,12 +76,12 @@
       <div class="glass-card p-4">
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
           <h5 class="fw-bold mb-0 text-white">
-            <i class="fa-solid fa-list-check text-info me-2"></i> Istóriku Pedidu Hotu Ohin Nian
+            <i class="fa-solid fa-list-check text-info me-2"></i> <span data-i18n="history_title">Istóriku Pedidu Hotu Ohin Nian</span>
           </h5>
           <div class="d-flex gap-2">
             <div class="input-group input-group-sm" style="max-width: 280px;">
               <span class="input-group-text bg-dark border-secondary text-secondary"><i class="fa-solid fa-magnifying-glass"></i></span>
-              <input type="text" id="order-history-search" class="form-control bg-dark border-secondary text-white" placeholder="Buka meza ka kódigu pedidu..." oninput="cashierApp.filterOrdersHistory()">
+              <input type="text" id="order-history-search" class="form-control bg-dark border-secondary text-white" placeholder="Buka meza ka kódigu pedidu..." data-i18n-placeholder="search_history_placeholder" oninput="cashierApp.filterOrdersHistory()">
             </div>
             <button class="btn btn-sm btn-outline-info rounded-pill" onclick="cashierApp.loadTodayOrdersHistory()">
               <i class="fa-solid fa-rotate"></i>
@@ -93,18 +93,18 @@
           <table class="table table-dark table-hover align-middle mb-0 small">
             <thead>
               <tr class="text-white-50 border-secondary">
-                <th>Oras</th>
-                <th>Kódigu Pedidu</th>
-                <th>Meza</th>
-                <th>Item Pedidu</th>
-                <th>Totál ($)</th>
-                <th>Status</th>
-                <th class="text-end">Asaun</th>
+                <th data-i18n="th_time">Oras</th>
+                <th data-i18n="th_order_code">Kódigu Pedidu</th>
+                <th data-i18n="th_table">Meza</th>
+                <th data-i18n="th_items">Item Pedidu</th>
+                <th data-i18n="th_total">Totál ($)</th>
+                <th data-i18n="th_status">Status</th>
+                <th class="text-end" data-i18n="th_action">Asaun</th>
               </tr>
             </thead>
             <tbody id="orders-history-tbody">
               <tr>
-                <td colspan="7" class="text-center py-4 text-white-50">Karga hela dadus pedidu...</td>
+                <td colspan="7" class="text-center py-4 text-white-50" data-i18n="loading_history">Karga hela dadus pedidu...</td>
               </tr>
             </tbody>
           </table>
@@ -117,9 +117,9 @@
       <div class="glass-card p-4">
         <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-white border-opacity-10">
           <h5 class="fw-bold mb-0 text-danger">
-            <i class="fa-solid fa-receipt me-2"></i> Meza Sira Ne'ebé Husu Konta (Live Bill Requests)
+            <i class="fa-solid fa-receipt me-2"></i> <span data-i18n="bill_alerts_title">Meza Sira Ne'ebé Husu Konta (Live Bill Requests)</span>
           </h5>
-          <span class="small text-white-50">Atende kedas atu bainaka labele hein kleur</span>
+          <span class="small text-white-50" data-i18n="bill_alerts_subtitle">Atende kedas atu bainaka labele hein kleur</span>
         </div>
 
         <div id="bill-alerts-container" class="row g-3">
@@ -135,7 +135,7 @@
           <div class="glass-card p-4">
             <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-white border-opacity-10">
               <h5 class="fw-bold mb-0 text-success">
-                <i class="fa-solid fa-vault me-2"></i> Relatóriu Fechu Kaixa Diáriu (Z-Report)
+                <i class="fa-solid fa-vault me-2"></i> <span data-i18n="z_report_title">Relatóriu Fechu Kaixa Diáriu (Z-Report)</span>
               </h5>
               <span class="badge bg-success bg-opacity-25 border border-success text-success px-3 py-1 rounded-pill">
                 {{ user.username|default:"Kaixa" }} &bull; Ohin
@@ -146,19 +146,19 @@
             <div class="row g-3 mb-4">
               <div class="col-md-4">
                 <div class="p-3 rounded-4 bg-dark bg-opacity-50 border border-success border-opacity-50 text-center">
-                  <small class="text-white-50 text-uppercase fw-bold">Totál Osan-Maran (Cash)</small>
+                  <small class="text-white-50 text-uppercase fw-bold" data-i18n="cash_total">Totál Osan-Maran (Cash)</small>
                   <h3 class="fw-bold text-success mb-0 mt-1" id="shift-cash-total">$0.00</h3>
                 </div>
               </div>
               <div class="col-md-4">
                 <div class="p-3 rounded-4 bg-dark bg-opacity-50 border border-info border-opacity-50 text-center">
-                  <small class="text-white-50 text-uppercase fw-bold">Kartaun / Transferénsia</small>
+                  <small class="text-white-50 text-uppercase fw-bold" data-i18n="card_total">Kartaun / Transferénsia</small>
                   <h3 class="fw-bold text-info mb-0 mt-1" id="shift-other-total">$0.00</h3>
                 </div>
               </div>
               <div class="col-md-4">
                 <div class="p-3 rounded-4 bg-dark bg-opacity-50 border border-warning border-opacity-50 text-center">
-                  <small class="text-white-50 text-uppercase fw-bold">Totál Rendimentu Ohin</small>
+                  <small class="text-white-50 text-uppercase fw-bold" data-i18n="shift_revenue">Totál Rendimentu Ohin</small>
                   <h3 class="fw-bold text-warning mb-0 mt-1" id="shift-grand-total">$0.00</h3>
                 </div>
               </div>
@@ -166,22 +166,22 @@
 
             <div class="p-3 rounded-4 bg-dark bg-opacity-30 border border-secondary border-opacity-25 mb-4">
               <div class="d-flex justify-content-between mb-2">
-                <span class="text-white-50">Totál Meza ne'ebé Selu Ona:</span>
+                <span class="text-white-50" data-i18n="paid_tables_count">Totál Meza ne'ebé Selu Ona:</span>
                 <strong class="text-white" id="shift-paid-sessions-count">0 Meza</strong>
               </div>
               <div class="d-flex justify-content-between mb-2">
-                <span class="text-white-50">Totál Pedidu Remata:</span>
+                <span class="text-white-50" data-i18n="completed_orders_count">Totál Pedidu Remata:</span>
                 <strong class="text-white" id="shift-completed-orders-count">0 Pedidu</strong>
               </div>
               <div class="d-flex justify-content-between">
-                <span class="text-white-50">Data &amp; Oras Relatóriu:</span>
+                <span class="text-white-50" data-i18n="report_timestamp">Data &amp; Oras Relatóriu:</span>
                 <strong class="text-white" id="shift-report-timestamp">-</strong>
               </div>
             </div>
 
             <div class="d-flex gap-2 justify-content-end">
               <button class="btn btn-outline-warning rounded-pill px-4 fw-bold" onclick="cashierApp.printShiftReport()">
-                <i class="fa-solid fa-print me-2"></i> Imprime Relatóriu Fechu Kaixa (80mm)
+                <i class="fa-solid fa-print me-2"></i> <span data-i18n="print_z_report">Imprime Relatóriu Fechu Kaixa (80mm)</span>
               </button>
             </div>
           </div>
@@ -198,17 +198,17 @@
   <div class="modal-dialog modal-dialog-centered modal-sm">
     <div class="modal-content glass-card border-warning border-opacity-50">
       <div class="modal-header border-0 pb-0">
-        <h5 class="modal-title fw-bold text-white"><i class="fa-solid fa-door-open text-warning me-1"></i> Loke Sesi Meza</h5>
+        <h5 class="modal-title fw-bold text-white"><i class="fa-solid fa-door-open text-warning me-1"></i> <span data-i18n="open_session_modal_title">Loke Sesi Meza</span></h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body p-3">
-        <p class="text-white-50 small">Loke sesi meza foun ba: <strong id="open-session-table-name" class="text-warning"></strong></p>
+        <p class="text-white-50 small"><span data-i18n="open_session_for">Loke sesi meza foun ba:</span> <strong id="open-session-table-name" class="text-warning"></strong></p>
         <div class="mb-3">
-          <label class="form-label small fw-bold text-white">Totál Bainaka (Guest Count):</label>
+          <label class="form-label small fw-bold text-white" data-i18n="guest_count_label">Totál Bainaka (Guest Count):</label>
           <input type="number" class="form-control bg-dark border-secondary text-white" id="open-session-guests" value="2" min="1" max="25">
         </div>
         <button type="button" class="btn btn-warning w-100 fw-bold rounded-pill text-dark shadow" onclick="cashierApp.submitOpenSession()">
-          <i class="fa-solid fa-circle-check me-1"></i> Konfirma Loke Sesi
+          <i class="fa-solid fa-circle-check me-1"></i> <span data-i18n="btn_confirm_open">Konfirma Loke Sesi</span>
         </button>
       </div>
     </div>
@@ -220,18 +220,18 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content glass-card border-danger border-opacity-50">
       <div class="modal-header border-bottom border-secondary border-opacity-25 text-white">
-        <h5 class="modal-title fw-bold text-danger"><i class="fa-solid fa-triangle-exclamation me-1"></i> Razaun Rekuza Pedidu <span id="reject-order-code"></span></h5>
+        <h5 class="modal-title fw-bold text-danger"><i class="fa-solid fa-triangle-exclamation me-1"></i> <span data-i18n="reject_modal_title">Razaun Rekuza Pedidu</span> <span id="reject-order-code"></span></h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body p-4">
-        <p class="text-white-50 small mb-3">Pedidu ne'ebé rekuza sei la haruka ba dapur. Fó razaun rekuza ne'ebé klaru:</p>
+        <p class="text-white-50 small mb-3" data-i18n="reject_modal_desc">Pedidu ne'ebé rekuza sei la haruka ba dapur. Fó razaun rekuza ne'ebé klaru:</p>
         <div class="mb-3">
-          <label class="form-label fw-bold small text-white">Razaun Rekuza (Obrigatóriu):</label>
-          <textarea class="form-control bg-dark border-secondary text-white" id="reject-reason-input" rows="3" placeholder="Ezemplu: Bainaka la iha meza / pedidu falsu"></textarea>
+          <label class="form-label fw-bold small text-white" data-i18n="reject_reason_label">Razaun Rekuza (Obrigatóriu):</label>
+          <textarea class="form-control bg-dark border-secondary text-white" id="reject-reason-input" rows="3" placeholder="Ezemplu: Bainaka la iha meza / pedidu falsu" data-i18n-placeholder="reject_reason_placeholder"></textarea>
         </div>
         <div class="d-flex justify-content-end gap-2">
-          <button type="button" class="btn btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Kansela</button>
-          <button type="button" class="btn btn-danger rounded-pill px-4 fw-bold shadow" onclick="cashierApp.submitRejectOrder()">Konfirma Rekuza</button>
+          <button type="button" class="btn btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal" data-i18n="cancel">Kansela</button>
+          <button type="button" class="btn btn-danger rounded-pill px-4 fw-bold shadow" onclick="cashierApp.submitRejectOrder()" data-i18n="btn_confirm_reject">Konfirma Rekuza</button>
         </div>
       </div>
     </div>
@@ -245,7 +245,7 @@
       <div class="modal-header border-bottom border-secondary border-opacity-25 text-white">
         <h5 class="modal-title fw-bold text-white d-flex align-items-center">
           <i class="fa-solid fa-cash-register text-warning me-2"></i>
-          <span>Pagamentu Kaixa POS &bull; <span id="pos-table-name" class="text-warning"></span></span>
+          <span><span data-i18n="pos_modal_title">Pagamentu Kaixa POS</span> &bull; <span id="pos-table-name" class="text-warning"></span></span>
         </h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
@@ -255,7 +255,7 @@
           <!-- Left: Itemized Order Details Breakdown -->
           <div class="col-md-6">
             <label class="form-label fw-bold small text-white-50 text-uppercase mb-1">
-              <i class="fa-solid fa-list-check text-warning me-1"></i> Detalle Item Pedidu (Order Items):
+              <i class="fa-solid fa-list-check text-warning me-1"></i> <span data-i18n="order_items_breakdown">Detalle Item Pedidu:</span>
             </label>
             <div class="border border-secondary border-opacity-50 rounded-4 p-2 bg-dark bg-opacity-50 overflow-auto" id="pos-order-items-container" style="max-height: 280px;">
               <!-- Dynamic order items list injected by cashier.js -->
@@ -265,21 +265,21 @@
           <!-- Right: Payment Calculation -->
           <div class="col-md-6">
             <div class="p-3 bg-dark bg-opacity-60 rounded-4 mb-3 text-center border border-secondary border-opacity-50">
-              <small class="text-white-50 text-uppercase fw-bold">Totál Konta (Remaining Bill)</small>
+              <small class="text-white-50 text-uppercase fw-bold" data-i18n="remaining_bill">Totál Konta (Remaining Bill)</small>
               <div class="fs-1 fw-bold text-warning" id="pos-bill-total">$0.00</div>
               <small class="text-white-50" id="pos-paid-status"></small>
             </div>
 
             <div class="mb-3">
-              <label class="form-label fw-bold small text-white">Metodu Pagamentu:</label>
+              <label class="form-label fw-bold small text-white" data-i18n="payment_method">Metodu Pagamentu:</label>
               <select class="form-select bg-dark border-secondary text-white" id="pos-payment-method">
-                <option value="CASH" selected>💵 Osan-Maran (Cash USD)</option>
-                <option value="MANUAL_OTHER">💳 Kartaun / Transferénsia Manuál</option>
+                <option value="CASH" selected data-i18n="method_cash">💵 Osan-Maran (Cash USD)</option>
+                <option value="MANUAL_OTHER" data-i18n="method_card">💳 Kartaun / Transferénsia Manuál</option>
               </select>
             </div>
 
             <div class="mb-3">
-              <label class="form-label fw-bold small text-white">Osan Simu (Tendered Cash $):</label>
+              <label class="form-label fw-bold small text-white" data-i18n="tendered_label">Osan Simu (Tendered Cash $):</label>
               <input type="number" step="0.01" class="form-control fs-5 fw-bold bg-dark border-secondary text-white" id="pos-tendered-amount" oninput="cashierApp.calculateChange()">
               
               <!-- Quick Cash Bills -->
@@ -293,12 +293,12 @@
             </div>
 
             <div class="p-2 bg-dark bg-opacity-75 rounded-3 mb-3 d-flex justify-content-between align-items-center border border-secondary border-opacity-50">
-              <span class="fw-bold small text-white">Osan Fila (Change):</span>
+              <span class="fw-bold small text-white" data-i18n="change_label">Osan Fila (Change):</span>
               <span class="fs-4 fw-bold text-success" id="pos-change-amount">$0.00</span>
             </div>
 
             <button type="button" class="btn btn-success w-100 py-3 rounded-pill fw-bold fs-5 shadow" id="btn-submit-payment" onclick="cashierApp.processPayment()">
-              <i class="fa-solid fa-check-circle me-1"></i> Kompleta Pagamentu
+              <i class="fa-solid fa-check-circle me-1"></i> <span data-i18n="btn_finish_payment">Kompleta Pagamentu</span>
             </button>
           </div>
         </div>

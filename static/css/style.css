@@ -973,6 +973,7 @@ body.occupied-page #flyingDockWrapper,
   pointer-events: none;
   transform: translateZ(0);
   will-change: transform;
+  overflow: visible !important;
 }
 
 .flying-glass-dock {
@@ -980,7 +981,7 @@ body.occupied-page #flyingDockWrapper,
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  background: rgba(12, 17, 28, 0.92);
+  background: rgba(12, 17, 28, 0.94);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--dock-border, rgba(255, 255, 255, 0.12));
@@ -989,14 +990,85 @@ body.occupied-page #flyingDockWrapper,
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55), 0 0 1px 1px rgba(255, 255, 255, 0.08);
   transition: border-color 0.25s ease, box-shadow 0.25s ease;
   max-width: 98vw;
-  overflow-x: auto;
+  overflow: visible !important;
   white-space: nowrap;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
 }
 
-.flying-glass-dock::-webkit-scrollbar {
-  display: none;
+.flying-glass-dock .dropdown {
+  position: relative;
+}
+
+.flying-glass-dock .dropdown-menu {
+  position: absolute !important;
+  top: calc(100% + 8px) !important;
+  right: 0 !important;
+  left: auto !important;
+  transform: none !important;
+  margin-top: 0 !important;
+  z-index: 2200 !important;
+  pointer-events: auto !important;
+  background: rgba(14, 18, 30, 0.98) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 1px 1px rgba(255, 255, 255, 0.1) !important;
+  padding: 0.4rem !important;
+  min-width: 145px !important;
+}
+
+.login-lang-dropdown .dropdown-menu {
+  position: absolute !important;
+  top: calc(100% + 6px) !important;
+  right: 0 !important;
+  left: auto !important;
+  z-index: 2200 !important;
+  background: rgba(14, 18, 30, 0.98) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8) !important;
+  padding: 0.4rem !important;
+  min-width: 145px !important;
+}
+
+.login-lang-dropdown .dropdown-item {
+  color: rgba(255, 255, 255, 0.88) !important;
+  font-family: 'Outfit', sans-serif !important;
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  padding: 0.45rem 0.75rem !important;
+  transition: all 0.18s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.4rem !important;
+}
+
+.login-lang-dropdown .dropdown-item:hover,
+.login-lang-dropdown .dropdown-item.active {
+  background: rgba(249, 115, 22, 0.25) !important;
+  color: #ffedd5 !important;
+}
+
+.flying-glass-dock .dropdown-item {
+  color: rgba(255, 255, 255, 0.88) !important;
+  font-family: 'Outfit', sans-serif !important;
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  padding: 0.45rem 0.75rem !important;
+  transition: all 0.18s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.4rem !important;
+}
+
+.flying-glass-dock .dropdown-item:hover,
+.flying-glass-dock .dropdown-item.active {
+  background: rgba(249, 115, 22, 0.25) !important;
+  color: #ffedd5 !important;
 }
 
 .flying-glass-dock:hover {

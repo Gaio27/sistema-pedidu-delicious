@@ -125,27 +125,27 @@
             </button>
             <button class="dock-item-btn" data-dock-tab="#audit-panel">
               <i class="fa-solid fa-clipboard-list text-primary"></i>
-              <span class="d-none d-md-inline">Auditoria</span>
+              <span class="d-none d-md-inline" data-i18n="audit_logs">Auditoria</span>
             </button>
           {% elif user.is_cashier %}
             <!-- CASHIER DEDICATED ITEMS -->
             <button class="dock-item-btn active" data-dock-tab="#live-pos-panel">
               <i class="fa-solid fa-cash-register text-warning"></i>
-              <span class="d-none d-sm-inline">POS &amp; Fila</span>
+              <span class="d-none d-sm-inline" data-i18n="live_pos">POS &amp; Fila</span>
               <span id="pending-count-badge" class="badge bg-danger rounded-pill ms-1" style="font-size:0.65rem;">0</span>
             </button>
             <button class="dock-item-btn" data-dock-tab="#orders-history-panel" onclick="if (typeof cashierApp !== 'undefined') cashierApp.loadTodayOrdersHistory();">
               <i class="fa-solid fa-clock-rotate-left text-info"></i>
-              <span class="d-none d-md-inline">Istóriku</span>
+              <span class="d-none d-md-inline" data-i18n="order_history">Istóriku</span>
             </button>
             <button class="dock-item-btn position-relative" data-dock-tab="#bill-alerts-panel">
               <i class="fa-solid fa-receipt text-danger"></i>
-              <span class="d-none d-md-inline">Alerta Konta</span>
+              <span class="d-none d-md-inline" data-i18n="bill_alerts">Alerta Konta</span>
               <span class="badge bg-danger rounded-pill ms-1" id="bill-alerts-count" style="display:none; font-size:0.65rem;">0</span>
             </button>
             <button class="dock-item-btn" data-dock-tab="#shift-close-panel" onclick="if (typeof cashierApp !== 'undefined') cashierApp.loadShiftSummary();">
               <i class="fa-solid fa-vault text-success"></i>
-              <span class="d-none d-md-inline">Fechu Kaixa</span>
+              <span class="d-none d-md-inline" data-i18n="shift_close">Fechu Kaixa</span>
             </button>
             <button class="dock-item-btn" onclick="if (typeof cashierApp !== 'undefined') { cashierApp.loadPendingOrders(); cashierApp.loadTables(); }" title="Refresh">
               <i class="fa-solid fa-rotate text-info"></i>
@@ -170,7 +170,7 @@
 
         <!-- Ultra-Compact Language Selector Pill (Fits mobile without overflow) -->
         <div class="dropdown">
-          <button class="dock-item-btn dropdown-toggle px-2 py-1" type="button" data-bs-toggle="dropdown" id="current-lang-label" style="font-size: 0.8rem; border-radius: 9999px;">
+          <button class="dock-item-btn dropdown-toggle px-2 py-1" type="button" data-bs-toggle="dropdown" data-bs-display="static" id="current-lang-label" style="font-size: 0.8rem; border-radius: 9999px;">
             🇹🇱<span class="d-none d-lg-inline ms-1">Tetun</span>
           </button>
           <ul class="dropdown-menu dropdown-menu-end shadow">
@@ -192,7 +192,7 @@
           {% else %}
             <a href="{% url 'logout' %}" class="dock-item-btn text-danger" title="Sai (Logout)">
               <i class="fa-solid fa-arrow-right-from-bracket"></i>
-              <span class="d-none d-lg-inline">Sai</span>
+              <span class="d-none d-lg-inline" data-i18n="logout">Sai</span>
             </a>
           {% endif %}
         {% else %}
@@ -206,8 +206,8 @@
       <!-- Morphing Inline Dock Search Bar (Revealed when search button is clicked in dock) -->
       <div id="dock-search-box" class="dock-search-inline align-items-center w-100" style="display: none !important;">
         <i class="fa-solid fa-magnifying-glass text-warning me-2 fs-6"></i>
-        <input type="text" id="dock-search-input" class="dock-search-input flex-grow-1" placeholder="Buka menu hahan, hemu, seafood..." autocomplete="off">
-        <button type="button" class="btn btn-link text-white-50 p-0 ms-2" onclick="closeDockSearch()" title="Taka">
+        <input type="text" id="dock-search-input" class="dock-search-input flex-grow-1" placeholder="Buka menu hahan, hemu, seafood..." data-i18n-placeholder="search_dock_placeholder" autocomplete="off">
+        <button type="button" class="btn btn-link text-white-50 p-0 ms-2" onclick="closeDockSearch()" title="Taka" data-i18n-title="close">
           <i class="fa-solid fa-circle-xmark fs-5"></i>
         </button>
       </div>

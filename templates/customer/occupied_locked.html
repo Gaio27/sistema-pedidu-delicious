@@ -14,7 +14,7 @@
       <div class="occupied-logo-ring">
         <i class="fa-solid fa-lock"></i>
       </div>
-      <h1 class="occupied-title">Meza Okupadu Hela</h1>
+      <h1 class="occupied-title" data-i18n="occupied_title">Meza Okupadu Hela</h1>
       <p class="occupied-tagline">{{ table.display_name }} ({{ table.table_code }})</p>
     </div>
 
@@ -23,8 +23,8 @@
       <div class="occupied-card-icon">
         <i class="fa-solid fa-shield-halved"></i>
       </div>
-      <h2 class="occupied-card-title">Protejidu hosi Telemóvel Seluk</h2>
-      <p class="occupied-card-desc">
+      <h2 class="occupied-card-title" data-i18n="occupied_heading">Protejidu hosi Telemóvel Seluk</h2>
+      <p class="occupied-card-desc" data-i18n="occupied_desc">
         Meza ne'e iha ona bainaka seluk ne'ebé halo hela pedidu liuhosi sira-nia telemóvel rasik.
         Ba seguransa no konfidensialidade pedidu nian, telemóvel seluk labele asesu ka aumenta pedidu ba meza ne'e durante sesaun ne'e sei ativu.
       </p>
@@ -32,16 +32,16 @@
       <div class="occupied-info-box">
         <div class="d-flex align-items-center gap-2 mb-2 text-warning fw-bold small">
           <i class="fa-solid fa-circle-question"></i>
-          <span>Ita-boot mak na'in ba meza ne'e?</span>
+          <span data-i18n="occupied_question">Ita-boot mak na'in ba meza ne'e?</span>
         </div>
-        <p class="small text-white-50 mb-0">
+        <p class="small text-white-50 mb-0" data-i18n="occupied_help">
           Karik ita-boot mak tuur iha meza ne'e maibé troka telemóvel ka browser, favor kontaktu <strong>Kaixa</strong> hodi halo verifikasaun ka taka sesaun uluk.
         </p>
       </div>
 
       <div class="mt-4">
         <a href="{% if user.is_authenticated %}{% if user.is_admin %}/admin-portal/{% elif user.is_cashier %}/cashier/{% elif user.is_kitchen %}/kitchen/{% else %}/{% endif %}{% else %}/{% endif %}" class="btn-occupied-home">
-          <i class="fa-solid fa-arrow-left me-2"></i>Fila ba Pájina Prinsipál
+          <i class="fa-solid fa-arrow-left me-2"></i><span data-i18n="home_portal">Fila ba Pájina Prinsipál</span>
         </a>
       </div>
     </div>
@@ -62,8 +62,6 @@
     font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
   }
   body.occupied-page nav.navbar-custom,
-  body.occupied-page #flyingDockWrapper,
-  body.occupied-page .flying-glass-dock-wrapper,
   body.occupied-page .mobile-bottom-dock {
     display: none !important;
   }

@@ -16,7 +16,7 @@
         <i class="fa-solid fa-utensils"></i>
       </div>
       <h1 class="landing-title">Celvass Resto & Bar</h1>
-      <p class="landing-tagline">Esperiénsia gastronómika modernu iha tasi-ibun Dili</p>
+      <p class="landing-tagline" data-i18n="landing_tagline">Esperiénsia gastronómika modernu iha tasi-ibun Dili</p>
     </div>
 
     <!-- QR Instruction Card -->
@@ -24,23 +24,23 @@
       <div class="qr-card-icon">
         <i class="fa-solid fa-qrcode"></i>
       </div>
-      <h2 class="qr-card-title">Buka QR Code iha ita nia Meza</h2>
-      <p class="qr-card-desc">
+      <h2 class="qr-card-title" data-i18n="scan_qr_prompt">Buka QR Code iha ita nia Meza</h2>
+      <p class="qr-card-desc" data-i18n="scan_qr_desc">
         Atu halo pedidu, favor <strong>skanu QR Code</strong> ne'ebé iha ita nia meza ho kamera ita nia telefone.
         QR Code ne'e mak sei abre menu no permite ita halo pedidu direitamente.
       </p>
       <div class="qr-steps">
         <div class="qr-step">
           <div class="step-num">1</div>
-          <span>Loke kamera ita nia telefone</span>
+          <span data-i18n="step_1">Loke kamera ita nia telefone</span>
         </div>
         <div class="qr-step">
           <div class="step-num">2</div>
-          <span>Aponta ba QR Code iha meza</span>
+          <span data-i18n="step_2">Aponta ba QR Code iha meza</span>
         </div>
         <div class="qr-step">
           <div class="step-num">3</div>
-          <span>Tama menu no halo pedidu!</span>
+          <span data-i18n="step_3">Tama menu no halo pedidu!</span>
         </div>
       </div>
     </div>
@@ -48,16 +48,16 @@
     <!-- PWA Install Prompt -->
     <div id="pwa-landing-install" style="display:none;" class="landing-pwa-bar">
       <i class="fa-solid fa-mobile-screen-button"></i>
-      <span>Instala Celvass App ba aksesu lais</span>
+      <span data-i18n="install_pwa_fast">Instala Celvass App ba aksesu lais</span>
       <button onclick="installPWA()" class="landing-pwa-btn">
-        <i class="fa-solid fa-download me-1"></i>Instala
+        <i class="fa-solid fa-download me-1"></i><span data-i18n="install_app">Instala</span>
       </button>
     </div>
 
     <!-- Staff login link (subtle) -->
     <div class="landing-staff-link">
       <a href="{% url 'login' %}">
-        <i class="fa-solid fa-shield-halved me-1"></i>Portal Staff
+        <i class="fa-solid fa-shield-halved me-1"></i><span data-i18n="login_staff">Portal Staff</span>
       </a>
     </div>
   </div>
@@ -71,8 +71,6 @@
     overflow-x: hidden;
   }
   body.landing-page nav.navbar-custom,
-  body.landing-page #flyingDockWrapper,
-  body.landing-page .flying-glass-dock-wrapper,
   body.landing-page .mobile-bottom-dock {
     display: none !important;
   }

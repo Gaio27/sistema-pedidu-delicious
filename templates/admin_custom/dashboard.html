@@ -13,7 +13,7 @@
     <div>
       <h3 class="fw-bold mb-0 text-white d-flex align-items-center">
         <i class="fa-solid fa-chart-line text-warning me-2"></i>
-        <span>Admin &amp; Relatóriu Restorante</span>
+        <span data-i18n="admin_title">Admin &amp; Relatóriu Restorante</span>
       </h3>
       <small class="text-white-50">{{ current_restaurant.name }} &bull; Moeda: USD ($) &bull; Timezone: {{ current_restaurant.timezone }}</small>
     </div>
@@ -27,7 +27,7 @@
         <div class="d-flex justify-content-between align-items-start">
           <div>
             <small class="text-white-50 text-uppercase fw-bold d-flex align-items-center gap-1 mb-1">
-              <i class="fa-solid fa-sack-dollar text-success"></i> Rendimentu Ohin
+              <i class="fa-solid fa-sack-dollar text-success"></i> <span data-i18n="revenue_today">Rendimentu Ohin</span>
             </small>
             <h3 class="fw-bold text-success mb-0">${{ metrics.today_sales }}</h3>
           </div>
@@ -37,7 +37,7 @@
         </div>
         <div class="text-white-50 small mt-2 d-flex align-items-center gap-1 pt-2 border-top border-white border-opacity-10">
           <i class="fa-solid fa-circle-check text-success"></i>
-          <span>{{ metrics.payments_count }} Transasaun Remata</span>
+          <span>{{ metrics.payments_count }} <span data-i18n="transactions_completed">Transasaun Remata</span></span>
         </div>
       </div>
     </div>
@@ -48,7 +48,7 @@
         <div class="d-flex justify-content-between align-items-start">
           <div>
             <small class="text-white-50 text-uppercase fw-bold d-flex align-items-center gap-1 mb-1">
-              <i class="fa-solid fa-receipt text-primary"></i> Totál Pedidu
+              <i class="fa-solid fa-receipt text-primary"></i> <span data-i18n="total_orders">Totál Pedidu</span>
             </small>
             <h3 class="fw-bold text-primary mb-0">{{ metrics.total_orders_count }}</h3>
           </div>
@@ -58,7 +58,7 @@
         </div>
         <div class="text-white-50 small mt-2 d-flex align-items-center gap-1 pt-2 border-top border-white border-opacity-10">
           <i class="fa-solid fa-fire-burner text-info"></i>
-          <span>{{ metrics.active_kitchen_count }} Ativu iha Dapur</span>
+          <span>{{ metrics.active_kitchen_count }} <span data-i18n="active_in_kitchen">Ativu iha Dapur</span></span>
         </div>
       </div>
     </div>
@@ -69,7 +69,7 @@
         <div class="d-flex justify-content-between align-items-start">
           <div>
             <small class="text-white-50 text-uppercase fw-bold d-flex align-items-center gap-1 mb-1">
-              <i class="fa-solid fa-chair text-warning"></i> Okupasaun Meza
+              <i class="fa-solid fa-chair text-warning"></i> <span data-i18n="table_occupancy">Okupasaun Meza</span>
             </small>
             <h3 class="fw-bold text-warning mb-0">{{ metrics.occupied_tables }} / {{ metrics.total_tables }}</h3>
           </div>
@@ -79,7 +79,7 @@
         </div>
         <div class="text-white-50 small mt-2 d-flex align-items-center gap-1 pt-2 border-top border-white border-opacity-10">
           <i class="fa-solid fa-users text-warning"></i>
-          <span>Meza Preeñxe Atual</span>
+          <span data-i18n="tables_occupied_now">Meza Preeñxe Atual</span>
         </div>
       </div>
     </div>
@@ -90,7 +90,7 @@
         <div class="d-flex justify-content-between align-items-start">
           <div>
             <small class="text-white-50 text-uppercase fw-bold d-flex align-items-center gap-1 mb-1">
-              <i class="fa-solid fa-ban text-danger"></i> Rekuza / Falsu
+              <i class="fa-solid fa-ban text-danger"></i> <span data-i18n="rejected_orders">Rekuza / Falsu</span>
             </small>
             <h3 class="fw-bold text-danger mb-0">{{ metrics.rejected_count }}</h3>
           </div>
@@ -100,7 +100,7 @@
         </div>
         <div class="text-white-50 small mt-2 d-flex align-items-center gap-1 pt-2 border-top border-white border-opacity-10">
           <i class="fa-solid fa-triangle-exclamation text-danger"></i>
-          <span>Kaixa Rekuza Molok Dapur</span>
+          <span data-i18n="rejected_before_kitchen">Kaixa Rekuza Molok Dapur</span>
         </div>
       </div>
     </div>
@@ -112,19 +112,19 @@
     <div class="tab-pane fade show active" id="menu-panel">
       <div class="glass-card p-3">
         <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-white border-opacity-10">
-          <h5 class="fw-bold mb-0 text-white">Lista Menu &amp; Disponibilidade Stok</h5>
-          <span class="small text-white-50">Klik butaun hodi troka status Hotu / Iha lais</span>
+          <h5 class="fw-bold mb-0 text-white" data-i18n="menu_stock_title">Lista Menu &amp; Disponibilidade Stok</h5>
+          <span class="small text-white-50" data-i18n="menu_stock_desc">Klik butaun hodi troka status Hotu / Iha lais</span>
         </div>
 
         <div class="table-responsive">
           <table class="table table-dark table-hover align-middle mb-0">
             <thead class="text-white-50 border-secondary">
               <tr>
-                <th>Menu</th>
-                <th>Kategoria</th>
-                <th>Presu</th>
-                <th>Status Stok</th>
-                <th>Asaun Lais</th>
+                <th data-i18n="th_menu_col">Menu</th>
+                <th data-i18n="th_cat_col">Kategoria</th>
+                <th data-i18n="th_price_col">Presu</th>
+                <th data-i18n="th_stock_status">Status Stok</th>
+                <th data-i18n="th_quick_action">Asaun Lais</th>
               </tr>
             </thead>
             <tbody>
@@ -143,19 +143,19 @@
                   <td class="fw-bold text-warning">${{ item.price }}</td>
                   <td>
                     {% if item.availability == 'AVAILABLE' %}
-                      <span class="badge bg-success bg-opacity-25 border border-success text-success rounded-pill">Iha (Available)</span>
+                      <span class="badge bg-success bg-opacity-25 border border-success text-success rounded-pill" data-i18n="stock_available">Iha (Available)</span>
                     {% elif item.availability == 'SOLD_OUT' %}
-                      <span class="badge bg-danger bg-opacity-25 border border-danger text-danger rounded-pill">Hotu (Sold Out)</span>
+                      <span class="badge bg-danger bg-opacity-25 border border-danger text-danger rounded-pill" data-i18n="stock_sold_out">Hotu (Sold Out)</span>
                     {% else %}
-                      <span class="badge bg-secondary bg-opacity-25 border border-secondary text-secondary rounded-pill">La-Ativu</span>
+                      <span class="badge bg-secondary bg-opacity-25 border border-secondary text-secondary rounded-pill" data-i18n="stock_inactive">La-Ativu</span>
                     {% endif %}
                   </td>
                   <td>
                     <button class="btn btn-sm rounded-pill px-3 fw-bold {% if item.availability == 'AVAILABLE' %}btn-outline-danger{% else %}btn-outline-success{% endif %}" onclick="toggleMenuItem('{{ item.id }}')">
                       {% if item.availability == 'AVAILABLE' %}
-                        <i class="fa-solid fa-ban me-1"></i> Marka Hotu
+                        <i class="fa-solid fa-ban me-1"></i> <span data-i18n="btn_mark_sold_out">Marka Hotu</span>
                       {% else %}
-                        <i class="fa-solid fa-check me-1"></i> Marka Iha
+                        <i class="fa-solid fa-check me-1"></i> <span data-i18n="btn_mark_available">Marka Iha</span>
                       {% endif %}
                     </button>
                   </td>
@@ -171,9 +171,9 @@
     <div class="tab-pane fade" id="tables-panel">
       <div class="glass-card p-3">
         <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-white border-opacity-10">
-          <h5 class="fw-bold mb-0 text-white">Lista Meza &amp; Seguransa Token QR</h5>
+          <h5 class="fw-bold mb-0 text-white" data-i18n="tables_qr_title">Lista Meza &amp; Seguransa Token QR</h5>
           <a href="{% url 'admin-qr-sheet' %}" target="_blank" class="btn btn-sm btn-outline-light rounded-pill px-3">
-            <i class="fa-solid fa-print me-1"></i> Folha Print QR
+            <i class="fa-solid fa-print me-1"></i> <span data-i18n="btn_print_qr_sheet">Folha Print QR</span>
           </a>
         </div>
 
@@ -181,12 +181,12 @@
           <table class="table table-dark table-hover align-middle mb-0">
             <thead class="text-white-50 border-secondary">
               <tr>
-                <th>Kódigu Meza</th>
-                <th>Naran Meza</th>
-                <th>Kapasidade</th>
-                <th>Status Atual</th>
-                <th>QR Token (128-bit)</th>
-                <th>Rotasaun Token QR</th>
+                <th data-i18n="th_table_code">Kódigu Meza</th>
+                <th data-i18n="th_table_name">Naran Meza</th>
+                <th data-i18n="th_capacity">Kapasidade</th>
+                <th data-i18n="th_current_status">Status Atual</th>
+                <th data-i18n="th_qr_token">QR Token (128-bit)</th>
+                <th data-i18n="th_qr_rotation">Rotasaun Token QR</th>
               </tr>
             </thead>
             <tbody>
@@ -204,7 +204,7 @@
                   </td>
                   <td>
                     <button class="btn btn-sm btn-outline-warning rounded-pill px-3" onclick="rotateTableQR('{{ t.id }}', '{{ t.display_name }}')">
-                      <i class="fa-solid fa-arrows-rotate me-1"></i> Troka QR
+                      <i class="fa-solid fa-arrows-rotate me-1"></i> <span data-i18n="btn_rotate_qr">Troka QR</span>
                     </button>
                   </td>
                 </tr>
@@ -220,20 +220,20 @@
       <div class="glass-card p-4">
         <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-white border-opacity-10">
           <h5 class="fw-bold mb-0 text-white">
-            <i class="fa-solid fa-users text-success me-2"></i> Jestaun Uzuáriu &amp; Papél Funsionáriu
+            <i class="fa-solid fa-users text-success me-2"></i> <span data-i18n="staff_mgmt_title">Jestaun Uzuáriu &amp; Papél Funsionáriu</span>
           </h5>
           <button class="btn btn-sm btn-warning rounded-pill px-3 fw-bold text-dark" data-bs-toggle="modal" data-bs-target="#createUserModal">
-            <i class="fa-solid fa-plus me-1"></i> Kria Uzuáriu Foun
+            <i class="fa-solid fa-plus me-1"></i> <span data-i18n="btn_create_user">Kria Uzuáriu Foun</span>
           </button>
         </div>
 
-        <p class="text-white-50 small mb-3">
+        <p class="text-white-50 small mb-3" data-i18n="staff_mgmt_desc">
           Ita-boot bele kria konta foun ba <strong>Kaixa (Cashier)</strong> ka <strong>Dapur (Kitchen KDS)</strong> direitamente iha ne'e laiha nesesidade atu tama ba Django Admin.
         </p>
 
         <div class="alert alert-dark border border-secondary text-white-50 small">
           <i class="fa-solid fa-shield-halved text-warning me-2"></i>
-          Kada funsionáriu ne'ebé kria sei asesu de'it ba sira-nia tela tuir papél (Kaixa sei la haree KDS, no Dapur sei la haree POS ka Relatóriu).
+          <span data-i18n="staff_mgmt_alert">Kada funsionáriu ne'ebé kria sei asesu de'it ba sira-nia tela tuir papél (Kaixa sei la haree KDS, no Dapur sei la haree POS ka Relatóriu).</span>
         </div>
       </div>
     </div>
@@ -243,25 +243,25 @@
       <div class="row g-3">
         <div class="col-md-6">
           <div class="glass-card p-3 h-100">
-            <h5 class="fw-bold mb-3 text-warning"><i class="fa-solid fa-ranking-star me-2"></i> Menu Favoritu Ohin</h5>
+            <h5 class="fw-bold mb-3 text-warning"><i class="fa-solid fa-ranking-star me-2"></i> <span data-i18n="top_items_title">Menu Favoritu Ohin</span></h5>
             <div class="table-responsive">
               <table class="table table-dark table-sm align-middle mb-0">
                 <thead class="text-white-50 border-secondary">
                   <tr>
-                    <th>Menu</th>
-                    <th>Kuantidade Fa'an</th>
-                    <th>Totál Rendimentu</th>
+                    <th data-i18n="th_menu_col">Menu</th>
+                    <th data-i18n="th_qty_sold">Kuantidade Fa'an</th>
+                    <th data-i18n="th_total_rev">Totál Rendimentu</th>
                   </tr>
                 </thead>
                 <tbody>
                   {% for item in metrics.top_items %}
                     <tr>
                       <td class="fw-bold text-white">{{ item.menu_name_snapshot }}</td>
-                      <td><span class="badge bg-warning bg-opacity-25 border border-warning text-warning fs-6">{{ item.qty_sold }} porsaun</span></td>
+                      <td><span class="badge bg-warning bg-opacity-25 border border-warning text-warning fs-6">{{ item.qty_sold }} <span data-i18n="portions">porsaun</span></span></td>
                       <td class="fw-bold text-success">${{ item.revenue }}</td>
                     </tr>
                   {% empty %}
-                    <tr><td colspan="3" class="text-center text-white-50 py-3">Seidauk iha dadus vendas ohin nian.</td></tr>
+                    <tr><td colspan="3" class="text-center text-white-50 py-3" data-i18n="no_sales_today">Seidauk iha dadus vendas ohin nian.</td></tr>
                   {% endfor %}
                 </tbody>
               </table>
@@ -271,15 +271,15 @@
 
         <div class="col-md-6">
           <div class="glass-card p-3 h-100">
-            <h5 class="fw-bold mb-3 text-primary"><i class="fa-solid fa-receipt me-2"></i> Transasaun Pagamentu Foun</h5>
+            <h5 class="fw-bold mb-3 text-primary"><i class="fa-solid fa-receipt me-2"></i> <span data-i18n="recent_payments_title">Transasaun Pagamentu Foun</span></h5>
             <div class="table-responsive">
               <table class="table table-dark table-sm align-middle mb-0">
                 <thead class="text-white-50 border-secondary">
                   <tr>
-                    <th>Oras</th>
-                    <th>Meza</th>
-                    <th>Nú. Resibu</th>
-                    <th>Montante</th>
+                    <th data-i18n="th_time">Oras</th>
+                    <th data-i18n="th_table">Meza</th>
+                    <th data-i18n="th_receipt_num">Nú. Resibu</th>
+                    <th data-i18n="th_amount">Montante</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -291,7 +291,7 @@
                       <td class="fw-bold text-success">${{ tx.amount }}</td>
                     </tr>
                   {% empty %}
-                    <tr><td colspan="4" class="text-center text-white-50 py-3">Seidauk iha transasaun pagamentu ohin nian.</td></tr>
+                    <tr><td colspan="4" class="text-center text-white-50 py-3" data-i18n="no_payments_today">Seidauk iha transasaun pagamentu ohin nian.</td></tr>
                   {% endfor %}
                 </tbody>
               </table>
@@ -304,16 +304,16 @@
     <!-- Tab 5: Audit Logs -->
     <div class="tab-pane fade" id="audit-panel">
       <div class="glass-card p-3">
-        <h5 class="fw-bold mb-3 text-white"><i class="fa-solid fa-shield-halved text-warning me-2"></i> Rejistu Auditoria Seguransa &amp; Finanseiru</h5>
+        <h5 class="fw-bold mb-3 text-white"><i class="fa-solid fa-shield-halved text-warning me-2"></i> <span data-i18n="audit_title">Rejistu Auditoria Seguransa &amp; Finanseiru</span></h5>
         <div class="table-responsive">
           <table class="table table-dark table-sm table-hover align-middle small mb-0">
             <thead class="text-white-50 border-secondary">
               <tr>
-                <th>Oras</th>
-                <th>Atór / Papél</th>
-                <th>Asaun</th>
-                <th>Entidade</th>
-                <th>Detallu Snapshot</th>
+                <th data-i18n="th_time">Oras</th>
+                <th data-i18n="th_actor">Atór / Papél</th>
+                <th data-i18n="th_action_col">Asaun</th>
+                <th data-i18n="th_entity">Entidade</th>
+                <th data-i18n="th_snapshot">Detallu Snapshot</th>
               </tr>
             </thead>
             <tbody>
@@ -331,7 +331,7 @@
                   </td>
                 </tr>
               {% empty %}
-                <tr><td colspan="5" class="text-center text-white-50 py-3">Seidauk iha rejistu auditoria.</td></tr>
+                <tr><td colspan="5" class="text-center text-white-50 py-3" data-i18n="no_audit_logs">Seidauk iha rejistu auditoria.</td></tr>
               {% endfor %}
             </tbody>
           </table>
@@ -348,32 +348,32 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content glass-card border-warning border-opacity-50">
       <div class="modal-header border-bottom border-secondary border-opacity-25 text-white">
-        <h5 class="modal-title fw-bold text-white"><i class="fa-solid fa-user-plus text-warning me-2"></i> Kria Konta Staff Foun</h5>
+        <h5 class="modal-title fw-bold text-white"><i class="fa-solid fa-user-plus text-warning me-2"></i> <span data-i18n="modal_create_staff_title">Kria Konta Staff Foun</span></h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body p-4">
         <div class="mb-3">
-          <label class="form-label small fw-bold text-white">Naran Kompletu / Primeiro Naran:</label>
+          <label class="form-label small fw-bold text-white" data-i18n="label_fullname">Naran Kompletu / Primeiro Naran:</label>
           <input type="text" class="form-control bg-dark border-secondary text-white" id="new-user-fullname" placeholder="Ez: Gilberto Soares">
         </div>
         <div class="mb-3">
-          <label class="form-label small fw-bold text-white">Naran-Uzuáriu (Username):</label>
+          <label class="form-label small fw-bold text-white" data-i18n="label_username">Naran-Uzuáriu (Username):</label>
           <input type="text" class="form-control bg-dark border-secondary text-white" id="new-user-username" placeholder="Ez: kaixa01">
         </div>
         <div class="mb-3">
-          <label class="form-label small fw-bold text-white">Liafuan Xave (Password):</label>
+          <label class="form-label small fw-bold text-white" data-i18n="label_password">Liafuan Xave (Password):</label>
           <input type="password" class="form-control bg-dark border-secondary text-white" id="new-user-password" placeholder="Minimu 6 karaktér">
         </div>
         <div class="mb-3">
-          <label class="form-label small fw-bold text-white">Papél / Funsaun (Role):</label>
+          <label class="form-label small fw-bold text-white" data-i18n="label_role">Papél / Funsaun (Role):</label>
           <select class="form-select bg-dark border-secondary text-white" id="new-user-role">
-            <option value="CASHIER" selected>💵 Kaixa (Cashier)</option>
-            <option value="KITCHEN">🍳 Dapur (Kitchen KDS)</option>
-            <option value="ADMIN">👑 Jerente / Admin</option>
+            <option value="CASHIER" selected data-i18n="role_cashier">💵 Kaixa (Cashier)</option>
+            <option value="KITCHEN" data-i18n="role_kitchen">🍳 Dapur (Kitchen KDS)</option>
+            <option value="ADMIN" data-i18n="role_admin">👑 Jerente / Admin</option>
           </select>
         </div>
         <button type="button" class="btn btn-warning w-100 fw-bold rounded-pill text-dark shadow py-2" onclick="submitCreateStaffUser()">
-          <i class="fa-solid fa-check-circle me-1"></i> Kria Konta Agora
+          <i class="fa-solid fa-check-circle me-1"></i> <span data-i18n="btn_create_account_now">Kria Konta Agora</span>
         </button>
       </div>
     </div>
