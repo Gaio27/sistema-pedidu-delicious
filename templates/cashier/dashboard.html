@@ -339,15 +339,15 @@
 <!-- Receipt Modal -->
 <div class="modal fade" id="receiptModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-sm">
-    <div class="modal-content rounded-4 border-0 shadow">
+    <div class="modal-content glass-card border-warning border-opacity-40">
       <div class="modal-header border-0 pb-0">
-        <h5 class="modal-title fw-bold">Resibu Pagamentu</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <h5 class="modal-title fw-bold text-white"><i class="fa-solid fa-receipt text-warning me-1"></i> <span data-i18n="receipt_title">Resibu Pagamentu</span></h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body p-3 text-center" id="receipt-print-content"></div>
       <div class="modal-footer border-0 pt-0">
-        <button type="button" class="btn btn-primary w-100 fw-bold rounded-pill" onclick="cashierApp.printCurrentReceipt()">
-          <i class="fa-solid fa-print me-1"></i> Print Resibu (1 Folha)
+        <button type="button" class="btn btn-warning text-dark w-100 fw-bold rounded-pill shadow" onclick="cashierApp.printCurrentReceipt()">
+          <i class="fa-solid fa-print me-1"></i> <span data-i18n="btn_print_receipt_one_page">Print Resibu (1 Folha)</span>
         </button>
       </div>
     </div>

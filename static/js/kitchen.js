@@ -12,6 +12,8 @@ class KitchenKDSApp {
     this.loadQueue();
     this.initWebSocket();
 
+    window.addEventListener('languageChanged', () => this.renderKDS());
+
     // Ticker timer update every second
     setInterval(() => this.updateElapsedTimers(), 1000);
 
@@ -55,19 +57,19 @@ class KitchenKDSApp {
     if (column === 'CONFIRMED') {
       actionBtn = `
         <button class="btn btn-warning w-100 fw-bold py-2 mt-2 rounded-pill text-dark shadow" onclick="kdsApp.startPreparing('${order.id}')">
-          <i class="fa-solid fa-fire me-1"></i> Hahu Tein
+          <i class="fa-solid fa-fire me-1"></i> ${t('btn_start_cooking')}
         </button>
       `;
     } else if (column === 'PREPARING') {
       actionBtn = `
         <button class="btn btn-success w-100 fw-bold py-2 mt-2 rounded-pill shadow" onclick="kdsApp.markReady('${order.id}')">
-          <i class="fa-solid fa-bell me-1"></i> Hahan Prontu
+          <i class="fa-solid fa-bell me-1"></i> ${t('btn_mark_ready')}
         </button>
       `;
     } else if (column === 'READY') {
       actionBtn = `
         <button class="btn btn-outline-light w-100 fw-bold py-2 mt-2 rounded-pill shadow" onclick="kdsApp.markServed('${order.id}')">
-          <i class="fa-solid fa-check-double me-1"></i> Entrega ba Meza Ona
+          <i class="fa-solid fa-check-double me-1"></i> ${t('btn_mark_served')}
         </button>
       `;
     }

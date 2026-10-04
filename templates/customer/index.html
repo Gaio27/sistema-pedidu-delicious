@@ -4,27 +4,35 @@
 {% block title %}{{ table.display_name }} — {{ current_restaurant.name }}{% endblock %}
 
 {% block content %}
-<div class="container" style="max-width: 960px; padding-bottom: 100px;">
+<div class="container" style="max-width: 960px; padding-bottom: 120px;">
 
   <!-- Restaurant Hero Banner -->
   <div class="resto-hero-banner">
     <div class="row align-items-center g-3">
       <div class="col-md-7">
-        <div class="d-flex align-items-center gap-2 mb-2">
-          <span class="badge bg-warning text-dark fw-bold px-2 py-1"><i class="fa-solid fa-star me-1"></i> 4.9 (500+ Reviews)</span>
-          <span class="badge bg-white bg-opacity-20 text-white px-2 py-1"><i class="fa-solid fa-location-dot me-1"></i> Praia dos Coqueiros, Dili</span>
+        <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+          <span class="badge bg-warning bg-opacity-25 border border-warning border-opacity-50 text-warning fw-bold px-2 py-1 rounded-pill">
+            <i class="fa-solid fa-star me-1"></i> 4.9 (500+ Avaliasaun)
+          </span>
+          <span class="badge bg-white bg-opacity-10 border border-white border-opacity-15 text-white px-2 py-1 rounded-pill">
+            <i class="fa-solid fa-location-dot me-1 text-danger"></i> Praia dos Coqueiros, Dili
+          </span>
         </div>
         <h3 class="fw-bold mb-1 text-white">{{ current_restaurant.name }}</h3>
         <p class="text-white-50 small mb-2">Esperiénsia gastronómika modernu iha tasi-ibun Dili ho vizaun tasi furak no pedidu dixital PWA.</p>
         
-        <!-- Table & Session Status -->
+        <!-- Table & Session Status Badge -->
         <div class="d-inline-flex align-items-center gap-2 bg-white bg-opacity-10 rounded-pill px-3 py-1 mt-1 border border-white border-opacity-10">
           <i class="fa-solid fa-chair text-warning"></i>
-          <span class="fw-bold small">{{ table.display_name|default:"Meza Seidauk Hili" }}</span>
+          <span class="fw-bold small text-white">{{ table.display_name|default:"Meza Seidauk Hili" }}</span>
           {% if session and session.is_active %}
-            <span class="badge bg-success rounded-pill small ms-1"><i class="fa-solid fa-circle-check me-1"></i> Sesi Ativu ({{ session.guest_count }} Ema)</span>
+            <span class="badge bg-success bg-opacity-25 border border-success text-success rounded-pill small ms-1">
+              <i class="fa-solid fa-circle-check me-1"></i> <span data-i18n="active_session">Sesi Ativu</span> ({{ session.guest_count }} <span data-i18n="people">Ema</span>)
+            </span>
           {% else %}
-            <span class="badge bg-warning text-dark rounded-pill small ms-1"><i class="fa-solid fa-circle-exclamation me-1"></i> Sesi Seidauk Loke</span>
+            <span class="badge bg-warning bg-opacity-25 border border-warning text-warning rounded-pill small ms-1">
+              <i class="fa-solid fa-circle-exclamation me-1"></i> <span data-i18n="session_not_opened">Sesi Seidauk Loke</span>
+            </span>
           {% endif %}
         </div>
       </div>
@@ -34,45 +42,46 @@
 
           {% if session and session.is_active %}
             {% if session.status == 'BILL_REQUESTED' %}
-              <button class="btn btn-sm btn-secondary text-white fw-bold rounded-pill px-3 shadow-sm" disabled id="btn-request-bill">
-                <i class="fa-solid fa-clock me-1"></i> Konta Husu Tiha Ona
+              <button class="btn btn-sm btn-secondary text-white fw-bold rounded-pill px-3 shadow-sm" disabled id="btn-request-bill" data-status="BILL_REQUESTED">
+                <i class="fa-solid fa-clock me-1"></i> <span data-i18n="bill_requested">Konta Husu Tiha Ona</span>
               </button>
             {% elif session.status == 'PAID' %}
-              <button class="btn btn-sm btn-success text-white fw-bold rounded-pill px-3 shadow-sm" disabled id="btn-request-bill">
-                <i class="fa-solid fa-circle-check me-1"></i> Selu Tiha Ona
+              <button class="btn btn-sm btn-success text-white fw-bold rounded-pill px-3 shadow-sm" disabled id="btn-request-bill" data-status="PAID">
+                <i class="fa-solid fa-circle-check me-1"></i> <span data-i18n="paid_status">Selu Tiha Ona</span>
               </button>
             {% else %}
               <button class="btn btn-sm btn-warning text-dark fw-bold rounded-pill px-3 shadow-sm" onclick="customerApp.requestBill()" id="btn-request-bill">
-                <i class="fa-solid fa-receipt me-1"></i> Husu Konta
+                <i class="fa-solid fa-receipt me-1"></i> <span data-i18n="request_bill">Husu Konta</span>
               </button>
             {% endif %}
           {% endif %}
 
-          <button class="btn btn-sm btn-light fw-bold rounded-pill px-3" onclick="installPWA()" id="btn-install-pwa">
-            <i class="fa-solid fa-download me-1"></i> Instala App
+          <button class="btn btn-sm btn-outline-light fw-bold rounded-pill px-3" onclick="installPWA()" id="btn-install-pwa">
+            <i class="fa-solid fa-download me-1 text-warning"></i> <span data-i18n="install_app">Instala App</span>
           </button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Live Orders Section -->
+  <!-- Live Orders Dynamic Section -->
   <div id="customer-active-orders"></div>
 
   <!-- Search & Category Filters -->
   <div class="mb-4">
-    <div class="input-group shadow-sm mb-3">
-      <span class="input-group-text bg-white border-end-0 ps-3"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
-      <input type="text" id="menu-search" class="form-control border-start-0 py-2 ps-2" placeholder="Buka hahan, hemu, seafood, dessert..." data-i18n-placeholder="search_placeholder">
+    <!-- Dark Glass Search Bar -->
+    <div class="search-bar-glass d-flex align-items-center mb-3 px-3 py-2">
+      <i class="fa-solid fa-magnifying-glass text-warning me-2 fs-5"></i>
+      <input type="text" id="menu-search" class="w-100" placeholder="Buka hahan, hemu, seafood, dessert..." data-i18n-placeholder="search_placeholder">
     </div>
 
-    <!-- Category Pills -->
+    <!-- Category Filter Pills -->
     <div class="d-flex gap-2 overflow-auto pb-2" style="white-space: nowrap; scrollbar-width: none;">
-      <button class="btn btn-sm btn-primary cat-pill active rounded-pill px-3 py-2" data-category="all">
+      <button class="cat-pill active" data-category="all">
         <i class="fa-solid fa-border-all me-1"></i> <span data-i18n="all_menu">Menu Hotu</span>
       </button>
       {% for cat in categories %}
-        <button class="btn btn-sm btn-outline-secondary cat-pill rounded-pill px-3 py-2 bg-white shadow-sm" data-category="{{ cat.slug }}">
+        <button class="cat-pill" data-category="{{ cat.slug }}">
           <i class="fa-solid fa-{{ cat.icon_name|default:'utensils' }} me-1"></i> {{ cat.name }}
         </button>
       {% endfor %}
@@ -85,46 +94,46 @@
       {% for item in cat.items.all %}
         {% if item.availability != 'INACTIVE' %}
           <div class="col-md-4 col-sm-6 menu-item-col" data-category="{{ cat.slug }}" data-name="{{ item.name }}" data-desc="{{ item.description }}">
-            <div class="menu-card shadow-sm">
+            <div class="menu-card">
               
               <!-- Fixed Aspect Ratio Image Container -->
               <div class="menu-card-img-wrapper position-relative">
                 <img src="{{ item.display_image }}" class="menu-card-img" alt="{{ item.name }}" loading="lazy" onerror="this.onerror=null; this.src='/static/icons/default-food.png';">
                 {% if item.is_featured %}
-                  <span class="badge bg-warning text-dark fw-bold position-absolute top-0 start-0 m-2 rounded-pill px-2 py-1 shadow-sm">
-                    <i class="fa-solid fa-star me-1"></i> Chef's Special
+                  <span class="badge bg-warning text-dark fw-bold position-absolute top-0 start-0 m-2 rounded-pill px-2 py-1 shadow">
+                    <i class="fa-solid fa-star me-1"></i> <span data-i18n="chefs_special">Chef Especial</span>
                   </span>
                 {% endif %}
-                <span class="badge bg-dark bg-opacity-75 text-white position-absolute bottom-0 end-0 m-2 rounded-pill px-2 py-1 small">
-                  <i class="fa-regular fa-clock me-1"></i> 10-15m
+                <span class="badge bg-black bg-opacity-75 text-white position-absolute bottom-0 end-0 m-2 rounded-pill px-2 py-1 small">
+                  <i class="fa-regular fa-clock me-1 text-warning"></i> <span data-i18n="prep_time">10-15m</span>
                 </span>
               </div>
 
               <!-- Card Body -->
               <div class="menu-card-body">
                 <div class="d-flex justify-content-between align-items-start mb-1">
-                  <h6 class="fw-bold mb-0 text-dark">{{ item.name }}</h6>
-                  <span class="badge bg-light text-secondary border small">{{ cat.name }}</span>
+                  <h6 class="menu-card-title">{{ item.name }}</h6>
+                  <span class="badge bg-white bg-opacity-10 border border-white border-opacity-10 text-white-50 small ms-1">{{ cat.name }}</span>
                 </div>
-                <p class="text-muted small mb-2 flex-grow-1" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4;">
+                <p class="menu-card-desc">
                   {{ item.description|default:"Hahán espesiál Celvass Resto & Bar ho ingredientes fresku." }}
                 </p>
 
-                <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
+                <div class="d-flex justify-content-between align-items-center mt-auto pt-2 border-top border-white border-opacity-10">
                   <div class="menu-card-price">${{ item.price }}</div>
 
                   {% if item.availability == 'AVAILABLE' %}
                     {% if session and session.is_active %}
-                      <button class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow-sm" onclick="openItemModal('{{ item.id }}', '{{ item.name|escapejs }}', '{{ item.price }}', '{{ item.display_image|escapejs }}', '{{ item.description|escapejs }}')">
-                        <i class="fa-solid fa-plus me-1"></i> <span data-i18n="add">Aumenta</span>
+                      <button class="btn-add-menu" onclick="openItemModal('{{ item.id }}', '{{ item.name|escapejs }}', '{{ item.price }}', '{{ item.display_image|escapejs }}', '{{ item.description|escapejs }}')">
+                        <i class="fa-solid fa-plus"></i> <span data-i18n="add">Aumenta</span>
                       </button>
                     {% else %}
-                      <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="showToast('Sesi meza seidauk loke hosi Kaixa.', 'warning')">
+                      <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="showToast(t('session_not_open_toast'), 'warning')">
                         <i class="fa-solid fa-lock me-1"></i> <span data-i18n="locked">Xave Hela</span>
                       </button>
                     {% endif %}
                   {% else %}
-                    <span class="badge bg-danger rounded-pill px-3 py-2" data-i18n="sold_out">Hotu Ona</span>
+                    <span class="badge bg-danger bg-opacity-25 border border-danger text-danger rounded-pill px-3 py-2" data-i18n="sold_out">Hotu Ona</span>
                   {% endif %}
                 </div>
               </div>
@@ -139,12 +148,12 @@
 </div>
 
 <!-- Floating Cart Bottom Bar -->
-<div id="floating-cart-bar" class="floating-cart-bar shadow-lg" style="display: none;" data-bs-toggle="offcanvas" data-bs-target="#cartOffcanvas">
+<div id="floating-cart-bar" class="floating-cart-bar" style="display: none;" data-bs-toggle="offcanvas" data-bs-target="#cartOffcanvas">
   <div class="d-flex align-items-center gap-2">
-    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 38px; height: 38px;">
-      <i class="fa-solid fa-bag-shopping"></i>
+    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: var(--primary-gradient); box-shadow: 0 0 15px var(--primary-glow);">
+      <i class="fa-solid fa-bag-shopping text-white"></i>
     </div>
-    <span class="badge bg-light text-dark fw-bold px-2 py-1 rounded-pill" id="cart-count-badge">0 Item</span>
+    <span class="badge bg-warning text-dark fw-bold px-2 py-1 rounded-pill" id="cart-count-badge">0 Item</span>
   </div>
   <div class="d-flex align-items-center gap-3">
     <span class="fs-5 fw-bold text-white" id="cart-total-price">$0.00</span>
@@ -152,74 +161,81 @@
   </div>
 </div>
 
-<!-- Item Customization Modal -->
+<!-- Item Customization Modal (Dark Glassmorphic) -->
 <div class="modal fade" id="itemCustomModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
+    <div class="modal-content overflow-hidden border-warning border-opacity-40">
       
       <!-- Modal Food Image Preview -->
-      <img id="modal-item-img" src="" class="w-100" style="height: 200px; object-fit: cover; display: none;" alt="Menu Image" onerror="this.src='/static/icons/default-food.png';">
+      <img id="modal-item-img" src="" class="w-100" style="height: 220px; object-fit: cover; display: none;" alt="Menu Image" onerror="this.src='/static/icons/default-food.png';">
 
       <div class="modal-body p-4 pt-3">
         <div class="d-flex justify-content-between align-items-start mb-2">
           <div>
-            <h5 class="fw-bold mb-1" id="modal-item-name">Naran Menu</h5>
-            <div class="text-primary fw-bold fs-5" id="modal-item-price">$0.00</div>
+            <h5 class="fw-bold mb-1 text-white" id="modal-item-name">Naran Menu</h5>
+            <div class="text-warning fw-bold fs-4" id="modal-item-price">$0.00</div>
           </div>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
 
-        <p class="text-muted small mb-3" id="modal-item-desc"></p>
+        <p class="text-white-50 small mb-3" id="modal-item-desc"></p>
 
-        <div class="mb-3 bg-light p-3 rounded-3 border">
-          <label class="form-label small fw-bold text-secondary mb-2">Kuantidade:</label>
+        <!-- Quantity Selector in Dark Glass -->
+        <div class="mb-3 p-3 rounded-3 border border-secondary border-opacity-25 bg-dark bg-opacity-40">
+          <label class="form-label small fw-bold text-white-50 mb-2" data-i18n="quantity_label">Kuantidade:</label>
           <div class="d-flex align-items-center gap-3">
-            <button class="btn btn-outline-secondary rounded-circle shadow-sm" style="width: 40px; height: 40px;" onclick="adjustModalQty(-1)">-</button>
-            <span class="fs-4 fw-bold px-2" id="modal-item-qty">1</span>
-            <button class="btn btn-outline-secondary rounded-circle shadow-sm" style="width: 40px; height: 40px;" onclick="adjustModalQty(1)">+</button>
+            <button class="btn btn-outline-light rounded-circle shadow-sm d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;" onclick="adjustModalQty(-1)">
+              <i class="fa-solid fa-minus"></i>
+            </button>
+            <span class="fs-3 fw-bold text-white px-3" id="modal-item-qty">1</span>
+            <button class="btn btn-outline-warning rounded-circle shadow-sm d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;" onclick="adjustModalQty(1)">
+              <i class="fa-solid fa-plus"></i>
+            </button>
           </div>
         </div>
 
         <div class="mb-3">
-          <label for="modal-item-note" class="form-label small fw-bold text-secondary" data-i18n="order_notes_label">Notasaun ba Meza / Dapur:</label>
-          <input type="text" class="form-control rounded-3" id="modal-item-note" placeholder="Ezemplu: Lalika tau pimenta, kuah haketak..." data-i18n-placeholder="order_notes_placeholder">
+          <label for="modal-item-note" class="form-label small fw-bold text-white-50" data-i18n="order_notes_label">Notasaun ba Meza / Dapur:</label>
+          <input type="text" class="form-control" id="modal-item-note" placeholder="Ezemplu: Lalika tau pimenta, kuah haketak..." data-i18n-placeholder="order_notes_placeholder">
         </div>
 
-        <button type="button" class="btn btn-primary w-100 py-2 rounded-pill fw-bold shadow-sm" id="btn-add-modal-item" data-i18n="add">
-          Aumenta ba Karreta
+        <button type="button" class="btn btn-warning text-dark w-100 py-3 rounded-pill fw-bold shadow" id="btn-add-modal-item">
+          <i class="fa-solid fa-plus me-1"></i> <span data-i18n="add">Aumenta ba Karreta</span>
         </button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Cart Offcanvas Drawer -->
-<div class="offcanvas offcanvas-bottom rounded-top-4" tabindex="-1" id="cartOffcanvas" style="height: 80vh;">
-  <div class="offcanvas-header border-bottom">
-    <h5 class="offcanvas-title fw-bold">
-      <i class="fa-solid fa-basket-shopping text-primary me-2"></i> <span data-i18n="cart_title">Karreta Pedidu</span> ({{ table.display_name }})
+<!-- Cart Offcanvas Drawer (Dark Glassmorphic) -->
+<div class="offcanvas offcanvas-bottom" tabindex="-1" id="cartOffcanvas" style="height: 82vh;">
+  <div class="offcanvas-header px-4 py-3">
+    <h5 class="offcanvas-title fw-bold text-white d-flex align-items-center">
+      <i class="fa-solid fa-basket-shopping text-warning me-2"></i>
+      <span data-i18n="cart_title">Karreta Pedidu</span>
+      <span class="badge bg-warning bg-opacity-20 border border-warning border-opacity-25 text-warning ms-2 small">{{ table.display_name }}</span>
     </h5>
-    <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
   </div>
-  <div class="offcanvas-body d-flex flex-column">
+  <div class="offcanvas-body d-flex flex-column px-4">
     <div id="cart-items-list" class="flex-grow-1 overflow-auto pe-1"></div>
 
-    <div class="border-top pt-3 mt-3">
+    <div class="border-top border-white border-opacity-10 pt-3 mt-3">
       <div class="mb-3">
-        <label for="order-customer-note" class="form-label small fw-bold text-secondary" data-i18n="order_notes_label">Notasaun ba Meza / Dapur:</label>
-        <textarea class="form-control rounded-3" id="order-customer-note" rows="2" placeholder="Ezemplu: Lalika tau pimenta, kuah haketak..." data-i18n-placeholder="order_notes_placeholder"></textarea>
+        <label for="order-customer-note" class="form-label small fw-bold text-white-50" data-i18n="order_notes_label">Notasaun ba Meza / Dapur:</label>
+        <textarea class="form-control" id="order-customer-note" rows="2" placeholder="Ezemplu: Lalika tau pimenta, kuah haketak..." data-i18n-placeholder="order_notes_placeholder"></textarea>
       </div>
 
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <span class="text-muted" data-i18n="estimated_total">Total Estimadu:</span>
-        <span class="fs-4 fw-bold text-primary" id="cart-drawer-total">$0.00</span>
+        <span class="text-white-50" data-i18n="estimated_total">Totál Estimadu:</span>
+        <span class="fs-3 fw-bold text-warning" id="cart-drawer-total">$0.00</span>
       </div>
 
-      <div class="alert alert-warning small py-2 mb-3" data-i18n="gatekeeper_warning">
+      <div class="alert alert-warning py-2 mb-3 bg-warning bg-opacity-10 border border-warning border-opacity-25 text-warning small" data-i18n="gatekeeper_warning">
         <i class="fa-solid fa-shield-halved me-1"></i> Pedidu sei hetan verifikasaun uluk hosi Kaixa molok tein iha dapur.
       </div>
 
-      <button class="btn btn-primary w-100 py-3 rounded-pill fw-bold fs-6 shadow" id="btn-submit-order" onclick="customerApp.submitOrder()" data-i18n="btn_submit_order">
+      <button class="btn btn-warning text-dark w-100 py-3 rounded-pill fw-bold fs-6 shadow" id="btn-submit-order" onclick="customerApp.submitOrder()" data-i18n="btn_submit_order">
         <i class="fa-solid fa-paper-plane me-1"></i> Haruka Pedidu ba Kaixa
       </button>
     </div>
@@ -244,7 +260,7 @@
     modalQty = 1;
     document.getElementById('modal-item-name').textContent = name;
     document.getElementById('modal-item-price').textContent = `$${parseFloat(price).toFixed(2)}`;
-    document.getElementById('modal-item-desc').textContent = desc;
+    document.getElementById('modal-item-desc').textContent = desc || '';
     document.getElementById('modal-item-qty').textContent = modalQty;
     document.getElementById('modal-item-note').value = '';
 

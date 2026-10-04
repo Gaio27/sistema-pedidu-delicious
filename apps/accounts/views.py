@@ -28,9 +28,9 @@ def login_view(request):
                     return redirect('kitchen-portal')
                 return redirect('cashier-portal')
             else:
-                messages.error(request, 'Akun Anda tidak aktif.')
+                messages.error(request, 'Ita-nia konta la ativu.')
         else:
-            messages.error(request, 'Username atau password salah.')
+            messages.error(request, 'Naran-uzuáriu ka liafuan xave sala.')
 
     return render(request, 'auth/login.html')
 
@@ -55,7 +55,7 @@ def demo_login_view(request, role):
         elif user.is_kitchen:
             return redirect('kitchen-portal')
             
-    messages.error(request, f'Akun demo {role} belum terdaftar. Jalankan seed data terlebih dahulu.')
+    messages.error(request, f'Konta demo {role} seidauk rejistu.')
     return redirect('login')
 
 def logout_view(request):

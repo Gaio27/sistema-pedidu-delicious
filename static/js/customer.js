@@ -1,6 +1,7 @@
 /**
  * Celvass Resto & Bar — Customer Dine-In PWA Controller
- * Pure Tetun Interface & Device-Locked Session Security
+ * Pure Tetun Base Interface & Dynamic Multilingual System
+ * Luxury Dark Glassmorphism & Device-Locked Table Security
  */
 
 class CustomerApp {
@@ -23,7 +24,7 @@ class CustomerApp {
       id = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : ('dev_' + Math.random().toString(36).substring(2) + Date.now().toString(36));
       localStorage.setItem('celvass_device_id', id);
     }
-    // Also store in cookie for seamless server-side verification
+    // Also store in cookie for server-side verification
     document.cookie = `celvass_device_id=${id}; path=/; max-age=31536000; SameSite=Lax`;
     return id;
   }
@@ -33,13 +34,18 @@ class CustomerApp {
     this.initWebSocket();
     this.loadActiveOrders();
 
+    // Listen for language switch
+    window.addEventListener('languageChanged', () => {
+      this.renderCartUI();
+      this.renderOrdersUI();
+      this.checkBillButtonEligibility();
+    });
+
     // Category Filter
     document.querySelectorAll('.cat-pill').forEach((btn) => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.cat-pill').forEach((b) => b.classList.remove('active', 'btn-primary'));
-        document.querySelectorAll('.cat-pill').forEach((b) => b.classList.add('btn-outline-secondary'));
-        btn.classList.add('active', 'btn-primary');
-        btn.classList.remove('btn-outline-secondary');
+        document.querySelectorAll('.cat-pill').forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
 
         const cat = btn.dataset.category;
         document.querySelectorAll('.menu-item-col').forEach((card) => {
@@ -99,7 +105,7 @@ class CustomerApp {
       });
     }
     this.saveCart();
-    showToast(`Aumenta ba karreta: ${item.name}`, 'success');
+    showToast(`${t('added_to_cart')} ${item.name}`, 'success');
   }
 
   updateQuantity(index, delta) {
@@ -135,7 +141,7 @@ class CustomerApp {
 
     if (bar && count > 0) {
       bar.style.display = 'flex';
-      if (badge) badge.textContent = `${count} Item`;
+      if (badge) badge.textContent = `${count} ${count > 1 ? 'Itens' : 'Item'}`;
       if (totalEl) totalEl.textContent = `$${total.toFixed(2)}`;
     } else if (bar) {
       bar.style.display = 'none';
@@ -148,25 +154,32 @@ class CustomerApp {
     if (drawerList) {
       if (this.cart.length === 0) {
         drawerList.innerHTML = `
-          <div class="text-center py-4 text-muted">
-            <i class="fa-solid fa-basket-shopping fa-2x mb-2 text-secondary"></i>
-            <p class="mb-0">Ita-boot nia karreta mamuk hela.</p>
+          <div class="text-center py-5 text-white-50">
+            <i class="fa-solid fa-basket-shopping fa-3x mb-3 text-warning opacity-50"></i>
+            <p class="mb-0 fw-semibold">${t('cart_empty')}</p>
           </div>
         `;
       } else {
         drawerList.innerHTML = this.cart
           .map(
             (item, index) => `
-          <div class="d-flex align-items-center justify-content-between py-2 border-bottom border-light">
-            <div>
-              <div class="fw-bold">${item.name}</div>
-              <div class="text-primary fw-semibold">$${(item.price * item.quantity).toFixed(2)} <span class="text-muted small">($${item.price.toFixed(2)}/item)</span></div>
-              ${item.note ? `<div class="small text-muted fst-italic"><i class="fa-solid fa-pen small"></i> ${item.note}</div>` : ''}
+          <div class="d-flex align-items-center justify-content-between py-3 border-bottom border-secondary border-opacity-25">
+            <div class="pe-2">
+              <div class="fw-bold text-white fs-6">${item.name}</div>
+              <div class="text-warning fw-bold fs-6">
+                $${(item.price * item.quantity).toFixed(2)} 
+                <span class="text-white-50 small fw-normal">($${item.price.toFixed(2)}/item)</span>
+              </div>
+              ${item.note ? `<div class="small text-warning bg-warning bg-opacity-10 border border-warning border-opacity-25 rounded-pill px-2 py-0 d-inline-block mt-1"><i class="fa-solid fa-pen small me-1"></i>${item.note}</div>` : ''}
             </div>
             <div class="d-flex align-items-center gap-2">
-              <button class="btn btn-sm btn-outline-secondary px-2" onclick="customerApp.updateQuantity(${index}, -1)">-</button>
-              <span class="fw-bold">${item.quantity}</span>
-              <button class="btn btn-sm btn-outline-secondary px-2" onclick="customerApp.updateQuantity(${index}, 1)">+</button>
+              <button class="btn btn-sm btn-outline-light rounded-circle d-flex align-items-center justify-content-center" style="width:34px; height:34px;" onclick="customerApp.updateQuantity(${index}, -1)">
+                <i class="fa-solid fa-minus small"></i>
+              </button>
+              <span class="fw-bold text-white fs-5 px-1">${item.quantity}</span>
+              <button class="btn btn-sm btn-outline-warning rounded-circle d-flex align-items-center justify-content-center" style="width:34px; height:34px;" onclick="customerApp.updateQuantity(${index}, 1)">
+                <i class="fa-solid fa-plus small"></i>
+              </button>
             </div>
           </div>
         `
@@ -178,11 +191,11 @@ class CustomerApp {
 
   async submitOrder() {
     if (this.cart.length === 0) {
-      showToast('Ita-boot nia karreta mamuk hela!', 'warning');
+      showToast(t('cart_empty_toast'), 'warning');
       return;
     }
     if (!this.sessionToken) {
-      showToast('Sesi meza seidauk loke hosi kaixa.', 'error');
+      showToast(t('session_not_open_toast'), 'error');
       return;
     }
 
@@ -201,7 +214,7 @@ class CustomerApp {
     const submitBtn = document.getElementById('btn-submit-order');
     if (submitBtn) {
       submitBtn.disabled = true;
-      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Haruka hela pedidu...';
+      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> ...';
     }
 
     try {
@@ -214,7 +227,7 @@ class CustomerApp {
       const cartModal = bootstrap.Offcanvas.getInstance(document.getElementById('cartOffcanvas'));
       if (cartModal) cartModal.hide();
 
-      showToast(`Pedidu ${order.order_code} haruka ona! Hein konfirmasaun kaixa.`, 'success');
+      showToast(`${t('order_sent_toast')} ${order.order_code}. ${t('waiting_cashier_toast')}`, 'success');
       SoundEffects.playSuccess();
 
       this.loadActiveOrders();
@@ -223,7 +236,7 @@ class CustomerApp {
     } finally {
       if (submitBtn) {
         submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i> Haruka Pedidu ba Kaixa';
+        submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane me-1"></i> ${t('btn_submit_order')}`;
       }
     }
   }
@@ -239,7 +252,7 @@ class CustomerApp {
       this.renderOrdersUI();
       this.checkBillButtonEligibility();
     } catch (e) {
-      console.log('No active orders or session not open');
+      // Session closed or inactive
     }
   }
 
@@ -253,20 +266,17 @@ class CustomerApp {
       ['WAITING_CASHIER_CONFIRMATION', 'CONFIRMED', 'PREPARING'].includes(o.status)
     );
 
-    // If button already shows "Konta Husu Tiha Ona" or "Selu Tiha Ona", preserve it
-    if (btn.textContent.includes('Konta Husu') || btn.textContent.includes('Selu Tiha')) {
+    // If button already shows requested or paid, preserve
+    if (btn.dataset.status === 'BILL_REQUESTED' || btn.dataset.status === 'PAID') {
       return;
     }
 
     if (!hasServedOrder) {
       btn.dataset.eligible = 'false';
-      btn.title = "Presiza iha pelumenus pedidu 1 ne'ebé entrega ona (SERVED)";
     } else if (hasCookingOrder) {
       btn.dataset.eligible = 'cooking';
-      btn.title = "Sei iha hahan ne'ebé tein hela iha dapur";
     } else {
       btn.dataset.eligible = 'true';
-      btn.title = "Husu Konta (Bill)";
     }
   }
 
@@ -280,10 +290,10 @@ class CustomerApp {
     }
 
     listEl.innerHTML = `
-      <div class="card card-custom p-3 mb-3 border-primary shadow-sm">
-        <h6 class="fw-bold mb-2 text-primary d-flex align-items-center justify-content-between">
-          <span><i class="fa-solid fa-clock-rotate-left me-1"></i> Status Ita-boot nia Pedidu</span>
-          <span class="badge bg-primary">${this.activeOrders.length} Pedidu</span>
+      <div class="glass-card p-3 mb-3 border-warning border-opacity-40 shadow-lg">
+        <h6 class="fw-bold mb-3 text-warning d-flex align-items-center justify-content-between" style="font-family: 'Outfit', sans-serif;">
+          <span><i class="fa-solid fa-clock-rotate-left me-2"></i> ${t('order_status_title')}</span>
+          <span class="badge bg-warning bg-opacity-20 text-warning border border-warning border-opacity-25 rounded-pill px-2 py-1">${this.activeOrders.length} ${t('total_orders')}</span>
         </h6>
         ${this.activeOrders
           .map((ord) => {
@@ -298,27 +308,29 @@ class CustomerApp {
             }[ord.status] || 'bg-secondary text-white';
 
             const statusText = {
-              WAITING_CASHIER_CONFIRMATION: '⏳ Hein Verifikasaun Kaixa',
-              CONFIRMED: '✅ Kaixa Konfirma Ona',
-              PREPARING: '🍳 Dapur Hahu Tein',
-              READY: '🔔 Hahan Prontu Ona',
-              SERVED: '🍽️ Entrega ba Meza Ona',
-              COMPLETED: '🏁 Remata Ona',
-              REJECTED: `❌ Kaixa Rekuza: ${ord.rejection_reason || ''}`,
+              WAITING_CASHIER_CONFIRMATION: t('status_waiting'),
+              CONFIRMED: t('status_confirmed'),
+              PREPARING: t('status_preparing'),
+              READY: t('status_ready'),
+              SERVED: t('status_served'),
+              COMPLETED: t('status_completed'),
+              REJECTED: `${t('status_rejected')}: ${ord.rejection_reason || ''}`,
             }[ord.status] || ord.status;
 
             return `
-            <div class="p-2 border rounded mb-2 bg-light">
+            <div class="p-3 border border-secondary border-opacity-25 rounded-3 mb-2 bg-dark bg-opacity-40">
               <div class="d-flex justify-content-between align-items-center mb-1">
-                <span class="fw-bold">${ord.order_code}</span>
+                <span class="fw-bold text-white fs-6">${ord.order_code}</span>
                 <span class="badge badge-status ${statusClass}">${statusText}</span>
               </div>
-              <div class="small text-muted mb-1">
-                ${ord.items.map((i) => `${i.quantity}x ${i.menu_name_snapshot}`).join(', ')}
+              <div class="small text-white-50 mb-2">
+                ${ord.items.map((i) => `<span class="text-white">${i.quantity}x</span> ${i.menu_name_snapshot}`).join(', ')}
               </div>
-              <div class="d-flex justify-content-between small fw-bold">
-                <span>Total: $${ord.grand_total}</span>
-                <a href="/t/${this.qrToken}/order/${ord.order_code}/" class="text-primary text-decoration-none">Haree Detalle & Rastreia →</a>
+              <div class="d-flex justify-content-between align-items-center small fw-bold pt-2 border-top border-secondary border-opacity-25">
+                <span class="text-warning fs-6">$${ord.grand_total}</span>
+                <a href="/t/${this.qrToken}/order/${ord.order_code}/" class="btn btn-sm btn-outline-warning rounded-pill px-3 py-1">
+                  ${t('btn_view_order')}
+                </a>
               </div>
             </div>
           `;
@@ -331,10 +343,9 @@ class CustomerApp {
   async requestBill() {
     if (!this.sessionToken) return;
 
-    // Check client eligibility before sending
     const hasServedOrder = this.activeOrders.some((o) => o.status === 'SERVED');
     if (!hasServedOrder) {
-      showToast("Ita-boot seidauk bele husu konta tanba seidauk iha pedidu ne'ebé entrega tiha ona ba meza (SERVED).", 'warning');
+      showToast(t('alert_waiting_desc') || "Presiza iha pelumenus pedidu 1 ne'ebé entrega tiha ona ba meza (SERVED).", 'warning');
       return;
     }
 
@@ -349,7 +360,7 @@ class CustomerApp {
     const btn = document.getElementById('btn-request-bill');
     if (btn) {
       btn.disabled = true;
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Haruka Hela...';
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> ...';
     }
 
     try {
@@ -358,19 +369,20 @@ class CustomerApp {
         {},
         { 'X-Device-Token': this.deviceId }
       );
-      const msg = res.message || 'Husu konta haruka ona ba kaixa.';
+      const msg = res.message || t('bill_sent_toast');
       showToast(msg, 'info');
       SoundEffects.playBell();
       if (btn) {
         btn.disabled = true;
+        btn.dataset.status = 'BILL_REQUESTED';
         btn.className = 'btn btn-sm btn-secondary text-white fw-bold rounded-pill px-3 shadow-sm';
-        btn.innerHTML = '<i class="fa-solid fa-clock me-1"></i> Konta Husu Tiha Ona';
+        btn.innerHTML = `<i class="fa-solid fa-clock me-1"></i> ${t('bill_requested')}`;
       }
     } catch (e) {
       showToast(e.message, 'error');
       if (btn) {
         btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-receipt me-1"></i> Husu Konta';
+        btn.innerHTML = `<i class="fa-solid fa-receipt me-1"></i> ${t('request_bill')}`;
       }
     }
   }
@@ -379,19 +391,18 @@ class CustomerApp {
     if (!this.sessionToken) return;
 
     this.ws = new WebSocketClient(`/ws/customer/${this.sessionToken}/`, (msg) => {
-      console.log('Customer WS update:', msg);
       if (msg.event === 'ORDER_CONFIRMED') {
-        showToast(`Kaixa konfirma ona pedidu ${msg.data.order_code}!`, 'success');
+        showToast(`${t('order_confirmed_toast')} ${msg.data.order_code}!`, 'success');
         SoundEffects.playSuccess();
         this.loadActiveOrders();
       } else if (msg.event === 'ORDER_REJECTED') {
-        showToast(`Kaixa rekuza pedidu ${msg.data.order_code}: ${msg.data.reason}`, 'error');
+        showToast(`${t('order_rejected_toast')} ${msg.data.order_code}: ${msg.data.reason}`, 'error');
         this.loadActiveOrders();
       } else if (msg.event === 'ORDER_PREPARING' || msg.event === 'ORDER_READY' || msg.event === 'ORDER_SERVED') {
-        showToast(`Status pedidu ${msg.data.order_code}: ${msg.event}`, 'info');
+        showToast(`${t('order_status_toast')} ${msg.data.order_code}`, 'info');
         this.loadActiveOrders();
       } else if (msg.event === 'SESSION_CLOSED') {
-        showToast('Sesi meza taka ona hosi kaixa. Obrigadu barak!', 'info');
+        showToast(t('session_closed_toast'), 'info');
         setTimeout(() => window.location.reload(), 2000);
       }
     });

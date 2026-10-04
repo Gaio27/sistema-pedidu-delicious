@@ -70,7 +70,7 @@ class PublicTableResolveAPIView(APIView):
     def get(self, request, qr_token):
         table = get_table_by_qr_token(qr_token)
         if not table:
-            return api_error("TABLE_NOT_FOUND", "Meja dengan QR code ini tidak ditemukan.", http_status=status.HTTP_404_NOT_FOUND)
+            return api_error("TABLE_NOT_FOUND", "Meza ho QR code ne'e la hetan.", http_status=status.HTTP_404_NOT_FOUND)
         
         from apps.tables.selectors import get_active_session_for_table
         active_session = get_active_session_for_table(table)
@@ -225,7 +225,7 @@ class PublicBillDetailAPIView(APIView):
     def get(self, request, session_token):
         session = get_session_by_public_token(session_token)
         if not session:
-            return api_error("TABLE_SESSION_NOT_OPEN", "Sesi meja tidak ditemukan.", http_status=status.HTTP_404_NOT_FOUND)
+            return api_error("TABLE_SESSION_NOT_OPEN", "Sesi meza la hetan.", http_status=status.HTTP_404_NOT_FOUND)
         
         bill = calculate_session_bill(session)
         payment = get_completed_payment_for_session(session)
@@ -268,7 +268,7 @@ class CashierConfirmOrderAPIView(APIView):
             confirmed_order = confirm_order_by_cashier(order=order, confirmed_by=user)
             return api_response(OrderSerializer(confirmed_order).data)
         except Order.DoesNotExist:
-            return api_error("RESOURCE_NOT_FOUND", "Pesanan tidak ditemukan.", http_status=status.HTTP_404_NOT_FOUND)
+            return api_error("RESOURCE_NOT_FOUND", "Pedidu la hetan.", http_status=status.HTTP_404_NOT_FOUND)
         except ValidationError as e:
             return api_error("ORDER_INVALID_STATE", str(e.message if hasattr(e, 'message') else e), http_status=status.HTTP_400_BAD_REQUEST)
 
@@ -280,7 +280,7 @@ class CashierRejectOrderAPIView(APIView):
     def post(self, request, order_id):
         reason = request.data.get('reason', '').strip()
         if not reason:
-            return api_error("INVALID_INPUT", "Alasan penolakan pesanan wajib diisi.", http_status=status.HTTP_400_BAD_REQUEST)
+            return api_error("INVALID_INPUT", "Razaun rekuza pedidu obrigatóriu atu preenxe.", http_status=status.HTTP_400_BAD_REQUEST)
         
         try:
             order = Order.objects.get(id=order_id)
@@ -288,7 +288,7 @@ class CashierRejectOrderAPIView(APIView):
             rejected_order = reject_order_by_cashier(order=order, rejected_by=user, reason=reason)
             return api_response(OrderSerializer(rejected_order).data)
         except Order.DoesNotExist:
-            return api_error("RESOURCE_NOT_FOUND", "Pesanan tidak ditemukan.", http_status=status.HTTP_404_NOT_FOUND)
+            return api_error("RESOURCE_NOT_FOUND", "Pedidu la hetan.", http_status=status.HTTP_404_NOT_FOUND)
         except ValidationError as e:
             return api_error("ORDER_INVALID_STATE", str(e.message if hasattr(e, 'message') else e), http_status=status.HTTP_400_BAD_REQUEST)
 
@@ -321,7 +321,7 @@ class CashierOpenTableSessionAPIView(APIView):
                 "guest_count": session.guest_count,
             }, http_status=status.HTTP_201_CREATED)
         except RestaurantTable.DoesNotExist:
-            return api_error("RESOURCE_NOT_FOUND", "Meja tidak ditemukan.", http_status=status.HTTP_404_NOT_FOUND)
+            return api_error("RESOURCE_NOT_FOUND", "Meza la hetan.", http_status=status.HTTP_404_NOT_FOUND)
         except ValidationError as e:
             return api_error("TABLE_SESSION_ALREADY_OPEN", str(e.message if hasattr(e, 'message') else e), http_status=status.HTTP_400_BAD_REQUEST)
 
@@ -342,7 +342,7 @@ class CashierCloseTableSessionAPIView(APIView):
                 "closed_at": closed_session.closed_at,
             })
         except TableSession.DoesNotExist:
-            return api_error("RESOURCE_NOT_FOUND", "Sesi meja tidak ditemukan.", http_status=status.HTTP_404_NOT_FOUND)
+            return api_error("RESOURCE_NOT_FOUND", "Sesi meza la hetan.", http_status=status.HTTP_404_NOT_FOUND)
 
 
 class CashierPaymentAPIView(APIView):
@@ -355,7 +355,7 @@ class CashierPaymentAPIView(APIView):
             bill = calculate_session_bill(session)
             last_payment = Payment.objects.filter(table_session=session, status=PaymentStatus.COMPLETED).last()
             if not last_payment:
-                return api_error("NO_PAYMENT_FOUND", "Belum ada pembayaran untuk sesi ini.", http_status=status.HTTP_404_NOT_FOUND)
+                return api_error("NO_PAYMENT_FOUND", "Seidauk iha pagamentu ba sesi ne'e.", http_status=status.HTTP_404_NOT_FOUND)
             return api_response({
                 "payment_code": last_payment.payment_code,
                 "amount": str(last_payment.amount),
@@ -368,12 +368,12 @@ class CashierPaymentAPIView(APIView):
                 "subtotal": str(bill.get("subtotal", last_payment.amount)),
             })
         except TableSession.DoesNotExist:
-            return api_error("RESOURCE_NOT_FOUND", "Sesi meja tidak ditemukan.", http_status=status.HTTP_404_NOT_FOUND)
+            return api_error("RESOURCE_NOT_FOUND", "Sesi meza la hetan.", http_status=status.HTTP_404_NOT_FOUND)
 
     def post(self, request, session_id):
         serializer = CashPaymentRequestSerializer(data=request.data)
         if not serializer.is_valid():
-            return api_error("INVALID_INPUT", "Format pembayaran tidak valid.", details=serializer.errors)
+            return api_error("INVALID_INPUT", "Formatu pagamentu la válidu.", details=serializer.errors)
 
         idempotency_key = request.headers.get('Idempotency-Key') or request.data.get('idempotency_key', '')
 
@@ -401,7 +401,7 @@ class CashierPaymentAPIView(APIView):
                 "subtotal": str(bill.get("subtotal", payment.amount)),
             }, http_status=status.HTTP_201_CREATED)
         except TableSession.DoesNotExist:
-            return api_error("RESOURCE_NOT_FOUND", "Sesi meja tidak ditemukan.", http_status=status.HTTP_404_NOT_FOUND)
+            return api_error("RESOURCE_NOT_FOUND", "Sesi meza la hetan.", http_status=status.HTTP_404_NOT_FOUND)
         except ValidationError as e:
             return api_error("PAYMENT_ERROR", str(e.message if hasattr(e, 'message') else e), http_status=status.HTTP_400_BAD_REQUEST)
 
@@ -431,7 +431,7 @@ class KitchenStartOrderAPIView(APIView):
             prep_order = start_preparing_order(order=order, staff_user=user)
             return api_response(OrderSerializer(prep_order).data)
         except Order.DoesNotExist:
-            return api_error("RESOURCE_NOT_FOUND", "Pesanan tidak ditemukan.", http_status=status.HTTP_404_NOT_FOUND)
+            return api_error("RESOURCE_NOT_FOUND", "Pedidu la hetan.", http_status=status.HTTP_404_NOT_FOUND)
         except ValidationError as e:
             return api_error("ORDER_INVALID_STATE", str(e.message if hasattr(e, 'message') else e), http_status=status.HTTP_400_BAD_REQUEST)
 
@@ -447,7 +447,7 @@ class KitchenReadyOrderAPIView(APIView):
             ready_order = mark_order_ready(order=order, staff_user=user)
             return api_response(OrderSerializer(ready_order).data)
         except Order.DoesNotExist:
-            return api_error("RESOURCE_NOT_FOUND", "Pesanan tidak ditemukan.", http_status=status.HTTP_404_NOT_FOUND)
+            return api_error("RESOURCE_NOT_FOUND", "Pedidu la hetan.", http_status=status.HTTP_404_NOT_FOUND)
         except ValidationError as e:
             return api_error("ORDER_INVALID_STATE", str(e.message if hasattr(e, 'message') else e), http_status=status.HTTP_400_BAD_REQUEST)
 
@@ -463,7 +463,7 @@ class KitchenServedOrderAPIView(APIView):
             served_order = mark_order_served(order=order, staff_user=user)
             return api_response(OrderSerializer(served_order).data)
         except Order.DoesNotExist:
-            return api_error("RESOURCE_NOT_FOUND", "Pesanan tidak ditemukan.", http_status=status.HTTP_404_NOT_FOUND)
+            return api_error("RESOURCE_NOT_FOUND", "Pedidu la hetan.", http_status=status.HTTP_404_NOT_FOUND)
         except ValidationError as e:
             return api_error("ORDER_INVALID_STATE", str(e.message if hasattr(e, 'message') else e), http_status=status.HTTP_400_BAD_REQUEST)
 
@@ -487,7 +487,7 @@ class AdminToggleMenuItemAvailabilityAPIView(APIView):
             updated = set_menu_item_availability(item=item, availability=target, actor_user=user)
             return api_response(MenuItemSerializer(updated).data)
         except MenuItem.DoesNotExist:
-            return api_error("RESOURCE_NOT_FOUND", "Menu item tidak ditemukan.", http_status=status.HTTP_404_NOT_FOUND)
+            return api_error("RESOURCE_NOT_FOUND", "Item menu la hetan.", http_status=status.HTTP_404_NOT_FOUND)
 
 
 class AdminRotateTableQRAPIView(APIView):
@@ -501,7 +501,7 @@ class AdminRotateTableQRAPIView(APIView):
             new_token = rotate_table_qr(table=table, actor_user=user)
             return api_response({"new_qr_token": new_token, "table_code": table.table_code})
         except RestaurantTable.DoesNotExist:
-            return api_error("RESOURCE_NOT_FOUND", "Meja tidak ditemukan.", http_status=status.HTTP_404_NOT_FOUND)
+            return api_error("RESOURCE_NOT_FOUND", "Meza la hetan.", http_status=status.HTTP_404_NOT_FOUND)
 
 
 class CashierOrdersHistoryAPIView(APIView):

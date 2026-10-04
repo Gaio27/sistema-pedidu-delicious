@@ -22,6 +22,11 @@ class CashierApp {
     this.loadTables();
     this.initWebSocket();
 
+    window.addEventListener('languageChanged', () => {
+      this.renderPendingOrdersUI();
+      this.renderTablesUI();
+    });
+
     // Polling fallback every 6 seconds
     setInterval(() => {
       this.loadPendingOrders();

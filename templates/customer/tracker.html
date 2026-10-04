@@ -1,131 +1,136 @@
 {% extends 'base/base.html' %}
 {% load static %}
 
-{% block title %}Tracking {{ order.order_code }} - {{ current_restaurant.name }}{% endblock %}
+{% block title %}Rastreia Pedidu {{ order.order_code }} — {{ current_restaurant.name }}{% endblock %}
 
 {% block content %}
-<div class="container py-4" style="max-width: 650px;">
+<div class="container py-4" style="max-width: 680px;">
   
-  <div class="card card-custom p-4 shadow-sm mb-4">
-    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+  <div class="glass-card p-4 mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-white border-opacity-10 flex-wrap gap-2">
       <div>
-        <span class="badge bg-dark">{{ order.table_session.table.display_name }}</span>
-        <h4 class="fw-bold mb-0 mt-1">{{ order.order_code }}</h4>
+        <span class="badge bg-warning bg-opacity-20 border border-warning border-opacity-25 text-warning rounded-pill px-3 py-1 fw-bold">{{ order.table_session.table.display_name }}</span>
+        <h3 class="fw-bold mb-0 mt-2 text-white">{{ order.order_code }}</h3>
       </div>
-      <a href="/t/{{ qr_token }}/" class="btn btn-sm btn-outline-secondary" data-i18n="back_to_menu">
-        <i class="fa-solid fa-arrow-left me-1"></i> Fila ba Menu
+      <a href="/t/{{ qr_token }}/" class="btn btn-sm btn-outline-warning rounded-pill px-3 py-2 fw-semibold">
+        <i class="fa-solid fa-arrow-left me-1"></i> <span data-i18n="back_to_menu">Fila ba Menu</span>
       </a>
     </div>
 
-    <!-- Status Visual Stepper -->
-    <div class="p-3 bg-light rounded-4 mb-4">
-      <h6 class="fw-bold mb-3 text-secondary text-uppercase small" data-i18n="order_progress">Progresu Pedidu:</h6>
+    <!-- Status Visual Stepper in Dark Glass -->
+    <div class="p-3 bg-dark bg-opacity-40 rounded-4 mb-4 border border-secondary border-opacity-25">
+      <h6 class="fw-bold mb-3 text-warning text-uppercase small" data-i18n="order_progress">Progresu Pedidu:</h6>
 
       <div class="d-flex justify-content-between position-relative mb-2">
+        <!-- Step 1: Sent -->
         <div class="text-center" style="z-index: 2;">
-          <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-1 {% if order.status == 'WAITING_CASHIER_CONFIRMATION' %}bg-warning text-dark ring-active{% else %}bg-success text-white{% endif %}" style="width: 42px; height: 42px;">
+          <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-1 {% if order.status == 'WAITING_CASHIER_CONFIRMATION' %}bg-warning text-dark status-waiting{% else %}bg-success text-white{% endif %}" style="width: 44px; height: 44px;">
             <i class="fa-solid fa-paper-plane"></i>
           </div>
-          <small class="fw-bold d-block" data-i18n="status_sent">Haruka Ona</small>
+          <small class="fw-bold d-block text-white" data-i18n="status_sent">Haruka Ona</small>
         </div>
 
+        <!-- Step 2: Confirmed -->
         <div class="text-center" style="z-index: 2;">
-          <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-1 {% if order.status in 'CONFIRMED,PREPARING,READY,SERVED,COMPLETED' %}bg-success text-white{% elif order.status == 'WAITING_CASHIER_CONFIRMATION' %}bg-secondary text-white opacity-50{% else %}bg-danger text-white{% endif %}" style="width: 42px; height: 42px;">
+          <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-1 {% if order.status in 'CONFIRMED,PREPARING,READY,SERVED,COMPLETED' %}bg-success text-white{% elif order.status == 'WAITING_CASHIER_CONFIRMATION' %}bg-secondary text-white opacity-40{% else %}bg-danger text-white{% endif %}" style="width: 44px; height: 44px;">
             <i class="fa-solid fa-check"></i>
           </div>
-          <small class="fw-bold d-block" data-i18n="status_confirmed_short">Konfirmadu</small>
+          <small class="fw-bold d-block text-white" data-i18n="status_confirmed_short">Konfirmadu</small>
         </div>
 
+        <!-- Step 3: Cooking -->
         <div class="text-center" style="z-index: 2;">
-          <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-1 {% if order.status in 'PREPARING,READY,SERVED,COMPLETED' %}bg-success text-white{% elif order.status == 'CONFIRMED' %}bg-warning text-dark ring-active{% else %}bg-secondary text-white opacity-50{% endif %}" style="width: 42px; height: 42px;">
+          <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-1 {% if order.status in 'PREPARING,READY,SERVED,COMPLETED' %}bg-success text-white{% elif order.status == 'CONFIRMED' %}bg-warning text-dark status-waiting{% else %}bg-secondary text-white opacity-40{% endif %}" style="width: 44px; height: 44px;">
             <i class="fa-solid fa-fire-burner"></i>
           </div>
-          <small class="fw-bold d-block" data-i18n="status_cooking_short">Tein Hela</small>
+          <small class="fw-bold d-block text-white" data-i18n="status_cooking_short">Tein Hela</small>
         </div>
 
+        <!-- Step 4: Ready -->
         <div class="text-center" style="z-index: 2;">
-          <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-1 {% if order.status in 'READY,SERVED,COMPLETED' %}bg-success text-white{% elif order.status == 'PREPARING' %}bg-warning text-dark ring-active{% else %}bg-secondary text-white opacity-50{% endif %}" style="width: 42px; height: 42px;">
+          <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-1 {% if order.status in 'READY,SERVED,COMPLETED' %}bg-success text-white{% elif order.status == 'PREPARING' %}bg-warning text-dark status-waiting{% else %}bg-secondary text-white opacity-40{% endif %}" style="width: 44px; height: 44px;">
             <i class="fa-solid fa-bell-concierge"></i>
           </div>
-          <small class="fw-bold d-block" data-i18n="status_ready_short">Prontu</small>
+          <small class="fw-bold d-block text-white" data-i18n="status_ready_short">Prontu</small>
         </div>
 
+        <!-- Step 5: Served -->
         <div class="text-center" style="z-index: 2;">
-          <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-1 {% if order.status in 'SERVED,COMPLETED' %}bg-success text-white{% else %}bg-secondary text-white opacity-50{% endif %}" style="width: 42px; height: 42px;">
+          <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-1 {% if order.status in 'SERVED,COMPLETED' %}bg-success text-white{% else %}bg-secondary text-white opacity-40{% endif %}" style="width: 44px; height: 44px;">
             <i class="fa-solid fa-utensils"></i>
           </div>
-          <small class="fw-bold d-block" data-i18n="status_served_short">Entrega Ona</small>
+          <small class="fw-bold d-block text-white" data-i18n="status_served_short">Entrega Ona</small>
         </div>
       </div>
     </div>
 
-    <!-- Status Alert Detail -->
+    <!-- Status Alert Detail Card -->
     {% if order.status == 'WAITING_CASHIER_CONFIRMATION' %}
-      <div class="alert alert-warning py-3 d-flex align-items-center gap-3">
+      <div class="alert alert-warning py-3 d-flex align-items-center gap-3 bg-warning bg-opacity-10 border border-warning border-opacity-30 text-warning">
         <i class="fa-solid fa-hourglass-half fa-2x text-warning"></i>
         <div>
           <strong data-i18n="alert_waiting_title">Hein Verifikasaun Kaixa</strong>
-          <div class="small" data-i18n="alert_waiting_desc">Ita-nia pedidu tama ona ba sistema kaixa. Hein kaixa konfirma, hafoin dapur hahu tein.</div>
+          <div class="small text-white-50 mt-1" data-i18n="alert_waiting_desc">Ita-nia pedidu tama ona ba sistema kaixa. Hein kaixa konfirma, hafoin dapur hahu tein.</div>
         </div>
       </div>
     {% elif order.status == 'CONFIRMED' %}
-      <div class="alert alert-info py-3 d-flex align-items-center gap-3">
+      <div class="alert alert-info py-3 d-flex align-items-center gap-3 bg-info bg-opacity-10 border border-info border-opacity-30 text-info">
         <i class="fa-solid fa-circle-check fa-2x text-info"></i>
         <div>
           <strong data-i18n="alert_confirmed_title">Kaixa Konfirma Ona Pedidu!</strong>
-          <div class="small" data-i18n="alert_confirmed_desc">Pedidu haruka ona ba liña dapur (Kitchen Display System).</div>
+          <div class="small text-white-50 mt-1" data-i18n="alert_confirmed_desc">Pedidu haruka ona ba liña dapur (Kitchen Display System).</div>
         </div>
       </div>
     {% elif order.status == 'PREPARING' %}
-      <div class="alert alert-warning py-3 d-flex align-items-center gap-3">
+      <div class="alert alert-warning py-3 d-flex align-items-center gap-3 bg-warning bg-opacity-10 border border-warning border-opacity-30 text-warning">
         <i class="fa-solid fa-fire fa-2x text-warning"></i>
         <div>
           <strong data-i18n="alert_cooking_title">Chef Hahu Tein Ita-nia Hahan</strong>
-          <div class="small" data-i18n="alert_cooking_desc">Kazu dapur agora dadaun tein hela ita-nia pedidu ho ingredienti fresku.</div>
+          <div class="small text-white-50 mt-1" data-i18n="alert_cooking_desc">Kazu dapur agora dadaun tein hela ita-nia pedidu ho ingredienti fresku.</div>
         </div>
       </div>
     {% elif order.status == 'READY' %}
-      <div class="alert alert-success py-3 d-flex align-items-center gap-3">
+      <div class="alert alert-success py-3 d-flex align-items-center gap-3 bg-success bg-opacity-10 border border-success border-opacity-30 text-success">
         <i class="fa-solid fa-bell fa-2x text-success"></i>
         <div>
           <strong data-i18n="alert_ready_title">Hahan Prontu Ona!</strong>
-          <div class="small" data-i18n="alert_ready_desc">Pelayan lori dadaun ita-nia hahan ba meza.</div>
+          <div class="small text-white-50 mt-1" data-i18n="alert_ready_desc">Pelayan lori dadaun ita-nia hahan ba meza.</div>
         </div>
       </div>
     {% elif order.status == 'SERVED' %}
-      <div class="alert alert-secondary py-3 d-flex align-items-center gap-3">
+      <div class="alert alert-secondary py-3 d-flex align-items-center gap-3 bg-white bg-opacity-10 border border-white border-opacity-20 text-white">
         <i class="fa-solid fa-heart fa-2x text-danger"></i>
         <div>
           <strong data-i18n="alert_served_title">Saboria Ita-nia Hahan!</strong>
-          <div class="small" data-i18n="alert_served_desc">Obrigado barak! Karik presiza tulun ka konta, bele hanehan butaun Husu Konta (Bill).</div>
+          <div class="small text-white-50 mt-1" data-i18n="alert_served_desc">Obrigadu barak! Karik presiza tulun ka konta, bele hanehan butaun Husu Konta (Bill).</div>
         </div>
       </div>
     {% elif order.status == 'REJECTED' %}
-      <div class="alert alert-danger py-3 d-flex align-items-center gap-3">
+      <div class="alert alert-danger py-3 d-flex align-items-center gap-3 bg-danger bg-opacity-10 border border-danger border-opacity-30 text-danger">
         <i class="fa-solid fa-circle-xmark fa-2x text-danger"></i>
         <div>
           <strong data-i18n="alert_rejected_title">Kaixa Rekuza Pedidu</strong>
-          <div class="small"><span data-i18n="reason">Razaun:</span> <em>{{ order.rejection_reason|default:"La bele prosesu" }}</em></div>
+          <div class="small text-white-50 mt-1"><span data-i18n="reason">Razaun:</span> <em>{{ order.rejection_reason|default:"La bele prosesu" }}</em></div>
         </div>
       </div>
     {% endif %}
 
-    <!-- Order Items Summary Table -->
-    <h6 class="fw-bold mt-3 mb-2" data-i18n="order_items_detail">Detallu Item Pedidu:</h6>
-    <div class="border rounded p-3 bg-white mb-3">
+    <!-- Order Items Summary Table in Dark Glass -->
+    <h6 class="fw-bold mt-4 mb-2 text-white" data-i18n="order_items_detail">Detallu Item Pedidu:</h6>
+    <div class="border border-secondary border-opacity-25 rounded-3 p-3 bg-dark bg-opacity-40 mb-3">
       {% for item in order.items.all %}
-        <div class="d-flex justify-content-between py-2 border-bottom">
+        <div class="d-flex justify-content-between py-2 border-bottom border-secondary border-opacity-25">
           <div>
-            <div class="fw-bold">{{ item.quantity }}x {{ item.menu_name_snapshot }}</div>
-            {% if item.note %}<div class="small text-muted fst-italic"><i class="fa-solid fa-pen"></i> {{ item.note }}</div>{% endif %}
+            <div class="fw-bold text-white">{{ item.quantity }}x {{ item.menu_name_snapshot }}</div>
+            {% if item.note %}<div class="small text-warning fst-italic"><i class="fa-solid fa-pen small me-1"></i>{{ item.note }}</div>{% endif %}
           </div>
-          <div class="fw-bold text-primary">${{ item.subtotal }}</div>
+          <div class="fw-bold text-warning">${{ item.subtotal }}</div>
         </div>
       {% endfor %}
       
-      <div class="d-flex justify-content-between pt-3 fw-bold fs-5">
-        <span data-i18n="grand_total">Totál:</span>
-        <span class="text-primary">${{ order.grand_total }}</span>
+      <div class="d-flex justify-content-between pt-3 fw-bold fs-4">
+        <span class="text-white-50" data-i18n="grand_total">Totál:</span>
+        <span class="text-warning">${{ order.grand_total }}</span>
       </div>
     </div>
 

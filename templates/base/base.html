@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>{% block title %}{{ current_restaurant.name }} - Dine In PWA{% endblock %}</title>
+  <title>{% block title %}{{ current_restaurant.name }} — Dine-In PWA{% endblock %}</title>
   
   <!-- PWA Meta -->
   <link rel="manifest" href="{% url 'pwa-manifest' %}">
@@ -13,75 +13,110 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Celvass PWA">
-  <meta name="description" content="Celvass Resto & Bar — Sistema Pedidu Digital PWA">
+  <meta name="description" content="Celvass Resto & Bar — Sistema Pedidu Digital PWA Modernu">
 
   <!-- Google Fonts: Outfit & Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Bootstrap 5.3 & FontAwesome 6 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-  <!-- Custom Styles -->
+  <!-- Unified Dark Glassmorphism Styles -->
   <link rel="stylesheet" href="{% static 'css/style.css' %}">
   {% block extra_css %}{% endblock %}
+
+  <style>
+    .dropdown-menu {
+      background: rgba(14, 19, 32, 0.96) !important;
+      backdrop-filter: blur(28px) !important;
+      -webkit-backdrop-filter: blur(28px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      border-radius: 16px !important;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6) !important;
+      padding: 0.5rem !important;
+    }
+    .dropdown-item {
+      color: rgba(255, 255, 255, 0.85) !important;
+      border-radius: 10px !important;
+      font-family: 'Outfit', sans-serif !important;
+      font-weight: 500 !important;
+      padding: 0.5rem 0.9rem !important;
+      transition: all 0.15s ease !important;
+    }
+    .dropdown-item:hover, .dropdown-item:focus {
+      background: rgba(249, 115, 22, 0.18) !important;
+      color: #f97316 !important;
+    }
+    .dropdown-divider {
+      border-top-color: rgba(255, 255, 255, 0.1) !important;
+    }
+    .dropdown-header {
+      color: rgba(255, 255, 255, 0.45) !important;
+      font-size: 0.75rem !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.5px !important;
+    }
+  </style>
 </head>
 <body class="{% block body_class %}{% endblock %}">
 
   {% csrf_token %}
 
-  <!-- Top Navigation (hidden for landing/customer-only pages via body_class) -->
+  <!-- Top Navigation (Hidden for landing / occupied / invalid QR pages via body_class) -->
   <nav class="navbar navbar-expand-lg navbar-dark navbar-custom sticky-top">
-    <div class="container-fluid">
+    <div class="container-fluid px-3">
       <a class="navbar-brand" href="{% if user.is_authenticated %}{% if user.is_admin %}/admin-portal/{% elif user.is_cashier %}/cashier/{% elif user.is_kitchen %}/kitchen/{% else %}/{% endif %}{% else %}/{% endif %}">
-        <i class="fa-solid fa-utensils text-warning"></i>
+        <div class="brand-logo-icon">
+          <i class="fa-solid fa-utensils"></i>
+        </div>
         <span>{{ current_restaurant.name }}</span>
       </a>
 
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
-        <span class="navbar-toggler-icon"></span>
+      <button class="navbar-toggler border-0 shadow-none text-white p-1" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+        <i class="fa-solid fa-bars fs-4"></i>
       </button>
 
       <div class="collapse navbar-collapse" id="navMenu">
-        <!-- Role-conditional left links -->
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <!-- Staff Navigation Links -->
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0 mt-2 mt-lg-0">
           {% if user.is_authenticated %}
             {% if user.is_admin %}
               <li class="nav-item">
-                <a class="nav-link" href="/cashier/"><i class="fa-solid fa-cash-register me-1"></i>Kaixa</a>
+                <a class="nav-link" href="/cashier/"><i class="fa-solid fa-cash-register me-1 text-warning"></i><span data-i18n="cashier">Kaixa</span></a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="/kitchen/"><i class="fa-solid fa-kitchen-set me-1"></i>Dapur (KDS)</a>
+                <a class="nav-link" href="/kitchen/"><i class="fa-solid fa-fire-burner me-1 text-info"></i><span data-i18n="kitchen">Dapur (KDS)</span></a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="/admin-portal/"><i class="fa-solid fa-chart-pie me-1"></i>Admin & Relatóriu</a>
+                <a class="nav-link" href="/admin-portal/"><i class="fa-solid fa-chart-line me-1 text-warning"></i><span data-i18n="admin_reports">Admin &amp; Relatóriu</span></a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="/admin-portal/qr-sheet/" target="_blank"><i class="fa-solid fa-qrcode me-1"></i>Imprime QR</a>
+                <a class="nav-link" href="/admin-portal/qr-sheet/" target="_blank"><i class="fa-solid fa-qrcode me-1 text-secondary"></i><span data-i18n="btn_print_qr_sheet">Folha QR</span></a>
               </li>
             {% elif user.is_cashier %}
               <li class="nav-item">
-                <a class="nav-link active" href="/cashier/"><i class="fa-solid fa-cash-register me-1"></i>Painel Kaixa</a>
+                <a class="nav-link active" href="/cashier/"><i class="fa-solid fa-cash-register me-1 text-warning"></i><span data-i18n="cashier_title">Painél Kaixa</span></a>
               </li>
             {% elif user.is_kitchen %}
               <li class="nav-item">
-                <a class="nav-link active" href="/kitchen/"><i class="fa-solid fa-fire-burner me-1"></i>Ekrã Dapur (KDS)</a>
+                <a class="nav-link active" href="/kitchen/"><i class="fa-solid fa-fire-burner me-1 text-info"></i><span data-i18n="kds_title">Ekrã Dapur (KDS)</span></a>
               </li>
             {% endif %}
           {% endif %}
         </ul>
 
-        <div class="d-flex align-items-center gap-2">
-          <!-- PWA Install -->
-          <button class="btn btn-sm btn-outline-warning fw-bold d-flex align-items-center gap-1 rounded-pill px-2" onclick="installPWA()" title="Instala Celvass PWA" id="navbar-pwa-btn" style="display:none!important;">
-            <i class="fa-solid fa-download"></i> <span class="d-none d-md-inline">Instala</span>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <!-- PWA Install Button -->
+          <button class="btn btn-sm btn-outline-warning fw-bold d-flex align-items-center gap-1 rounded-pill px-3 py-1" onclick="installPWA()" title="Instala Celvass PWA" id="navbar-pwa-btn" style="display:none!important;">
+            <i class="fa-solid fa-download"></i> <span data-i18n="install_app">Instala App</span>
           </button>
 
           <!-- Language Selector -->
           <div class="dropdown">
-            <button class="btn btn-sm btn-outline-light dropdown-toggle fw-bold" type="button" data-bs-toggle="dropdown" id="current-lang-label">
+            <button class="btn btn-sm btn-outline-secondary dropdown-toggle fw-bold text-white rounded-pill px-3 py-1" type="button" data-bs-toggle="dropdown" id="current-lang-label">
               🇹🇱 Tetun
             </button>
             <ul class="dropdown-menu dropdown-menu-end shadow">
@@ -92,33 +127,33 @@
             </ul>
           </div>
 
-          <span id="ws-network-status" class="badge bg-success">● Live</span>
+          <!-- Live Network Indicator -->
+          <span id="ws-network-status" class="badge bg-success bg-opacity-25 border border-success text-success rounded-pill px-2 py-1">● Live</span>
 
-          <!-- User menu (staff only) or Login link -->
+          <!-- Staff User Menu or Login Link -->
           {% if user.is_authenticated %}
             <div class="dropdown">
-              <button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+              <button class="btn btn-sm btn-outline-light dropdown-toggle rounded-pill px-3 py-1" type="button" data-bs-toggle="dropdown">
                 <i class="fa-solid fa-user-circle me-1"></i>
                 {{ user.username }}
                 <span class="badge ms-1
                   {% if user.is_admin %}bg-danger
                   {% elif user.is_cashier %}bg-warning text-dark
-                  {% else %}bg-info text-dark{% endif %}
-                  " style="font-size:0.65rem;">{{ user.role }}</span>
+                  {% else %}bg-info text-dark{% endif %}" style="font-size:0.68rem;">{{ user.role }}</span>
               </button>
               <ul class="dropdown-menu dropdown-menu-end shadow">
                 <li><h6 class="dropdown-header">{{ user.get_full_name|default:user.username }}</h6></li>
                 <li><hr class="dropdown-divider"></li>
                 <li>
                   <a class="dropdown-item text-danger" href="{% url 'logout' %}">
-                    <i class="fa-solid fa-arrow-right-from-bracket me-1"></i> Sai (Logout)
+                    <i class="fa-solid fa-arrow-right-from-bracket me-1"></i> <span data-i18n="logout">Sai (Logout)</span>
                   </a>
                 </li>
               </ul>
             </div>
           {% else %}
-            <a href="{% url 'login' %}" class="btn btn-sm btn-warning fw-bold rounded-pill px-3">
-              <i class="fa-solid fa-right-to-bracket me-1"></i>Login Staff
+            <a href="{% url 'login' %}" class="btn btn-sm btn-outline-light fw-bold rounded-pill px-3 py-1">
+              <i class="fa-solid fa-shield-halved me-1"></i> <span data-i18n="login_staff">Portal Staff</span>
             </a>
           {% endif %}
         </div>
@@ -130,14 +165,14 @@
   <div id="pwa-install-banner" class="pwa-banner py-2 px-3 shadow" style="display: none;">
     <div class="container d-flex align-items-center justify-content-between gap-3">
       <div class="d-flex align-items-center gap-2">
-        <img src="/static/icons/icon-192.png" width="38" height="38" class="rounded-2 shadow-sm" alt="Celvass App">
+        <img src="/static/icons/icon-192.png" width="36" height="36" class="rounded-2 shadow-sm" alt="Celvass App">
         <div>
-          <div class="fw-bold small text-white">Instala Celvass Resto & Bar PWA</div>
+          <div class="fw-bold small text-white" data-i18n="install_pwa_text">Instala Celvass Resto &amp; Bar PWA</div>
           <div class="small text-white-50 d-none d-sm-block">Asesu menus lais, poupa kuota, no bele haree hahan offline!</div>
         </div>
       </div>
       <div class="d-flex align-items-center gap-2">
-        <button class="btn btn-sm btn-warning fw-bold px-3 rounded-pill shadow-sm" onclick="installPWA()">
+        <button class="btn btn-sm btn-warning fw-bold px-3 rounded-pill shadow-sm text-dark" onclick="installPWA()" data-i18n="install_pwa_btn">
           <i class="fa-solid fa-download me-1"></i> Instala PWA
         </button>
         <button class="btn btn-sm btn-link text-white-50 p-1" onclick="dismissPwaBanner()" title="Taka">
@@ -148,10 +183,10 @@
   </div>
 
   <!-- Toast Notification Container -->
-  <div id="toast-container" class="position-fixed top-0 end-0 p-3" style="z-index: 2000;"></div>
+  <div id="toast-container" class="position-fixed top-0 end-0 p-3" style="z-index: 2050;"></div>
 
   <!-- Main Content -->
-  <main class="container-fluid py-3">
+  <main class="container-fluid py-3 position-relative" style="z-index: 1;">
     {% block content %}{% endblock %}
   </main>
 
@@ -172,5 +207,3 @@
   {% block extra_js %}{% endblock %}
 </body>
 </html>
-
-
