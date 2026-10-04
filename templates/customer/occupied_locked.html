@@ -112,12 +112,8 @@
     font-size: 2.2rem;
     color: #fff;
     margin: 0 auto 1.2rem;
-    box-shadow: 0 0 0 10px rgba(245,158,11,0.15), 0 0 50px rgba(245,158,11,0.3);
-    animation: lock-pulse 2.5s ease-in-out infinite;
-  }
-  @keyframes lock-pulse {
-    0%, 100% { box-shadow: 0 0 0 10px rgba(245,158,11,0.15), 0 0 50px rgba(245,158,11,0.3); }
-    50% { box-shadow: 0 0 0 20px rgba(245,158,11,0.06), 0 0 70px rgba(245,158,11,0.45); }
+    border: 2px solid rgba(245, 158, 11, 0.4);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
   }
 
   .occupied-title {
@@ -184,12 +180,12 @@
     border-radius: 9999px;
     text-decoration: none;
     transition: all 0.25s ease;
-    box-shadow: 0 4px 20px rgba(249, 115, 22, 0.35);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   }
   .btn-occupied-home:hover {
     color: #ffffff;
     transform: translateY(-2px);
-    box-shadow: 0 6px 25px rgba(249, 115, 22, 0.5);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
   }
 
   .occupied-footer {

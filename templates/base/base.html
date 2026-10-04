@@ -73,7 +73,7 @@
       <div id="dock-normal-items" class="d-flex align-items-center gap-1">
         <!-- Brand Logo -->
         <a class="dock-item-btn text-white fw-bold px-2" href="{% if user.is_authenticated %}{% if user.is_admin %}/admin-portal/{% elif user.is_cashier %}/cashier/{% elif user.is_kitchen %}/kitchen/{% else %}/{% endif %}{% else %}{% if qr_token %}/t/{{ qr_token }}/{% else %}/{% endif %}{% endif %}">
-          <div class="brand-logo-icon" style="width: 26px; height: 26px; border-radius: 7px; background: var(--primary-gradient); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; box-shadow: 0 0 10px var(--primary-glow);">
+          <div class="brand-logo-icon" style="width: 26px; height: 26px; border-radius: 7px; background: var(--primary-gradient); display: flex; align-items: center; justify-content: center; font-size: 0.8rem;">
             <i class="fa-solid fa-utensils text-white"></i>
           </div>
           <span class="d-none d-lg-inline">{{ current_restaurant.name }}</span>

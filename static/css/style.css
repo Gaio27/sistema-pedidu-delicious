@@ -7,7 +7,7 @@
   --primary-color: #f97316;
   --primary-hover: #ea580c;
   --primary-gradient: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
-  --primary-glow: rgba(249, 115, 22, 0.35);
+  --primary-glow: transparent;
   
   --amber-accent: #eab308;
   --cyan-accent: #06b6d4;
@@ -30,8 +30,8 @@
   --radius-lg: 24px;
   --radius-pill: 9999px;
 
-  --shadow-glass: 0 20px 48px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  --shadow-hover: 0 25px 60px rgba(0, 0, 0, 0.65), 0 0 30px rgba(249, 115, 22, 0.2);
+  --shadow-glass: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.5);
 
   /* Fluid Typographic Tokens (UI1.MD) */
   --font-hero-title: clamp(1.4rem, 4vw, 2.4rem);
@@ -43,9 +43,9 @@
   --font-dock-label: clamp(0.65rem, 1.6vw, 0.75rem);
 
   /* macOS Flying Glass Dock Tokens */
-  --dock-bg: rgba(12, 17, 28, 0.88);
+  --dock-bg: rgba(12, 17, 28, 0.94);
   --dock-border: rgba(255, 255, 255, 0.12);
-  --dock-glow: rgba(249, 115, 22, 0.35);
+  --dock-glow: transparent;
   --dock-radius: 9999px;
 }
 
@@ -127,7 +127,6 @@ h1, h2, h3, h4, h5, h6, .brand-font {
   justify-content: center;
   color: #fff;
   font-size: 1.1rem;
-  box-shadow: 0 0 15px var(--primary-glow);
 }
 
 .navbar-brand span {
@@ -165,7 +164,7 @@ h1, h2, h3, h4, h5, h6, .brand-font {
   border: 1px solid var(--border-glass) !important;
   border-radius: var(--radius-lg) !important;
   color: var(--text-body) !important;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   position: relative;
   z-index: 1;
@@ -174,7 +173,7 @@ h1, h2, h3, h4, h5, h6, .brand-font {
 .glass-card:hover,
 .card-custom:hover {
   border-color: var(--border-glass-hover) !important;
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.55), 0 0 15px rgba(249, 115, 22, 0.1) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
 }
 
 /* Resto Hero Banner */
@@ -258,7 +257,7 @@ h1, h2, h3, h4, h5, h6, .brand-font {
   background: var(--primary-gradient) !important;
   border-color: var(--primary-color) !important;
   color: #ffffff !important;
-  box-shadow: 0 4px 16px var(--primary-glow) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
   transform: translateY(-2px);
 }
 
@@ -394,7 +393,6 @@ h1, h2, h3, h4, h5, h6, .brand-font {
   font-size: var(--font-card-price, 1.35rem);
   font-weight: 800;
   color: var(--primary-color);
-  text-shadow: 0 0 15px rgba(249, 115, 22, 0.25);
 }
 
 .btn-add-menu {
@@ -406,7 +404,7 @@ h1, h2, h3, h4, h5, h6, .brand-font {
   font-family: 'Outfit', sans-serif;
   font-weight: 700;
   font-size: 0.88rem;
-  box-shadow: 0 4px 15px var(--primary-glow);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
@@ -416,7 +414,7 @@ h1, h2, h3, h4, h5, h6, .brand-font {
 .btn-add-menu:hover {
   background: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(249, 115, 22, 0.5);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   color: #fff;
 }
 
@@ -430,14 +428,12 @@ h1, h2, h3, h4, h5, h6, .brand-font {
   transform: translateX(-50%);
   width: calc(100% - 2rem);
   max-width: 520px;
-  background: rgba(14, 19, 32, 0.88);
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
+  background: rgba(14, 19, 32, 0.95);
   border: 1px solid rgba(249, 115, 22, 0.35);
   color: #fff;
   border-radius: var(--radius-pill);
   padding: 0.8rem 1.4rem;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65), 0 0 30px rgba(249, 115, 22, 0.2);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -448,32 +444,26 @@ h1, h2, h3, h4, h5, h6, .brand-font {
 
 .floating-cart-bar:hover {
   transform: translateX(-50%) translateY(-3px) scale(1.02);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75), 0 0 40px rgba(249, 115, 22, 0.35);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.65);
 }
 
 /* ==========================================
-   MODALS & OFFCANVAS (Dark Luxury Blur)
+   MODALS & OFFCANVAS (Dark Luxury High-Performance)
    ========================================== */
 .modal-backdrop.show {
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  background-color: rgba(5, 7, 12, 0.75);
+  background-color: rgba(5, 7, 12, 0.8);
 }
 
 .modal-content {
-  background: rgba(13, 18, 30, 0.94) !important;
-  backdrop-filter: blur(32px) !important;
-  -webkit-backdrop-filter: blur(32px) !important;
+  background: rgba(13, 18, 30, 0.98) !important;
   border: 1px solid var(--border-glass) !important;
   border-radius: var(--radius-lg) !important;
   color: var(--text-body) !important;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6) !important;
 }
 
 .offcanvas {
-  background: rgba(12, 17, 28, 0.95) !important;
-  backdrop-filter: blur(32px) !important;
-  -webkit-backdrop-filter: blur(32px) !important;
+  background: rgba(12, 17, 28, 0.98) !important;
   border-top: 1px solid rgba(249, 115, 22, 0.3) !important;
   color: var(--text-body) !important;
 }
@@ -636,14 +626,14 @@ h1, h2, h3, h4, h5, h6, .brand-font {
   background: var(--primary-gradient) !important;
   border-color: var(--primary-color) !important;
   color: #fff !important;
-  box-shadow: 0 4px 20px var(--primary-glow);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 /* ==========================================
    KITCHEN KDS
    ========================================== */
 .kds-body {
-  background: linear-gradient(135deg, #060300 0%, #100600 35%, #050a14 100%) fixed;
+  background-color: #060300;
   color: #f8fafc;
   min-height: 100vh;
 }
@@ -927,9 +917,7 @@ body.occupied-page #flyingDockWrapper,
 .offcanvas-bottom {
   border-top-left-radius: 24px !important;
   border-top-right-radius: 24px !important;
-  background: rgba(12, 17, 28, 0.96) !important;
-  backdrop-filter: blur(28px) !important;
-  -webkit-backdrop-filter: blur(28px) !important;
+  background: rgba(12, 17, 28, 0.98) !important;
   border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
   height: 85vh;
   height: 85dvh !important;
@@ -942,9 +930,7 @@ body.occupied-page #flyingDockWrapper,
 
 .modal-content {
   border-radius: 24px !important;
-  background: rgba(15, 20, 32, 0.96) !important;
-  backdrop-filter: blur(24px) !important;
-  -webkit-backdrop-filter: blur(24px) !important;
+  background: rgba(15, 20, 32, 0.98) !important;
   border: 1px solid rgba(255, 255, 255, 0.12) !important;
 }
 
@@ -1030,11 +1016,9 @@ body.occupied-page #flyingDockWrapper,
   z-index: 2200 !important;
   pointer-events: auto !important;
   background: rgba(14, 18, 30, 0.98) !important;
-  backdrop-filter: blur(24px) !important;
-  -webkit-backdrop-filter: blur(24px) !important;
   border: 1px solid rgba(255, 255, 255, 0.15) !important;
   border-radius: 14px !important;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 1px 1px rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8) !important;
   padding: 0.4rem !important;
   min-width: 145px !important;
 }
@@ -1046,8 +1030,6 @@ body.occupied-page #flyingDockWrapper,
   left: auto !important;
   z-index: 2200 !important;
   background: rgba(14, 18, 30, 0.98) !important;
-  backdrop-filter: blur(24px) !important;
-  -webkit-backdrop-filter: blur(24px) !important;
   border: 1px solid rgba(255, 255, 255, 0.15) !important;
   border-radius: 14px !important;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8) !important;
@@ -1095,7 +1077,7 @@ body.occupied-page #flyingDockWrapper,
 
 .flying-glass-dock:hover {
   border-color: rgba(249, 115, 22, 0.35);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65), 0 0 25px rgba(249, 115, 22, 0.15);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65);
 }
 
 .dock-item-btn {
@@ -1138,7 +1120,7 @@ body.occupied-page #flyingDockWrapper,
   background: var(--primary-gradient) !important;
   color: #ffffff !important;
   border-color: var(--primary-color) !important;
-  box-shadow: 0 4px 18px var(--primary-glow) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
   transform: translateY(-1px);
 }
 
