@@ -94,28 +94,31 @@
       {% for item in cat.items.all %}
         {% if item.availability != 'INACTIVE' %}
           <div class="col-md-4 col-sm-6 menu-item-col" data-category="{{ cat.slug }}" data-name="{{ item.name }}" data-desc="{{ item.description }}">
-            <div class="menu-card">
+            <div class="menu-card" onclick="openItemModal('{{ item.id }}', '{{ item.name|escapejs }}', '{{ item.price }}', '{{ item.display_image|escapejs }}', '{{ item.description|escapejs }}')">
               
               <!-- Fixed Aspect Ratio Image Container -->
               <div class="menu-card-img-wrapper position-relative">
                 <img src="{{ item.display_image }}" class="menu-card-img" alt="{{ item.name }}" loading="lazy" onerror="this.onerror=null; this.src='/static/icons/default-food.png';">
+                
+                <!-- Interactive Floating Category Chip (Top-Right) -->
+                <span class="menu-card-floating-badge" onclick="event.stopPropagation(); filterByCategory('{{ cat.slug }}');">
+                  <i class="fa-solid fa-tag me-1"></i>{{ cat.name }}
+                </span>
+
                 {% if item.is_featured %}
-                  <span class="badge bg-warning text-dark fw-bold position-absolute top-0 start-0 m-2 rounded-pill px-2 py-1 shadow">
-                    <i class="fa-solid fa-star me-1"></i> <span data-i18n="chefs_special">Chef Especial</span>
+                  <span class="badge bg-warning text-dark fw-bold position-absolute top-0 start-0 m-2 rounded-pill px-2 py-1 shadow" style="font-size: 0.65rem;">
+                    <i class="fa-solid fa-star me-1"></i> <span data-i18n="chefs_special">Chef</span>
                   </span>
                 {% endif %}
-                <span class="badge bg-black bg-opacity-75 text-white position-absolute bottom-0 end-0 m-2 rounded-pill px-2 py-1 small">
-                  <i class="fa-regular fa-clock me-1 text-warning"></i> <span data-i18n="prep_time">10-15m</span>
+                <span class="badge bg-black bg-opacity-75 text-white position-absolute bottom-0 end-0 m-2 rounded-pill px-2 py-1 small" style="font-size: 0.65rem;">
+                  <i class="fa-regular fa-clock me-1 text-warning"></i> 10-15m
                 </span>
               </div>
 
-              <!-- Card Body -->
+              <!-- Card Body: 100% Width Title & Micro-Description -->
               <div class="menu-card-body">
-                <div class="d-flex justify-content-between align-items-start mb-1">
-                  <h6 class="menu-card-title">{{ item.name }}</h6>
-                  <span class="badge bg-white bg-opacity-10 border border-white border-opacity-10 text-white-50 small ms-1">{{ cat.name }}</span>
-                </div>
-                <p class="menu-card-desc">
+                <h6 class="menu-card-title">{{ item.name }}</h6>
+                <p class="menu-card-desc-compact">
                   {{ item.description|default:"Hahán espesiál Celvass Resto & Bar ho ingredientes fresku." }}
                 </p>
 
@@ -124,16 +127,16 @@
 
                   {% if item.availability == 'AVAILABLE' %}
                     {% if session and session.is_active %}
-                      <button class="btn-add-menu" onclick="openItemModal('{{ item.id }}', '{{ item.name|escapejs }}', '{{ item.price }}', '{{ item.display_image|escapejs }}', '{{ item.description|escapejs }}')">
+                      <button class="btn-add-menu btn-touch-target" onclick="event.stopPropagation(); openItemModal('{{ item.id }}', '{{ item.name|escapejs }}', '{{ item.price }}', '{{ item.display_image|escapejs }}', '{{ item.description|escapejs }}')">
                         <i class="fa-solid fa-plus"></i> <span data-i18n="add">Aumenta</span>
                       </button>
                     {% else %}
-                      <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="showToast(t('session_not_open_toast'), 'warning')">
+                      <button class="btn btn-sm btn-outline-secondary rounded-pill px-2 py-1" onclick="event.stopPropagation(); showToast(t('session_not_open_toast'), 'warning')" style="font-size: 0.72rem;">
                         <i class="fa-solid fa-lock me-1"></i> <span data-i18n="locked">Xave Hela</span>
                       </button>
                     {% endif %}
                   {% else %}
-                    <span class="badge bg-danger bg-opacity-25 border border-danger text-danger rounded-pill px-3 py-2" data-i18n="sold_out">Hotu Ona</span>
+                    <span class="badge bg-danger bg-opacity-25 border border-danger text-danger rounded-pill px-2 py-1" style="font-size: 0.7rem;" data-i18n="sold_out">Hotu Ona</span>
                   {% endif %}
                 </div>
               </div>

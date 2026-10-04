@@ -65,101 +65,127 @@
 
   {% csrf_token %}
 
-  <!-- Top Navigation (Hidden for landing / occupied / invalid QR pages via body_class) -->
-  <nav class="navbar navbar-expand-lg navbar-dark navbar-custom sticky-top">
-    <div class="container-fluid px-3">
-      <a class="navbar-brand" href="{% if user.is_authenticated %}{% if user.is_admin %}/admin-portal/{% elif user.is_cashier %}/cashier/{% elif user.is_kitchen %}/kitchen/{% else %}/{% endif %}{% else %}/{% endif %}">
-        <div class="brand-logo-icon">
-          <i class="fa-solid fa-utensils"></i>
+  <!-- Top macOS Flying Glass Dock Navigation -->
+  <header class="flying-glass-dock-wrapper" id="flyingDockWrapper">
+    <nav class="flying-glass-dock" aria-label="Navegasaun Prinsipál">
+      
+      <!-- Brand Logo -->
+      <a class="dock-item-btn text-white fw-bold" href="{% if user.is_authenticated %}{% if user.is_admin %}/admin-portal/{% elif user.is_cashier %}/cashier/{% elif user.is_kitchen %}/kitchen/{% else %}/{% endif %}{% else %}{% if qr_token %}/t/{{ qr_token }}/{% else %}/{% endif %}{% endif %}">
+        <div class="brand-logo-icon" style="width: 28px; height: 28px; border-radius: 8px; background: var(--primary-gradient); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; box-shadow: 0 0 10px var(--primary-glow);">
+          <i class="fa-solid fa-utensils text-white"></i>
         </div>
-        <span>{{ current_restaurant.name }}</span>
+        <span class="d-none d-sm-inline">{{ current_restaurant.name }}</span>
       </a>
 
-      <button class="navbar-toggler border-0 shadow-none text-white p-1" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
-        <i class="fa-solid fa-bars fs-4"></i>
-      </button>
+      <div class="dock-divider"></div>
 
-      <div class="collapse navbar-collapse" id="navMenu">
-        <!-- Staff Navigation Links -->
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0 mt-2 mt-lg-0">
-          {% if user.is_authenticated %}
-            {% if user.is_admin %}
-              <li class="nav-item">
-                <a class="nav-link" href="/cashier/"><i class="fa-solid fa-cash-register me-1 text-warning"></i><span data-i18n="cashier">Kaixa</span></a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="/kitchen/"><i class="fa-solid fa-fire-burner me-1 text-info"></i><span data-i18n="kitchen">Dapur (KDS)</span></a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="/admin-portal/"><i class="fa-solid fa-chart-line me-1 text-warning"></i><span data-i18n="admin_reports">Admin &amp; Relatóriu</span></a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="/admin-portal/qr-sheet/" target="_blank"><i class="fa-solid fa-qrcode me-1 text-secondary"></i><span data-i18n="btn_print_qr_sheet">Folha QR</span></a>
-              </li>
-            {% elif user.is_cashier %}
-              <li class="nav-item">
-                <a class="nav-link active" href="/cashier/"><i class="fa-solid fa-cash-register me-1 text-warning"></i><span data-i18n="cashier_title">Painél Kaixa</span></a>
-              </li>
-            {% elif user.is_kitchen %}
-              <li class="nav-item">
-                <a class="nav-link active" href="/kitchen/"><i class="fa-solid fa-fire-burner me-1 text-info"></i><span data-i18n="kds_title">Ekrã Dapur (KDS)</span></a>
-              </li>
-            {% endif %}
-          {% endif %}
-        </ul>
-
-        <div class="d-flex align-items-center gap-2 flex-wrap">
-          <!-- PWA Install Button -->
-          <button class="btn btn-sm btn-outline-warning fw-bold d-flex align-items-center gap-1 rounded-pill px-3 py-1" onclick="installPWA()" title="Instala Celvass PWA" id="navbar-pwa-btn" style="display:none!important;">
-            <i class="fa-solid fa-download"></i> <span data-i18n="install_app">Instala App</span>
+      <!-- ROLE SPECIFIC DOCK ITEMS -->
+      {% if user.is_authenticated %}
+        {% if user.is_admin %}
+          <!-- ADMIN DEDICATED ITEMS (Strictly NO links to Cashier/Kitchen) -->
+          <button class="dock-item-btn active" data-bs-toggle="pill" data-bs-target="#menu-panel" onclick="document.getElementById('menu-tab')?.click();">
+            <i class="fa-solid fa-bowl-food text-warning"></i>
+            <span class="d-none d-md-inline" data-i18n="menu_stock">Menu &amp; Stok</span>
           </button>
+          <button class="dock-item-btn" data-bs-toggle="pill" data-bs-target="#tables-panel" onclick="document.getElementById('tables-tab')?.click();">
+            <i class="fa-solid fa-table-cells text-info"></i>
+            <span class="d-none d-md-inline" data-i18n="tables_qr">Meza &amp; QR</span>
+          </button>
+          <button class="dock-item-btn" data-bs-toggle="pill" data-bs-target="#users-panel" onclick="document.getElementById('users-tab')?.click();">
+            <i class="fa-solid fa-users text-success"></i>
+            <span class="d-none d-md-inline" data-i18n="staff_users">Staff</span>
+          </button>
+          <button class="dock-item-btn" data-bs-toggle="pill" data-bs-target="#reports-panel" onclick="document.getElementById('reports-tab')?.click();">
+            <i class="fa-solid fa-chart-pie text-warning"></i>
+            <span class="d-none d-md-inline" data-i18n="reports">Relatóriu</span>
+          </button>
+          <a href="/admin-portal/qr-sheet/" target="_blank" class="dock-item-btn" title="Folha QR">
+            <i class="fa-solid fa-qrcode text-secondary"></i>
+            <span class="d-none d-lg-inline" data-i18n="btn_print_qr_sheet">Folha QR</span>
+          </a>
+          <a href="/admin/" target="_blank" class="dock-item-btn" title="Django Admin">
+            <i class="fa-solid fa-gear text-secondary"></i>
+          </a>
+        {% elif user.is_cashier %}
+          <!-- CASHIER DEDICATED ITEMS -->
+          <button class="dock-item-btn active" data-bs-toggle="pill" data-bs-target="#live-pos-panel" onclick="document.getElementById('live-pos-tab')?.click();">
+            <i class="fa-solid fa-cash-register text-warning"></i>
+            <span class="d-none d-sm-inline">POS &amp; Fila</span>
+          </button>
+          <button class="dock-item-btn" data-bs-toggle="pill" data-bs-target="#orders-history-panel" onclick="document.getElementById('orders-history-tab')?.click();">
+            <i class="fa-solid fa-clock-rotate-left text-info"></i>
+            <span class="d-none d-md-inline">Istóriku</span>
+          </button>
+          <button class="dock-item-btn" data-bs-toggle="pill" data-bs-target="#shift-close-panel" onclick="document.getElementById('shift-close-tab')?.click();">
+            <i class="fa-solid fa-vault text-success"></i>
+            <span class="d-none d-md-inline">Fechu Kaixa</span>
+          </button>
+          <button class="dock-item-btn" onclick="if (typeof cashierApp !== 'undefined') { cashierApp.loadPendingOrders(); cashierApp.loadTables(); }" title="Refresh">
+            <i class="fa-solid fa-rotate text-info"></i>
+          </button>
+        {% elif user.is_kitchen %}
+          <!-- KITCHEN DEDICATED ITEMS -->
+          <button class="dock-item-btn active" onclick="if (typeof kdsApp !== 'undefined') kdsApp.loadQueue();">
+            <i class="fa-solid fa-fire text-warning"></i>
+            <span class="d-none d-sm-inline" data-i18n="kds_title">Fila Dapur</span>
+          </button>
+          <button class="dock-item-btn" onclick="toggleFullscreen()" title="Fullscreen">
+            <i class="fa-solid fa-expand text-success"></i>
+            <span class="d-none d-md-inline">Fullscreen</span>
+          </button>
+          <button class="dock-item-btn" onclick="if (typeof kdsApp !== 'undefined') kdsApp.loadQueue();" title="Refresh">
+            <i class="fa-solid fa-rotate text-info"></i>
+          </button>
+        {% endif %}
+      {% else %}
+        <!-- CUSTOMER VIEW TOP DOCK ITEMS -->
+        {% if table %}
+          <span class="dock-item-btn text-warning fw-bold">
+            <i class="fa-solid fa-chair text-warning"></i>
+            <span>{{ table.display_name }}</span>
+          </span>
+        {% endif %}
+        <a href="javascript:void(0)" onclick="const s = document.getElementById('menu-search'); if (s) { s.scrollIntoView({behavior:'smooth', block:'center'}); s.focus(); }" class="dock-item-btn">
+          <i class="fa-solid fa-magnifying-glass text-warning"></i>
+          <span class="d-none d-sm-inline" data-i18n="search">Buka</span>
+        </a>
+        <a href="javascript:void(0)" data-bs-toggle="offcanvas" data-bs-target="#cartOffcanvas" class="dock-item-btn position-relative">
+          <i class="fa-solid fa-basket-shopping text-warning"></i>
+          <span class="badge bg-warning text-dark rounded-pill" id="top-dock-cart-badge" style="display:none; font-size:0.65rem;">0</span>
+          <span class="d-none d-sm-inline" data-i18n="cart_title">Karreta</span>
+        </a>
+      {% endif %}
 
-          <!-- Language Selector -->
-          <div class="dropdown">
-            <button class="btn btn-sm btn-outline-secondary dropdown-toggle fw-bold text-white rounded-pill px-3 py-1" type="button" data-bs-toggle="dropdown" id="current-lang-label">
-              🇹🇱 Tetun
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end shadow">
-              <li><a class="dropdown-item" href="javascript:void(0)" onclick="setLanguage('tet')">🇹🇱 Tetun (Timor-Leste)</a></li>
-              <li><a class="dropdown-item" href="javascript:void(0)" onclick="setLanguage('pt')">🇵🇹 Português</a></li>
-              <li><a class="dropdown-item" href="javascript:void(0)" onclick="setLanguage('en')">🇬🇧 English</a></li>
-              <li><a class="dropdown-item" href="javascript:void(0)" onclick="setLanguage('id')">🇮🇩 Indonesia</a></li>
-            </ul>
-          </div>
+      <div class="dock-divider"></div>
 
-          <!-- Live Network Indicator -->
-          <span id="ws-network-status" class="badge bg-success bg-opacity-25 border border-success text-success rounded-pill px-2 py-1">● Live</span>
-
-          <!-- Staff User Menu or Login Link -->
-          {% if user.is_authenticated %}
-            <div class="dropdown">
-              <button class="btn btn-sm btn-outline-light dropdown-toggle rounded-pill px-3 py-1" type="button" data-bs-toggle="dropdown">
-                <i class="fa-solid fa-user-circle me-1"></i>
-                {{ user.username }}
-                <span class="badge ms-1
-                  {% if user.is_admin %}bg-danger
-                  {% elif user.is_cashier %}bg-warning text-dark
-                  {% else %}bg-info text-dark{% endif %}" style="font-size:0.68rem;">{{ user.role }}</span>
-              </button>
-              <ul class="dropdown-menu dropdown-menu-end shadow">
-                <li><h6 class="dropdown-header">{{ user.get_full_name|default:user.username }}</h6></li>
-                <li><hr class="dropdown-divider"></li>
-                <li>
-                  <a class="dropdown-item text-danger" href="{% url 'logout' %}">
-                    <i class="fa-solid fa-arrow-right-from-bracket me-1"></i> <span data-i18n="logout">Sai (Logout)</span>
-                  </a>
-                </li>
-              </ul>
-            </div>
-          {% else %}
-            <a href="{% url 'login' %}" class="btn btn-sm btn-outline-light fw-bold rounded-pill px-3 py-1">
-              <i class="fa-solid fa-shield-halved me-1"></i> <span data-i18n="login_staff">Portal Staff</span>
-            </a>
-          {% endif %}
-        </div>
+      <!-- Language Selector Pill -->
+      <div class="dropdown">
+        <button class="dock-item-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" id="current-lang-label">
+          🇹🇱 <span class="d-none d-md-inline">Tetun</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end shadow">
+          <li><a class="dropdown-item" href="javascript:void(0)" onclick="setLanguage('tet')">🇹🇱 Tetun</a></li>
+          <li><a class="dropdown-item" href="javascript:void(0)" onclick="setLanguage('pt')">🇵🇹 Português</a></li>
+          <li><a class="dropdown-item" href="javascript:void(0)" onclick="setLanguage('en')">🇬🇧 English</a></li>
+          <li><a class="dropdown-item" href="javascript:void(0)" onclick="setLanguage('id')">🇮🇩 Indonesia</a></li>
+        </ul>
       </div>
-    </div>
-  </nav>
+
+      <!-- User Profile / Logout or Staff Login -->
+      {% if user.is_authenticated %}
+        <a href="{% url 'logout' %}" class="dock-item-btn text-danger" title="Sai (Logout)">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          <span class="d-none d-lg-inline">Sai</span>
+        </a>
+      {% else %}
+        <a href="{% url 'login' %}" class="dock-item-btn text-warning" title="Portal Staff">
+          <i class="fa-solid fa-shield-halved"></i>
+          <span class="d-none d-sm-inline" data-i18n="login_staff">Staff</span>
+        </a>
+      {% endif %}
+
+    </nav>
+  </header>
 
   <!-- PWA Install Prompt Banner -->
   <div id="pwa-install-banner" class="pwa-banner py-2 px-3 shadow" style="display: none;">
@@ -242,6 +268,14 @@
       const btn = document.getElementById('navbar-pwa-btn');
       if (btn) btn.style.removeProperty('display');
     });
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
   </script>
   {% block extra_js %}{% endblock %}
 </body>

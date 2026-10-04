@@ -139,6 +139,7 @@ class CustomerApp {
     const badge = document.getElementById('cart-count-badge');
     const totalEl = document.getElementById('cart-total-price');
     const dockBadge = document.getElementById('dock-cart-badge');
+    const topDockBadge = document.getElementById('top-dock-cart-badge');
 
     if (bar && count > 0) {
       bar.style.display = 'flex';
@@ -154,6 +155,15 @@ class CustomerApp {
         dockBadge.style.display = 'block';
       } else {
         dockBadge.style.display = 'none';
+      }
+    }
+
+    if (topDockBadge) {
+      if (count > 0) {
+        topDockBadge.textContent = count;
+        topDockBadge.style.display = 'inline-block';
+      } else {
+        topDockBadge.style.display = 'none';
       }
     }
 
@@ -428,5 +438,34 @@ class CustomerApp {
     } else {
       showToast(t('alert_waiting_desc') || "Seidauk iha pedidu ativu ba sesi meza ne'e.", 'info');
     }
+  }
+}
+
+/**
+ * Filter menu by category slug
+ */
+function filterByCategory(slug) {
+  document.querySelectorAll('.cat-pill').forEach((btn) => {
+    if (btn.dataset.category === slug) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+
+  const items = document.querySelectorAll('.menu-item-col');
+  let visibleCount = 0;
+  items.forEach((col) => {
+    if (slug === 'all' || col.dataset.category === slug) {
+      col.style.display = 'block';
+      visibleCount++;
+    } else {
+      col.style.display = 'none';
+    }
+  });
+
+  const activePill = document.querySelector(`.cat-pill[data-category="${slug}"]`);
+  if (activePill) {
+    activePill.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
   }
 }
