@@ -32,16 +32,11 @@ class CustomerApp {
   }
 
   init() {
-    // Ensure mobile table badge in dock has a clean compact table name
+    // Ensure mobile table badge in dock has the table code
     const mobileTableBadge = document.getElementById('dock-table-name-mobile');
     if (mobileTableBadge) {
-      const current = mobileTableBadge.textContent.trim();
-      if (!current || current === 'None' || current === 'Meza') {
-        if (this.tableName) {
-          mobileTableBadge.textContent = this.tableName;
-        } else if (this.tableCode) {
-          mobileTableBadge.textContent = this.tableCode;
-        }
+      if (this.tableCode) {
+        mobileTableBadge.textContent = this.tableCode;
       }
     }
 
