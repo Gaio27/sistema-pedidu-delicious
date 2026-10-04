@@ -60,18 +60,46 @@ class CustomerApp {
 
     // Search bar
     const searchInput = document.getElementById('menu-search');
+    const dockSearchInput = document.getElementById('dock-search-input');
+
+    const applySearch = (q) => {
+      document.querySelectorAll('.menu-item-col').forEach((card) => {
+        const name = (card.dataset.name || '').toLowerCase();
+        const desc = (card.dataset.desc || '').toLowerCase();
+        if (!q || name.includes(q) || desc.includes(q)) {
+          card.style.display = 'block';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    };
+
     if (searchInput) {
       searchInput.addEventListener('input', (e) => {
         const q = e.target.value.toLowerCase().trim();
-        document.querySelectorAll('.menu-item-col').forEach((card) => {
-          const name = (card.dataset.name || '').toLowerCase();
-          const desc = (card.dataset.desc || '').toLowerCase();
-          if (name.includes(q) || desc.includes(q)) {
-            card.style.display = 'block';
-          } else {
-            card.style.display = 'none';
-          }
-        });
+        if (dockSearchInput && dockSearchInput.value !== e.target.value) {
+          dockSearchInput.value = e.target.value;
+        }
+        applySearch(q);
+      });
+    }
+
+    if (dockSearchInput) {
+      dockSearchInput.addEventListener('input', (e) => {
+        const q = e.target.value.toLowerCase().trim();
+        if (searchInput && searchInput.value !== e.target.value) {
+          searchInput.value = e.target.value;
+        }
+        applySearch(q);
+        const grid = document.getElementById('menu-grid');
+        if (grid && window.scrollY < 200) {
+          grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+      dockSearchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closeDockSearch();
+        }
       });
     }
   }
@@ -339,9 +367,9 @@ class CustomerApp {
 
             return `
             <div class="p-3 border border-secondary border-opacity-25 rounded-3 mb-2 bg-dark bg-opacity-40">
-              <div class="d-flex justify-content-between align-items-center mb-1">
-                <span class="fw-bold text-white fs-6">${ord.order_code}</span>
-                <span class="badge badge-status ${statusClass}">${statusText}</span>
+              <div class="d-flex flex-wrap justify-content-between align-items-center gap-1 mb-2">
+                <span class="fw-bold text-white fs-6 text-truncate" style="max-width: 140px;">${ord.order_code}</span>
+                <span class="badge badge-status ${statusClass} text-wrap" style="font-size: 0.72rem; padding: 0.32rem 0.55rem; max-width: 100%; white-space: normal;">${statusText}</span>
               </div>
               <div class="small text-white-50 mb-2">
                 ${ord.items.map((i) => `<span class="text-white">${i.quantity}x</span> ${i.menu_name_snapshot}`).join(', ')}
@@ -438,6 +466,68 @@ class CustomerApp {
     } else {
       showToast(t('alert_waiting_desc') || "Seidauk iha pedidu ativu ba sesi meza ne'e.", 'info');
     }
+  }
+}
+
+/**
+ * Global Navigation & Dock Inline Search Controllers
+ */
+function scrollToMenuCatalog() {
+  const dockMenuBtn = document.getElementById('dock-btn-menu');
+  if (dockMenuBtn) {
+    document.querySelectorAll('.flying-glass-dock .dock-item-btn').forEach(b => b.classList.remove('active'));
+    dockMenuBtn.classList.add('active');
+  }
+  const el = document.getElementById('menu-grid');
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function scrollToActiveOrders() {
+  const dockStatusBtn = document.getElementById('dock-btn-status');
+  if (dockStatusBtn) {
+    document.querySelectorAll('.flying-glass-dock .dock-item-btn').forEach(b => b.classList.remove('active'));
+    dockStatusBtn.classList.add('active');
+  }
+  const el = document.getElementById('customer-active-orders');
+  if (el && el.children.length > 0) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } else {
+    showToast(t('alert_waiting_desc') || "Seidauk iha pedidu ativu ba sesi meza ne'e.", 'info');
+  }
+}
+
+function toggleDockSearch() {
+  const normalItems = document.getElementById('dock-normal-items');
+  const searchBox = document.getElementById('dock-search-box');
+  const input = document.getElementById('dock-search-input');
+  if (normalItems && searchBox) {
+    normalItems.style.setProperty('display', 'none', 'important');
+    searchBox.style.setProperty('display', 'flex', 'important');
+    if (input) {
+      input.focus();
+    }
+  }
+}
+
+function closeDockSearch() {
+  const normalItems = document.getElementById('dock-normal-items');
+  const searchBox = document.getElementById('dock-search-box');
+  const input = document.getElementById('dock-search-input');
+  const menuSearch = document.getElementById('menu-search');
+  if (normalItems && searchBox) {
+    searchBox.style.setProperty('display', 'none', 'important');
+    normalItems.style.removeProperty('display');
+    if (input) {
+      input.value = '';
+    }
+    if (menuSearch) {
+      menuSearch.value = '';
+    }
+    document.querySelectorAll('.menu-item-col').forEach((card) => {
+      card.style.display = 'block';
+    });
   }
 }
 

@@ -91,7 +91,7 @@ const translations = {
     select_table: "Hili Meza",
     switch_table: "Troka Meza",
     active_session: "Sesi Ativu",
-    session_not_opened: "Sesi Seidauk Loke hosi Kaixa",
+    session_not_opened: "Sesi Seidauk Loke",
     guests: "Konvidadu",
     people: "Ema",
     request_bill: "Husu Konta (Bill)",
@@ -116,7 +116,7 @@ const translations = {
     order_status_title: "Status Ita-boot nia Pedidu",
 
     // Order Status Flow
-    status_waiting: "⏳ Hein Verifikasaun Kaixa",
+    status_waiting: "⏳ Hein Kaixa",
     status_confirmed: "✅ Kaixa Konfirma Ona",
     status_preparing: "🍳 Dapur Hahu Tein",
     status_ready: "🔔 Hahan Prontu Ona",
@@ -304,7 +304,7 @@ const translations = {
     select_table: "Selecionar Mesa",
     switch_table: "Trocar Mesa",
     active_session: "Sessão Ativa",
-    session_not_opened: "Sessão Não Aberta pelo Caixa",
+    session_not_opened: "Sessão Não Aberta",
     guests: "Convidados",
     people: "Pessoas",
     request_bill: "Pedir Conta (Bill)",
@@ -329,7 +329,7 @@ const translations = {
     order_status_title: "Estado do Seu Pedido",
 
     // Order Status Flow
-    status_waiting: "⏳ A aguardar verificação do caixa",
+    status_waiting: "⏳ Aguarda Caixa",
     status_confirmed: "✅ Confirmado pelo Caixa",
     status_preparing: "🍳 A Cozinhar na Cozinha",
     status_ready: "🔔 Pronto a Servir",
@@ -517,7 +517,7 @@ const translations = {
     select_table: "Select Table",
     switch_table: "Switch Table",
     active_session: "Active Session",
-    session_not_opened: "Session Not Opened by Cashier",
+    session_not_opened: "Session Not Open",
     guests: "Guests",
     people: "People",
     request_bill: "Request Bill",
@@ -542,7 +542,7 @@ const translations = {
     order_status_title: "Your Order Status",
 
     // Order Status Flow
-    status_waiting: "⏳ Waiting Cashier Verification",
+    status_waiting: "⏳ Waiting Cashier",
     status_confirmed: "✅ Confirmed by Cashier",
     status_preparing: "🍳 Cooking in Kitchen",
     status_ready: "🔔 Ready to Serve",
@@ -730,7 +730,7 @@ const translations = {
     select_table: "Pilih Meja",
     switch_table: "Ganti Meja",
     active_session: "Sesi Aktif",
-    session_not_opened: "Sesi Belum Dibuka Kasir",
+    session_not_opened: "Sesi Belum Buka",
     guests: "Tamu",
     people: "Orang",
     request_bill: "Minta Tagihan (Bill)",
@@ -755,7 +755,7 @@ const translations = {
     order_status_title: "Status Pesanan Anda",
 
     // Order Status Flow
-    status_waiting: "⏳ Menunggu Verifikasi Kasir",
+    status_waiting: "⏳ Menunggu Kasir",
     status_confirmed: "✅ Dikonfirmasi Kasir",
     status_preparing: "🍳 Sedang Dimasak",
     status_ready: "🔔 Makanan Siap Disajikan",
