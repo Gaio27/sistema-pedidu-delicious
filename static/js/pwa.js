@@ -26,6 +26,16 @@ window.addEventListener('beforeinstallprompt', (e) => {
   showPwaInstallUI();
 });
 
+// Proactively check and display install UI after load if not in standalone mode
+window.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    if (!isStandalone) {
+      showPwaInstallUI();
+    }
+  }, 1200);
+});
+
 // App installed event
 window.addEventListener('appinstalled', () => {
   console.log('🎉 Celvass PWA was installed successfully!');

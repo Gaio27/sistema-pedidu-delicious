@@ -67,7 +67,12 @@ class MenuItem(models.Model):
     @property
     def display_image(self):
         if self.image:
-            return self.image.url
+            try:
+                url = self.image.url
+                if url:
+                    return url
+            except Exception:
+                pass
         if self.image_url:
             return self.image_url
         return "/static/icons/default-food.png"
