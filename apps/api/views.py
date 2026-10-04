@@ -6,8 +6,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 
-from apps.accounts.permissions import IsCashierRole, IsKitchenRole, IsAdminRole
+from apps.accounts.permissions import IsCashierRole, IsKitchenRole, IsAdminRole, IsCashierOrAdmin, IsKitchenOrAdmin
 from apps.tables.models import RestaurantTable, TableSession
 from apps.tables.selectors import get_table_by_qr_token, get_session_by_public_token, list_tables_with_status
 from apps.tables.services import open_table_session, close_table_session, request_bill_for_session, rotate_table_qr
@@ -219,7 +220,8 @@ class PublicBillDetailAPIView(APIView):
 # ==========================================
 
 class CashierPendingOrdersAPIView(APIView):
-    permission_classes = [AllowAny]  # or IsCashierRole; AllowAny allows local dev verification
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated, IsCashierOrAdmin]
 
     def get(self, request):
         pending_orders = get_pending_orders_for_cashier()
@@ -228,7 +230,8 @@ class CashierPendingOrdersAPIView(APIView):
 
 
 class CashierConfirmOrderAPIView(APIView):
-    permission_classes = [AllowAny]
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated, IsCashierRole | IsAdminRole]
 
     def post(self, request, order_id):
         try:
@@ -243,7 +246,8 @@ class CashierConfirmOrderAPIView(APIView):
 
 
 class CashierRejectOrderAPIView(APIView):
-    permission_classes = [AllowAny]
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated, IsCashierRole | IsAdminRole]
 
     def post(self, request, order_id):
         reason = request.data.get('reason', '').strip()
@@ -262,7 +266,8 @@ class CashierRejectOrderAPIView(APIView):
 
 
 class CashierTablesListAPIView(APIView):
-    permission_classes = [AllowAny]
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated, IsCashierRole | IsAdminRole]
 
     def get(self, request):
         tables = list_tables_with_status()
@@ -271,7 +276,8 @@ class CashierTablesListAPIView(APIView):
 
 
 class CashierOpenTableSessionAPIView(APIView):
-    permission_classes = [AllowAny]
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated, IsCashierRole | IsAdminRole]
 
     def post(self, request, table_id):
         guest_count = int(request.data.get('guest_count', 1))
@@ -293,7 +299,8 @@ class CashierOpenTableSessionAPIView(APIView):
 
 
 class CashierCloseTableSessionAPIView(APIView):
-    permission_classes = [AllowAny]
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated, IsCashierRole | IsAdminRole]
 
     def post(self, request, session_id):
         reason = request.data.get('reason', 'Completed')
@@ -311,7 +318,8 @@ class CashierCloseTableSessionAPIView(APIView):
 
 
 class CashierPaymentAPIView(APIView):
-    permission_classes = [AllowAny]
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated, IsCashierRole | IsAdminRole]
 
     def get(self, request, session_id):
         try:
@@ -375,7 +383,8 @@ class CashierPaymentAPIView(APIView):
 # ==========================================
 
 class KitchenQueueAPIView(APIView):
-    permission_classes = [AllowAny]
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated, IsKitchenOrAdmin]
 
     def get(self, request):
         queue = get_kitchen_queue_orders()
@@ -384,7 +393,8 @@ class KitchenQueueAPIView(APIView):
 
 
 class KitchenStartOrderAPIView(APIView):
-    permission_classes = [AllowAny]
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated, IsKitchenOrAdmin]
 
     def post(self, request, order_id):
         try:
@@ -399,7 +409,8 @@ class KitchenStartOrderAPIView(APIView):
 
 
 class KitchenReadyOrderAPIView(APIView):
-    permission_classes = [AllowAny]
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated, IsKitchenRole | IsAdminRole]
 
     def post(self, request, order_id):
         try:
@@ -414,7 +425,8 @@ class KitchenReadyOrderAPIView(APIView):
 
 
 class KitchenServedOrderAPIView(APIView):
-    permission_classes = [AllowAny]
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated, IsKitchenRole | IsAdminRole]
 
     def post(self, request, order_id):
         try:
@@ -433,7 +445,8 @@ class KitchenServedOrderAPIView(APIView):
 # ==========================================
 
 class AdminToggleMenuItemAvailabilityAPIView(APIView):
-    permission_classes = [AllowAny]
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminRole]
 
     def post(self, request, item_id):
         try:
@@ -450,7 +463,8 @@ class AdminToggleMenuItemAvailabilityAPIView(APIView):
 
 
 class AdminRotateTableQRAPIView(APIView):
-    permission_classes = [AllowAny]
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminRole]
 
     def post(self, request, table_id):
         try:

@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="id">
+<html lang="tet">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -12,7 +12,8 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Sabor Dili">
+  <meta name="apple-mobile-web-app-title" content="Celvass PWA">
+  <meta name="description" content="Celvass Resto & Bar — Sistema Pedidu Digital PWA">
 
   <!-- Google Fonts: Outfit & Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -31,10 +32,10 @@
 
   {% csrf_token %}
 
-  <!-- Top Navigation -->
+  <!-- Top Navigation (hidden for landing/customer-only pages via body_class) -->
   <nav class="navbar navbar-expand-lg navbar-dark navbar-custom sticky-top">
     <div class="container-fluid">
-      <a class="navbar-brand" href="/">
+      <a class="navbar-brand" href="{% if user.is_authenticated %}{% if user.is_admin %}/admin-portal/{% elif user.is_cashier %}/cashier/{% elif user.is_kitchen %}/kitchen/{% else %}/{% endif %}{% else %}/{% endif %}">
         <i class="fa-solid fa-utensils text-warning"></i>
         <span>{{ current_restaurant.name }}</span>
       </a>
@@ -44,25 +45,38 @@
       </button>
 
       <div class="collapse navbar-collapse" id="navMenu">
+        <!-- Role-conditional left links -->
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item">
-            <a class="nav-link" href="/" data-i18n="dine_in_pwa"><i class="fa-solid fa-mobile-screen-button me-1"></i> Dine-In PWA</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/cashier/" data-i18n="cashier"><i class="fa-solid fa-cash-register me-1"></i> Kaixa (Cashier)</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/kitchen/" data-i18n="kitchen"><i class="fa-solid fa-kitchen-set me-1"></i> Dapur (KDS)</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/admin-portal/" data-i18n="admin_reports"><i class="fa-solid fa-chart-pie me-1"></i> Admin & Relatóriu</a>
-          </li>
+          {% if user.is_authenticated %}
+            {% if user.is_admin %}
+              <li class="nav-item">
+                <a class="nav-link" href="/cashier/"><i class="fa-solid fa-cash-register me-1"></i>Kaixa</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/kitchen/"><i class="fa-solid fa-kitchen-set me-1"></i>Dapur (KDS)</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/admin-portal/"><i class="fa-solid fa-chart-pie me-1"></i>Admin & Relatóriu</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/admin-portal/qr-sheet/" target="_blank"><i class="fa-solid fa-qrcode me-1"></i>Imprime QR</a>
+              </li>
+            {% elif user.is_cashier %}
+              <li class="nav-item">
+                <a class="nav-link active" href="/cashier/"><i class="fa-solid fa-cash-register me-1"></i>Painel Kaixa</a>
+              </li>
+            {% elif user.is_kitchen %}
+              <li class="nav-item">
+                <a class="nav-link active" href="/kitchen/"><i class="fa-solid fa-fire-burner me-1"></i>Ekrã Dapur (KDS)</a>
+              </li>
+            {% endif %}
+          {% endif %}
         </ul>
 
         <div class="d-flex align-items-center gap-2">
-          <!-- PWA Install Quick Action -->
-          <button class="btn btn-sm btn-outline-warning fw-bold d-flex align-items-center gap-1 rounded-pill px-2" onclick="installPWA()" title="Instala Celvass PWA">
-            <i class="fa-solid fa-download"></i> <span class="d-none d-md-inline">Instala App</span>
+          <!-- PWA Install -->
+          <button class="btn btn-sm btn-outline-warning fw-bold d-flex align-items-center gap-1 rounded-pill px-2" onclick="installPWA()" title="Instala Celvass PWA" id="navbar-pwa-btn" style="display:none!important;">
+            <i class="fa-solid fa-download"></i> <span class="d-none d-md-inline">Instala</span>
           </button>
 
           <!-- Language Selector -->
@@ -80,33 +94,32 @@
 
           <span id="ws-network-status" class="badge bg-success">● Live</span>
 
+          <!-- User menu (staff only) or Login link -->
           {% if user.is_authenticated %}
             <div class="dropdown">
               <button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                <i class="fa-solid fa-user-circle me-1"></i> {{ user.username }} ({{ user.role }})
+                <i class="fa-solid fa-user-circle me-1"></i>
+                {{ user.username }}
+                <span class="badge ms-1
+                  {% if user.is_admin %}bg-danger
+                  {% elif user.is_cashier %}bg-warning text-dark
+                  {% else %}bg-info text-dark{% endif %}
+                  " style="font-size:0.65rem;">{{ user.role }}</span>
               </button>
               <ul class="dropdown-menu dropdown-menu-end shadow">
-                <li><h6 class="dropdown-header" data-i18n="demo_login_quick">Login Demo Lais</h6></li>
-                <li><a class="dropdown-item" href="{% url 'demo-login' 'ADMIN' %}"><i class="fa-solid fa-shield-halved text-danger me-1"></i> <span data-i18n="switch_admin">Troka ba Admin</span></a></li>
-                <li><a class="dropdown-item" href="{% url 'demo-login' 'CASHIER' %}"><i class="fa-solid fa-cash-register text-warning me-1"></i> <span data-i18n="switch_cashier">Troka ba Kaixa</span></a></li>
-                <li><a class="dropdown-item" href="{% url 'demo-login' 'KITCHEN' %}"><i class="fa-solid fa-fire-burner text-info me-1"></i> <span data-i18n="switch_kitchen">Troka ba Dapur</span></a></li>
+                <li><h6 class="dropdown-header">{{ user.get_full_name|default:user.username }}</h6></li>
                 <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item text-danger" href="{% url 'logout' %}"><i class="fa-solid fa-arrow-right-from-bracket me-1"></i> <span data-i18n="logout">Sai (Logout)</span></a></li>
+                <li>
+                  <a class="dropdown-item text-danger" href="{% url 'logout' %}">
+                    <i class="fa-solid fa-arrow-right-from-bracket me-1"></i> Sai (Logout)
+                  </a>
+                </li>
               </ul>
             </div>
           {% else %}
-            <div class="dropdown">
-              <button class="btn btn-sm btn-warning dropdown-toggle fw-bold" type="button" data-bs-toggle="dropdown">
-                <i class="fa-solid fa-key me-1"></i> <span data-i18n="login_demo">Login Demo</span>
-              </button>
-              <ul class="dropdown-menu dropdown-menu-end shadow">
-                <li><a class="dropdown-item" href="{% url 'demo-login' 'ADMIN' %}"><i class="fa-solid fa-shield-halved text-danger me-1"></i> <span data-i18n="login_as_admin">Login hanesan Admin</span></a></li>
-                <li><a class="dropdown-item" href="{% url 'demo-login' 'CASHIER' %}"><i class="fa-solid fa-cash-register text-warning me-1"></i> <span data-i18n="login_as_cashier">Login hanesan Kaixa</span></a></li>
-                <li><a class="dropdown-item" href="{% url 'demo-login' 'KITCHEN' %}"><i class="fa-solid fa-fire-burner text-info me-1"></i> <span data-i18n="login_as_kitchen">Login hanesan Dapur</span></a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="{% url 'login' %}"><i class="fa-solid fa-right-to-bracket me-1"></i> <span data-i18n="login_form">Formuláriu Login</span></a></li>
-              </ul>
-            </div>
+            <a href="{% url 'login' %}" class="btn btn-sm btn-warning fw-bold rounded-pill px-3">
+              <i class="fa-solid fa-right-to-bracket me-1"></i>Login Staff
+            </a>
           {% endif %}
         </div>
       </div>
@@ -119,13 +132,13 @@
       <div class="d-flex align-items-center gap-2">
         <img src="/static/icons/icon-192.png" width="38" height="38" class="rounded-2 shadow-sm" alt="Celvass App">
         <div>
-          <div class="fw-bold small text-white"><span data-i18n="install_pwa_title">Instala Celvass Resto &amp; Bar PWA</span></div>
-          <div class="small text-white-50 d-none d-sm-block"><span data-i18n="install_pwa_text">Asesu menus lais, poupa kuota, no bele haree hahan offline!</span></div>
+          <div class="fw-bold small text-white">Instala Celvass Resto & Bar PWA</div>
+          <div class="small text-white-50 d-none d-sm-block">Asesu menus lais, poupa kuota, no bele haree hahan offline!</div>
         </div>
       </div>
       <div class="d-flex align-items-center gap-2">
         <button class="btn btn-sm btn-warning fw-bold px-3 rounded-pill shadow-sm" onclick="installPWA()">
-          <i class="fa-solid fa-download me-1"></i> <span data-i18n="install_pwa_btn">Instala PWA</span>
+          <i class="fa-solid fa-download me-1"></i> Instala PWA
         </button>
         <button class="btn btn-sm btn-link text-white-50 p-1" onclick="dismissPwaBanner()" title="Taka">
           <i class="fa-solid fa-xmark fs-5"></i>
@@ -149,6 +162,15 @@
   <script src="{% static 'js/sound.js' %}"></script>
   <script src="{% static 'js/websocket.js' %}"></script>
   <script src="{% static 'js/pwa.js' %}"></script>
+  <script>
+    // Show PWA install button in navbar when installable
+    document.addEventListener('pwa-installable', () => {
+      const btn = document.getElementById('navbar-pwa-btn');
+      if (btn) btn.style.removeProperty('display');
+    });
+  </script>
   {% block extra_js %}{% endblock %}
 </body>
 </html>
+
+

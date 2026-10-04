@@ -1,0 +1,115 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}QR Code La Válidu — Celvass Resto & Bar{% endblock %}
+
+{% block body_class %}landing-page{% endblock %}
+
+{% block content %}
+<div class="landing-hero">
+  <div class="landing-content">
+    
+    <div class="invalid-qr-card">
+      <div class="invalid-icon">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <h2 class="invalid-title">QR Code La Válidu</h2>
+      <p class="invalid-desc">
+        QR Code ne'e la rekonhese ka meza ne'e seidauk ativu.
+        Favor skanu QR Code seluk ne'ebé iha ita nia meza.
+      </p>
+      <a href="/" class="btn-back">
+        <i class="fa-solid fa-arrow-left me-2"></i>Fila Fali
+      </a>
+    </div>
+
+    <div class="landing-staff-link">
+      <a href="{% url 'login' %}">
+        <i class="fa-solid fa-shield-halved me-1"></i>Portal Staff
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  body.landing-page {
+    background: #0a0a0a;
+  }
+  body.landing-page nav.navbar-custom,
+  body.landing-page #pwa-install-banner {
+    display: none !important;
+  }
+  .landing-hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #1a0a00 0%, #2d1200 30%, #0f1a2e 100%);
+  }
+  .landing-content {
+    max-width: 440px;
+    width: 100%;
+    padding: 2rem 1.5rem;
+    text-align: center;
+  }
+  .invalid-qr-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(239,68,68,0.25);
+    border-radius: 24px;
+    padding: 2.5rem 2rem;
+    margin-bottom: 1.5rem;
+  }
+  .invalid-icon {
+    font-size: 4rem;
+    color: #ef4444;
+    margin-bottom: 1rem;
+    animation: shake 0.5s ease 0.3s;
+  }
+  @keyframes shake {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-8deg); }
+    75% { transform: rotate(8deg); }
+  }
+  .invalid-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 0.8rem;
+  }
+  .invalid-desc {
+    color: rgba(255,255,255,0.6);
+    font-size: 0.93rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
+  .btn-back {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(249,115,22,0.2);
+    border: 1px solid rgba(249,115,22,0.4);
+    color: #f97316;
+    border-radius: 50px;
+    padding: 0.6rem 1.5rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .btn-back:hover {
+    background: rgba(249,115,22,0.3);
+    color: #fb923c;
+  }
+  .landing-staff-link a {
+    color: rgba(255,255,255,0.3);
+    font-size: 0.8rem;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .landing-staff-link a:hover {
+    color: rgba(255,255,255,0.6);
+  }
+</style>
+{% endblock %}

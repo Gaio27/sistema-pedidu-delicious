@@ -21,7 +21,8 @@ def role_required(allowed_roles):
 
 class IsAdminRole(BasePermission):
     def has_permission(self, request, view):
-        return bool(request.user and request.user.is_authenticated and request.user.is_admin)
+        return bool(request.user and request.user.is_authenticated and
+                    (request.user.is_superuser or request.user.is_admin))
 
 class IsCashierRole(BasePermission):
     def has_permission(self, request, view):
@@ -30,3 +31,19 @@ class IsCashierRole(BasePermission):
 class IsKitchenRole(BasePermission):
     def has_permission(self, request, view):
         return bool(request.user and request.user.is_authenticated and request.user.is_kitchen)
+
+class IsCashierOrAdmin(BasePermission):
+    """Allow access to authenticated Cashier or Admin users."""
+    def has_permission(self, request, view):
+        return bool(
+            request.user and request.user.is_authenticated and
+            (request.user.is_superuser or request.user.is_cashier or request.user.is_admin)
+        )
+
+class IsKitchenOrAdmin(BasePermission):
+    """Allow access to authenticated Kitchen staff or Admin users."""
+    def has_permission(self, request, view):
+        return bool(
+            request.user and request.user.is_authenticated and
+            (request.user.is_superuser or request.user.is_kitchen or request.user.is_admin)
+        )

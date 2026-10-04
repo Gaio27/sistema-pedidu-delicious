@@ -18,12 +18,12 @@ urlpatterns = [
     # REST API v1
     path('api/v1/', include('apps.api.urls')),
 
-    # Customer Dine-In Web App
+    # Customer Dine-In Web App (QR-gated)
     path('', resto_views.customer_dine_in_view, name='customer-home'),
     path('t/<str:qr_token>/', resto_views.customer_dine_in_view, name='customer-table'),
     path('t/<str:qr_token>/order/<str:order_code>/', resto_views.customer_tracker_view, name='customer-tracker'),
 
-    # Staff Portals
+    # Staff Portals (protected by @login_required + @role_required)
     path('cashier/', resto_views.cashier_portal_view, name='cashier-portal'),
     path('kitchen/', resto_views.kitchen_portal_view, name='kitchen-portal'),
     path('admin-portal/', resto_views.admin_portal_view, name='admin-portal'),
@@ -32,8 +32,13 @@ urlpatterns = [
     # Authentication
     path('login/', auth_views.login_view, name='login'),
     path('logout/', auth_views.logout_view, name='logout'),
-    path('demo-login/<str:role>/', auth_views.demo_login_view, name='demo-login'),
 ]
+
+# Demo login only available in DEBUG mode (development)
+if settings.DEBUG:
+    urlpatterns += [
+        path('demo-login/<str:role>/', auth_views.demo_login_view, name='demo-login'),
+    ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

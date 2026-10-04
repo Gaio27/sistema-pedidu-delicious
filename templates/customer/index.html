@@ -1,7 +1,7 @@
 {% extends 'base/base.html' %}
 {% load static %}
 
-{% block title %}{{ table.display_name|default:"Pilih Meja" }} - {{ current_restaurant.name }}{% endblock %}
+{% block title %}{{ table.display_name }} — {{ current_restaurant.name }}{% endblock %}
 
 {% block content %}
 <div class="container" style="max-width: 960px; padding-bottom: 100px;">
@@ -31,61 +31,30 @@
 
       <div class="col-md-5 text-md-end">
         <div class="d-flex flex-wrap gap-2 justify-content-md-end">
-          <!-- Switch Table Dropdown -->
-          <div class="dropdown">
-            <button class="btn btn-sm btn-outline-light dropdown-toggle rounded-pill px-3" type="button" data-bs-toggle="dropdown" data-i18n="switch_table">
-              <i class="fa-solid fa-qrcode me-1"></i> Troka Meza
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end shadow">
-              {% if active_open_tables %}
-                <li><h6 class="dropdown-header text-success fw-bold"><i class="fa-solid fa-door-open me-1"></i> Meza Sesi Loke Hela (Active)</h6></li>
-                {% for ot in active_open_tables %}
-                  <li><a class="dropdown-item {% if ot.id == table.id %}active fw-bold{% endif %}" href="/t/{{ ot.qr_token }}/">🟢 {{ ot.display_name }}</a></li>
-                {% endfor %}
-                <li><hr class="dropdown-divider"></li>
-              {% endif %}
-              <li><h6 class="dropdown-header text-muted" data-i18n="select_table">Meza Hotu (All Tables)</h6></li>
-              {% for t in all_tables %}
-                <li><a class="dropdown-item {% if t.id == table.id %}active fw-bold{% endif %}" href="/t/{{ t.qr_token }}/">{{ t.display_name }} ({{ t.status }})</a></li>
-              {% endfor %}
-            </ul>
-          </div>
 
           {% if session and session.is_active %}
             {% if session.status == 'BILL_REQUESTED' %}
               <button class="btn btn-sm btn-secondary text-white fw-bold rounded-pill px-3 shadow-sm" disabled id="btn-request-bill">
-                <i class="fa-solid fa-clock me-1"></i> <span data-i18n="bill_already_requested">Konta Husu Tiha Ona</span>
+                <i class="fa-solid fa-clock me-1"></i> Konta Husu Tiha Ona
               </button>
             {% elif session.status == 'PAID' %}
               <button class="btn btn-sm btn-success text-white fw-bold rounded-pill px-3 shadow-sm" disabled id="btn-request-bill">
-                <i class="fa-solid fa-circle-check me-1"></i> <span data-i18n="bill_already_paid">Selu Tiha Ona</span>
+                <i class="fa-solid fa-circle-check me-1"></i> Selu Tiha Ona
               </button>
             {% else %}
-              <button class="btn btn-sm btn-warning text-dark fw-bold rounded-pill px-3 shadow-sm" onclick="customerApp.requestBill()" id="btn-request-bill" data-i18n="request_bill">
+              <button class="btn btn-sm btn-warning text-dark fw-bold rounded-pill px-3 shadow-sm" onclick="customerApp.requestBill()" id="btn-request-bill">
                 <i class="fa-solid fa-receipt me-1"></i> Husu Konta
               </button>
             {% endif %}
           {% endif %}
 
-          <button class="btn btn-sm btn-light fw-bold rounded-pill px-3" onclick="installPWA()">
+          <button class="btn btn-sm btn-light fw-bold rounded-pill px-3" onclick="installPWA()" id="btn-install-pwa">
             <i class="fa-solid fa-download me-1"></i> Instala App
           </button>
         </div>
       </div>
     </div>
   </div>
-
-  <!-- Active Cashier-Opened Tables Bar -->
-  {% if active_open_tables %}
-    <div class="d-flex align-items-center gap-2 overflow-auto pb-2 mb-3" style="white-space: nowrap;">
-      <span class="badge bg-success bg-opacity-10 text-success border border-success fw-bold px-2 py-2 rounded-pill"><i class="fa-solid fa-door-open me-1"></i> Meza Loke:</span>
-      {% for ot in active_open_tables %}
-        <a href="/t/{{ ot.qr_token }}/" class="btn btn-sm {% if ot.id == table.id %}btn-success fw-bold text-white shadow-sm{% else %}btn-outline-success bg-white shadow-sm{% endif %} rounded-pill px-3 py-1">
-          <i class="fa-solid fa-chair me-1"></i> {{ ot.display_name }}
-        </a>
-      {% endfor %}
-    </div>
-  {% endif %}
 
   <!-- Live Orders Section -->
   <div id="customer-active-orders"></div>
@@ -138,7 +107,7 @@
                   <span class="badge bg-light text-secondary border small">{{ cat.name }}</span>
                 </div>
                 <p class="text-muted small mb-2 flex-grow-1" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4;">
-                  {{ item.description|default:"Hidangan spesial khas Celvass Resto & Bar dengan bahan segar pilihan." }}
+                  {{ item.description|default:"Hahán espesiál Celvass Resto & Bar ho ingredientes fresku." }}
                 </p>
 
                 <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
@@ -150,7 +119,7 @@
                         <i class="fa-solid fa-plus me-1"></i> <span data-i18n="add">Aumenta</span>
                       </button>
                     {% else %}
-                      <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="showToast('Sesi meja belum dibuka oleh kasir.', 'warning')">
+                      <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="showToast('Sesi meza seidauk loke hosi Kaixa.', 'warning')">
                         <i class="fa-solid fa-lock me-1"></i> <span data-i18n="locked">Xave Hela</span>
                       </button>
                     {% endif %}
@@ -203,7 +172,7 @@
         <p class="text-muted small mb-3" id="modal-item-desc"></p>
 
         <div class="mb-3 bg-light p-3 rounded-3 border">
-          <label class="form-label small fw-bold text-secondary mb-2">Kuantidade (Quantity):</label>
+          <label class="form-label small fw-bold text-secondary mb-2">Kuantidade:</label>
           <div class="d-flex align-items-center gap-3">
             <button class="btn btn-outline-secondary rounded-circle shadow-sm" style="width: 40px; height: 40px;" onclick="adjustModalQty(-1)">-</button>
             <span class="fs-4 fw-bold px-2" id="modal-item-qty">1</span>
