@@ -278,8 +278,11 @@
       }
     }
 
-    const modal = new bootstrap.Modal(document.getElementById('itemCustomModal'));
-    modal.show();
+    const modalEl = document.getElementById('itemCustomModal');
+    if (modalEl) {
+      const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+      modal.show();
+    }
   }
 
   function adjustModalQty(delta) {
@@ -291,7 +294,11 @@
     if (currentModalItem) {
       const note = document.getElementById('modal-item-note').value.trim();
       customerApp.addToCart(currentModalItem, modalQty, note);
-      bootstrap.Modal.getInstance(document.getElementById('itemCustomModal')).hide();
+      const modalEl = document.getElementById('itemCustomModal');
+      if (modalEl) {
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) modal.hide();
+      }
     }
   });
 </script>

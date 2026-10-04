@@ -17,111 +17,94 @@
       </h3>
       <small class="text-white-50">{{ current_restaurant.name }} &bull; Moeda: USD ($) &bull; Timezone: {{ current_restaurant.timezone }}</small>
     </div>
-
-    <div class="d-flex gap-2">
-      <button class="btn btn-warning fw-bold rounded-pill px-3 text-dark shadow" data-bs-toggle="modal" data-bs-target="#createUserModal">
-        <i class="fa-solid fa-user-plus me-1"></i> Kria Konta Staff
-      </button>
-      <a href="{% url 'admin-qr-sheet' %}" target="_blank" class="btn btn-outline-light fw-bold rounded-pill px-3">
-        <i class="fa-solid fa-qrcode me-1"></i> Folha QR Meza
-      </a>
-      <a href="/admin/" target="_blank" class="btn btn-outline-secondary fw-bold rounded-pill px-3">
-        <i class="fa-solid fa-gear me-1"></i> Django Admin
-      </a>
-    </div>
   </div>
 
   <!-- Top Metrics Cards -->
   <div class="row g-3 mb-4">
+    <!-- Card 1: Sales Today -->
     <div class="col-md-3 col-sm-6">
-      <div class="glass-card p-3 border-start border-4 border-success">
-        <div class="d-flex justify-content-between align-items-center">
+      <div class="glass-card p-3 border-start border-4 border-success h-100 shadow-sm">
+        <div class="d-flex justify-content-between align-items-start">
           <div>
-            <small class="text-white-50 text-uppercase fw-bold">Rendimentu Ohin</small>
+            <small class="text-white-50 text-uppercase fw-bold d-flex align-items-center gap-1 mb-1">
+              <i class="fa-solid fa-sack-dollar text-success"></i> Rendimentu Ohin
+            </small>
             <h3 class="fw-bold text-success mb-0">${{ metrics.today_sales }}</h3>
           </div>
           <div class="bg-success bg-opacity-20 text-success rounded-circle p-3">
-            <i class="fa-solid fa-dollar-sign fa-xl"></i>
+            <i class="fa-solid fa-cash-register fa-xl"></i>
           </div>
         </div>
-        <small class="text-white-50 mt-2 d-block">{{ metrics.payments_count }} Transasaun Remata</small>
+        <div class="text-white-50 small mt-2 d-flex align-items-center gap-1 pt-2 border-top border-white border-opacity-10">
+          <i class="fa-solid fa-circle-check text-success"></i>
+          <span>{{ metrics.payments_count }} Transasaun Remata</span>
+        </div>
       </div>
     </div>
 
+    <!-- Card 2: Total Orders -->
     <div class="col-md-3 col-sm-6">
-      <div class="glass-card p-3 border-start border-4 border-primary">
-        <div class="d-flex justify-content-between align-items-center">
+      <div class="glass-card p-3 border-start border-4 border-primary h-100 shadow-sm">
+        <div class="d-flex justify-content-between align-items-start">
           <div>
-            <small class="text-white-50 text-uppercase fw-bold">Totál Pedidu</small>
+            <small class="text-white-50 text-uppercase fw-bold d-flex align-items-center gap-1 mb-1">
+              <i class="fa-solid fa-receipt text-primary"></i> Totál Pedidu
+            </small>
             <h3 class="fw-bold text-primary mb-0">{{ metrics.total_orders_count }}</h3>
           </div>
           <div class="bg-primary bg-opacity-20 text-primary rounded-circle p-3">
             <i class="fa-solid fa-utensils fa-xl"></i>
           </div>
         </div>
-        <small class="text-white-50 mt-2 d-block">{{ metrics.active_kitchen_count }} Ativu iha Dapur</small>
+        <div class="text-white-50 small mt-2 d-flex align-items-center gap-1 pt-2 border-top border-white border-opacity-10">
+          <i class="fa-solid fa-fire-burner text-info"></i>
+          <span>{{ metrics.active_kitchen_count }} Ativu iha Dapur</span>
+        </div>
       </div>
     </div>
 
+    <!-- Card 3: Table Occupancy -->
     <div class="col-md-3 col-sm-6">
-      <div class="glass-card p-3 border-start border-4 border-warning">
-        <div class="d-flex justify-content-between align-items-center">
+      <div class="glass-card p-3 border-start border-4 border-warning h-100 shadow-sm">
+        <div class="d-flex justify-content-between align-items-start">
           <div>
-            <small class="text-white-50 text-uppercase fw-bold">Okupasaun Meza</small>
+            <small class="text-white-50 text-uppercase fw-bold d-flex align-items-center gap-1 mb-1">
+              <i class="fa-solid fa-chair text-warning"></i> Okupasaun Meza
+            </small>
             <h3 class="fw-bold text-warning mb-0">{{ metrics.occupied_tables }} / {{ metrics.total_tables }}</h3>
           </div>
           <div class="bg-warning bg-opacity-20 text-warning rounded-circle p-3">
-            <i class="fa-solid fa-chair fa-xl"></i>
+            <i class="fa-solid fa-table-cells fa-xl"></i>
           </div>
         </div>
-        <small class="text-white-50 mt-2 d-block">Meza Preeñxe Atual</small>
+        <div class="text-white-50 small mt-2 d-flex align-items-center gap-1 pt-2 border-top border-white border-opacity-10">
+          <i class="fa-solid fa-users text-warning"></i>
+          <span>Meza Preeñxe Atual</span>
+        </div>
       </div>
     </div>
 
+    <!-- Card 4: Rejected / Fake Orders -->
     <div class="col-md-3 col-sm-6">
-      <div class="glass-card p-3 border-start border-4 border-danger">
-        <div class="d-flex justify-content-between align-items-center">
+      <div class="glass-card p-3 border-start border-4 border-danger h-100 shadow-sm">
+        <div class="d-flex justify-content-between align-items-start">
           <div>
-            <small class="text-white-50 text-uppercase fw-bold">Rekuza / Pedidu Falsu</small>
+            <small class="text-white-50 text-uppercase fw-bold d-flex align-items-center gap-1 mb-1">
+              <i class="fa-solid fa-ban text-danger"></i> Rekuza / Falsu
+            </small>
             <h3 class="fw-bold text-danger mb-0">{{ metrics.rejected_count }}</h3>
           </div>
           <div class="bg-danger bg-opacity-20 text-danger rounded-circle p-3">
             <i class="fa-solid fa-shield-halved fa-xl"></i>
           </div>
         </div>
-        <small class="text-white-50 mt-2 d-block">Kaixa Rekuza Molok Dapur</small>
+        <div class="text-white-50 small mt-2 d-flex align-items-center gap-1 pt-2 border-top border-white border-opacity-10">
+          <i class="fa-solid fa-triangle-exclamation text-danger"></i>
+          <span>Kaixa Rekuza Molok Dapur</span>
+        </div>
       </div>
     </div>
   </div>
-
-  <!-- Admin Tabs -->
-  <ul class="nav nav-pills mb-3 gap-2 border-0" id="adminTabs" role="tablist">
-    <li class="nav-item">
-      <button class="nav-link active rounded-pill fw-bold px-3 py-2 text-white" id="menu-tab" data-bs-toggle="pill" data-bs-target="#menu-panel">
-        <i class="fa-solid fa-bowl-food me-1 text-warning"></i> 1. Katalógu Menu &amp; Stok
-      </button>
-    </li>
-    <li class="nav-item">
-      <button class="nav-link rounded-pill fw-bold px-3 py-2 text-white" id="tables-tab" data-bs-toggle="pill" data-bs-target="#tables-panel">
-        <i class="fa-solid fa-table-cells me-1 text-info"></i> 2. Jestaun Meza &amp; QR
-      </button>
-    </li>
-    <li class="nav-item">
-      <button class="nav-link rounded-pill fw-bold px-3 py-2 text-white" id="users-tab" data-bs-toggle="pill" data-bs-target="#users-panel">
-        <i class="fa-solid fa-users me-1 text-success"></i> 3. Uzuáriu &amp; Funsionáriu
-      </button>
-    </li>
-    <li class="nav-item">
-      <button class="nav-link rounded-pill fw-bold px-3 py-2 text-white" id="reports-tab" data-bs-toggle="pill" data-bs-target="#reports-panel">
-        <i class="fa-solid fa-chart-pie me-1 text-warning"></i> 4. Relatóriu Vendas &amp; Itens
-      </button>
-    </li>
-    <li class="nav-item">
-      <button class="nav-link rounded-pill fw-bold px-3 py-2 text-white" id="audit-tab" data-bs-toggle="pill" data-bs-target="#audit-panel">
-        <i class="fa-solid fa-list-check me-1 text-secondary"></i> 5. Rejistu Auditoria
-      </button>
-    </li>
-  </ul>
 
   <div class="tab-content" id="adminTabContent">
     

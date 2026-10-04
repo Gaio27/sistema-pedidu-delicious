@@ -831,6 +831,38 @@ h1, h2, h3, h4, h5, h6, .brand-font {
   display: none !important;
 }
 
+/* Hide flying dock on landing and occupied pages */
+body.landing-page .flying-glass-dock-wrapper,
+body.landing-page #flyingDockWrapper,
+body.occupied-page .flying-glass-dock-wrapper,
+body.occupied-page #flyingDockWrapper,
+.landing-page .flying-glass-dock-wrapper,
+.landing-page #flyingDockWrapper,
+.occupied-page .flying-glass-dock-wrapper,
+.occupied-page #flyingDockWrapper {
+  display: none !important;
+}
+
+/* Modal, Offcanvas, and Dock Stacking Context Hierarchy (Fix Freeze Bug) */
+.modal-backdrop {
+  z-index: 2050 !important;
+}
+.modal {
+  z-index: 2060 !important;
+}
+.offcanvas-backdrop {
+  z-index: 2030 !important;
+}
+.offcanvas {
+  z-index: 2040 !important;
+}
+.flying-glass-dock-wrapper {
+  z-index: 1040 !important;
+}
+.mobile-bottom-dock {
+  z-index: 1030 !important;
+}
+
 /* Scroll containment & dynamic viewport height */
 .modal-body,
 .offcanvas-body,

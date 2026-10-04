@@ -82,41 +82,44 @@
       <!-- ROLE SPECIFIC DOCK ITEMS -->
       {% if user.is_authenticated %}
         {% if user.is_admin %}
-          <!-- ADMIN DEDICATED ITEMS (Strictly NO links to Cashier/Kitchen) -->
-          <button class="dock-item-btn active" data-bs-toggle="pill" data-bs-target="#menu-panel" onclick="document.getElementById('menu-tab')?.click();">
+          <!-- ADMIN DEDICATED ITEMS (Strictly NO links to Cashier/Kitchen, no Django/QR clutter) -->
+          <button class="dock-item-btn active" data-dock-tab="#menu-panel">
             <i class="fa-solid fa-bowl-food text-warning"></i>
             <span class="d-none d-md-inline" data-i18n="menu_stock">Menu &amp; Stok</span>
           </button>
-          <button class="dock-item-btn" data-bs-toggle="pill" data-bs-target="#tables-panel" onclick="document.getElementById('tables-tab')?.click();">
+          <button class="dock-item-btn" data-dock-tab="#tables-panel">
             <i class="fa-solid fa-table-cells text-info"></i>
             <span class="d-none d-md-inline" data-i18n="tables_qr">Meza &amp; QR</span>
           </button>
-          <button class="dock-item-btn" data-bs-toggle="pill" data-bs-target="#users-panel" onclick="document.getElementById('users-tab')?.click();">
+          <button class="dock-item-btn" data-dock-tab="#users-panel">
             <i class="fa-solid fa-users text-success"></i>
             <span class="d-none d-md-inline" data-i18n="staff_users">Staff</span>
           </button>
-          <button class="dock-item-btn" data-bs-toggle="pill" data-bs-target="#reports-panel" onclick="document.getElementById('reports-tab')?.click();">
+          <button class="dock-item-btn" data-dock-tab="#reports-panel">
             <i class="fa-solid fa-chart-pie text-warning"></i>
             <span class="d-none d-md-inline" data-i18n="reports">Relatóriu</span>
           </button>
-          <a href="/admin-portal/qr-sheet/" target="_blank" class="dock-item-btn" title="Folha QR">
-            <i class="fa-solid fa-qrcode text-secondary"></i>
-            <span class="d-none d-lg-inline" data-i18n="btn_print_qr_sheet">Folha QR</span>
-          </a>
-          <a href="/admin/" target="_blank" class="dock-item-btn" title="Django Admin">
-            <i class="fa-solid fa-gear text-secondary"></i>
-          </a>
+          <button class="dock-item-btn" data-dock-tab="#audit-panel">
+            <i class="fa-solid fa-clipboard-list text-primary"></i>
+            <span class="d-none d-md-inline">Auditoria</span>
+          </button>
         {% elif user.is_cashier %}
           <!-- CASHIER DEDICATED ITEMS -->
-          <button class="dock-item-btn active" data-bs-toggle="pill" data-bs-target="#live-pos-panel" onclick="document.getElementById('live-pos-tab')?.click();">
+          <button class="dock-item-btn active" data-dock-tab="#live-pos-panel">
             <i class="fa-solid fa-cash-register text-warning"></i>
             <span class="d-none d-sm-inline">POS &amp; Fila</span>
+            <span id="pending-count-badge" class="badge bg-danger rounded-pill ms-1" style="font-size:0.65rem;">0</span>
           </button>
-          <button class="dock-item-btn" data-bs-toggle="pill" data-bs-target="#orders-history-panel" onclick="document.getElementById('orders-history-tab')?.click();">
+          <button class="dock-item-btn" data-dock-tab="#orders-history-panel" onclick="if (typeof cashierApp !== 'undefined') cashierApp.loadTodayOrdersHistory();">
             <i class="fa-solid fa-clock-rotate-left text-info"></i>
             <span class="d-none d-md-inline">Istóriku</span>
           </button>
-          <button class="dock-item-btn" data-bs-toggle="pill" data-bs-target="#shift-close-panel" onclick="document.getElementById('shift-close-tab')?.click();">
+          <button class="dock-item-btn position-relative" data-dock-tab="#bill-alerts-panel">
+            <i class="fa-solid fa-receipt text-danger"></i>
+            <span class="d-none d-md-inline">Alerta Konta</span>
+            <span class="badge bg-danger rounded-pill ms-1" id="bill-alerts-count" style="display:none; font-size:0.65rem;">0</span>
+          </button>
+          <button class="dock-item-btn" data-dock-tab="#shift-close-panel" onclick="if (typeof cashierApp !== 'undefined') cashierApp.loadShiftSummary();">
             <i class="fa-solid fa-vault text-success"></i>
             <span class="d-none d-md-inline">Fechu Kaixa</span>
           </button>
@@ -212,7 +215,7 @@
   <div id="toast-container" class="position-fixed top-0 end-0 p-3" style="z-index: 2050;"></div>
 
   <!-- Main Content -->
-  <main class="container-fluid py-3 position-relative" style="z-index: 1;">
+  <main class="container-fluid py-3">
     {% block content %}{% endblock %}
   </main>
 
@@ -276,6 +279,34 @@
         document.exitFullscreen().catch(() => {});
       }
     }
+
+    // Universal Dock Tab Switching Controller
+    document.addEventListener('click', function(e) {
+      const btn = e.target.closest('.dock-item-btn[data-dock-tab]');
+      if (!btn) return;
+      
+      const targetSelector = btn.getAttribute('data-dock-tab');
+      if (!targetSelector) return;
+      
+      // Set active in dock
+      const parentDock = btn.closest('.flying-glass-dock');
+      if (parentDock) {
+        parentDock.querySelectorAll('.dock-item-btn[data-dock-tab]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      }
+
+      // Activate tab pane
+      const targetPane = document.querySelector(targetSelector);
+      if (targetPane) {
+        const tabContent = targetPane.closest('.tab-content');
+        if (tabContent) {
+          tabContent.querySelectorAll('.tab-pane').forEach(p => {
+            p.classList.remove('show', 'active');
+          });
+          targetPane.classList.add('show', 'active');
+        }
+      }
+    });
   </script>
   {% block extra_js %}{% endblock %}
 </body>

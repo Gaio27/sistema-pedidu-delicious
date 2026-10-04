@@ -40,7 +40,7 @@
       </div>
 
       <div class="mt-4">
-        <a href="/" class="btn-occupied-home">
+        <a href="{% if user.is_authenticated %}{% if user.is_admin %}/admin-portal/{% elif user.is_cashier %}/cashier/{% elif user.is_kitchen %}/kitchen/{% else %}/{% endif %}{% else %}/{% endif %}" class="btn-occupied-home">
           <i class="fa-solid fa-arrow-left me-2"></i>Fila ba Pájina Prinsipál
         </a>
       </div>
@@ -61,7 +61,10 @@
     overflow-x: hidden;
     font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
   }
-  body.occupied-page nav.navbar-custom {
+  body.occupied-page nav.navbar-custom,
+  body.occupied-page #flyingDockWrapper,
+  body.occupied-page .flying-glass-dock-wrapper,
+  body.occupied-page .mobile-bottom-dock {
     display: none !important;
   }
   body.occupied-page #pwa-install-banner {
