@@ -95,6 +95,29 @@ else:
 # WhiteNoise static files serving
 WHITENOISE_USE_FINDERS = True
 
+# Vercel Blob Object Storage Backend
+BLOB_READ_WRITE_TOKEN = os.environ.get('BLOB_READ_WRITE_TOKEN')
+if BLOB_READ_WRITE_TOKEN:
+    DEFAULT_FILE_STORAGE = 'apps.catalog.storage.VercelBlobStorage'
+    STORAGES = {
+        'default': {
+            'BACKEND': 'apps.catalog.storage.VercelBlobStorage',
+        },
+        'staticfiles': {
+            'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+        },
+    }
+else:
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+    STORAGES = {
+        'default': {
+            'BACKEND': 'django.core.files.storage.FileSystemStorage',
+        },
+        'staticfiles': {
+            'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+        },
+    }
+
 # Security hardening
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
@@ -102,4 +125,5 @@ X_FRAME_OPTIONS = 'DENY'
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 

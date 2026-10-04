@@ -109,11 +109,11 @@ class Command(BaseCommand):
                     "icon": "bowl-food",
                     "sort": 1,
                     "items": [
-                        ("Ikan Saboko Celvass Special", "Ikan kakap laut bakar daun kelapa rempah tamarind & cabai merah Dili.", Decimal("7.50"), "/static/images/menu/ikan-saboko.jpg"),
-                        ("Batar Da'an & Pork Ribs", "Jagung manis lembut dimasak kacang merah disajikan dengan iga bakar gurih.", Decimal("8.50"), "/static/images/menu/batar-daan-ribs.jpg"),
-                        ("Tukir Daging Sapi Bambu", "Daging sapi empuk bumbu rempah tradisional dipanggang di bumbung bambu.", Decimal("8.00"), "/static/images/menu/tukir-sapi.jpg"),
-                        ("Ayam Bakar Rempah Celvass", "Ayam bakar bumbu pedas manis madu khas pesisir pantai Dili.", Decimal("6.00"), "/static/images/menu/ayam-bakar.jpg"),
-                        ("Nasi Goreng Seafood Spesial", "Nasi goreng wangi dengan cumi segar, udang laut, telur mata sapi, dan kerupuk.", Decimal("5.00"), "/static/images/menu/nasi-goreng-seafood.jpg"),
+                        ("Ikan Saboko Celvass Special", "Ikan kakap laut bakar daun kelapa rempah tamarind & cabai merah Dili.", Decimal("7.50"), "https://lhauqgbaeb8sosgu.public.blob.vercel-storage.com/menu/ikan-saboko-OyjLshxOt688SYVYngQoqGmhKuYdXP.jpg"),
+                        ("Batar Da'an & Pork Ribs", "Jagung manis lembut dimasak kacang merah disajikan dengan iga bakar gurih.", Decimal("8.50"), "https://lhauqgbaeb8sosgu.public.blob.vercel-storage.com/menu/batar-daan-ribs-1lu3j82nQAkWT8UsxmHqmwRStjyu0e.jpg"),
+                        ("Tukir Daging Sapi Bambu", "Daging sapi empuk bumbu rempah tradisional dipanggang di bumbung bambu.", Decimal("8.00"), "https://lhauqgbaeb8sosgu.public.blob.vercel-storage.com/menu/tukir-sapi-nzD2bX0HyohRDCBQofCox5cws2UaHa.jpg"),
+                        ("Ayam Bakar Rempah Celvass", "Ayam bakar bumbu pedas manis madu khas pesisir pantai Dili.", Decimal("6.00"), "https://lhauqgbaeb8sosgu.public.blob.vercel-storage.com/menu/ayam-bakar-CP2Tfmso9jR6esAa8LybIdn5mISnTw.jpg"),
+                        ("Nasi Goreng Seafood Spesial", "Nasi goreng wangi dengan cumi segar, udang laut, telur mata sapi, dan kerupuk.", Decimal("5.00"), "https://lhauqgbaeb8sosgu.public.blob.vercel-storage.com/menu/nasi-goreng-seafood-ygqTDSwikPOgj9eFOXUCQ60wynHz3B.jpg"),
                     ]
                 },
                 {
@@ -122,9 +122,9 @@ class Command(BaseCommand):
                     "icon": "fish",
                     "sort": 2,
                     "items": [
-                        ("Cumi Bakar Saus Madu Pedas", "Cumi segar panggang arang dengan olesan saus madu cabai nikmat.", Decimal("7.00"), "/static/images/menu/cumi-bakar.jpg"),
-                        ("Udang Jumbo Goreng Mentega", "Udang laut goreng renyah disiram saus mentega bawang putih wangi.", Decimal("8.00"), "/static/images/menu/udang-mentega.jpg"),
-                        ("Kepiting Saus Padang Celvass", "Kepiting bakau segar saus kental pedas gurih aroma daun jeruk.", Decimal("11.00"), "/static/images/menu/kepiting-padang.jpg"),
+                        ("Cumi Bakar Saus Madu Pedas", "Cumi segar panggang arang dengan olesan saus madu cabai nikmat.", Decimal("7.00"), "https://lhauqgbaeb8sosgu.public.blob.vercel-storage.com/menu/cumi-bakar-2WwOOPWTgPPlldeSZc0wmiXBdeXLRL.jpg"),
+                        ("Udang Jumbo Goreng Mentega", "Udang laut goreng renyah disiram saus mentega bawang putih wangi.", Decimal("8.00"), "https://lhauqgbaeb8sosgu.public.blob.vercel-storage.com/menu/udang-mentega-YnJBd0HsYGXFMECmXzQBSa5y3uGNYe.jpg"),
+                        ("Kepiting Saus Padang Celvass", "Kepiting bakau segar saus kental pedas gurih aroma daun jeruk.", Decimal("11.00"), "https://lhauqgbaeb8sosgu.public.blob.vercel-storage.com/menu/kepiting-padang-vQ43EVbn7nGLP36Pv0iDAG0IhIhFuH.jpg"),
                     ]
                 },
                 {
@@ -133,11 +133,11 @@ class Command(BaseCommand):
                     "icon": "martini-glass-citrus",
                     "sort": 3,
                     "items": [
-                        ("Sunset Celvass Mocktail", "Campuran sari jeruk segar, grenadine, daun mint dingin, dan soda segar.", Decimal("3.50"), "/static/images/menu/sunset-mocktail.jpg"),
-                        ("Dili Mojito Lime", "Perasan jeruk nipis segar, daun mint, gula tebu, dan air berkarbonasi dingin.", Decimal("4.00"), "/static/images/menu/dili-mojito.jpg"),
-                        ("Tropical Blue Ocean", "Minuman sirup blue curacao non-alkohol dengan perasan lemon dan kelapa muda.", Decimal("3.80"), "/static/images/menu/tropical-blue.jpg"),
-                        ("Kafé Timor Organik Ermera", "Kopi arabika asli Timor-Leste seduh espresso pekat harum.", Decimal("2.50"), "/static/images/menu/kafe-timor.jpg"),
-                        ("Kelapa Muda Segar Batok", "Air kelapa murni dingin langsung dari batok dengan daging kelapa lembut.", Decimal("2.50"), "/static/images/menu/kelapa-muda.jpg"),
+                        ("Sunset Celvass Mocktail", "Campuran sari jeruk segar, grenadine, daun mint dingin, dan soda segar.", Decimal("3.50"), "https://lhauqgbaeb8sosgu.public.blob.vercel-storage.com/menu/sunset-mocktail-lGPyMMF9LvhcR6F8p0AMTebgsrRn5f.jpg"),
+                        ("Dili Mojito Lime", "Perasan jeruk nipis segar, daun mint, gula tebu, dan air berkarbonasi dingin.", Decimal("4.00"), "https://lhauqgbaeb8sosgu.public.blob.vercel-storage.com/menu/dili-mojito-ra9FdcrPpBXi9HW8QcM4NrpMHlTQ7D.jpg"),
+                        ("Tropical Blue Ocean", "Minuman sirup blue curacao non-alkohol dengan perasan lemon dan kelapa muda.", Decimal("3.80"), "https://lhauqgbaeb8sosgu.public.blob.vercel-storage.com/menu/tropical-blue-xdQKfbwHyjDlOYqWAE9p7bTy12RRsq.jpg"),
+                        ("Kafé Timor Organik Ermera", "Kopi arabika asli Timor-Leste seduh espresso pekat harum.", Decimal("2.50"), "https://lhauqgbaeb8sosgu.public.blob.vercel-storage.com/menu/kafe-timor-83hhzYQAXp0dGpmaUzbm7pKueJ2boF.jpg"),
+                        ("Kelapa Muda Segar Batok", "Air kelapa murni dingin langsung dari batok dengan daging kelapa lembut.", Decimal("2.50"), "https://lhauqgbaeb8sosgu.public.blob.vercel-storage.com/menu/kelapa-muda-oLRFcoON2O48aF9PoTSTxOCJIVR2KE.jpg"),
                     ]
                 },
                 {
@@ -146,8 +146,8 @@ class Command(BaseCommand):
                     "icon": "mug-hot",
                     "sort": 4,
                     "items": [
-                        ("Caldo Verde Tradisional", "Sup kentang khas Portugis-Timor dengan irisan daun kale segar.", Decimal("4.50"), "/static/images/menu/caldo-verde.jpg"),
-                        ("Sup Ikan Laut Kuah Asam", "Sup fillet ikan segar kuah bening asam pedas segar belimbing wuluh.", Decimal("5.50"), "/static/images/menu/sup-ikan-asam.jpg"),
+                        ("Caldo Verde Tradisional", "Sup kentang khas Portugis-Timor dengan irisan daun kale segar.", Decimal("4.50"), "https://lhauqgbaeb8sosgu.public.blob.vercel-storage.com/menu/caldo-verde-omt59etxjlnQvbFNa7qFzoxkZ59kRV.jpg"),
+                        ("Sup Ikan Laut Kuah Asam", "Sup fillet ikan segar kuah bening asam pedas segar belimbing wuluh.", Decimal("5.50"), "https://lhauqgbaeb8sosgu.public.blob.vercel-storage.com/menu/sup-ikan-asam-gnoPhBb3eFiaakuMrUusjuvDMhUlqh.jpg"),
                     ]
                 },
                 {
@@ -156,9 +156,9 @@ class Command(BaseCommand):
                     "icon": "ice-cream",
                     "sort": 5,
                     "items": [
-                        ("Pastel de Nata Português", "Tart telur panggang karamel renyah manis lembut taburan kayu manis.", Decimal("2.50"), "/static/images/menu/pastel-de-nata.jpg"),
-                        ("Pisang Goreng Keju Karamel", "Pisang kepok renyah limpahan keju parut cheddar dan karamel madu.", Decimal("3.00"), "/static/images/menu/pisang-keju.jpg"),
-                        ("Singkong Goreng Garlic Rempah", "Singkong empuk gurih renyah dengan sambal bawang spesial bar.", Decimal("2.50"), "/static/images/menu/singkong-garlic.jpg"),
+                        ("Pastel de Nata Português", "Tart telur panggang karamel renyah manis lembut taburan kayu manis.", Decimal("2.50"), "https://lhauqgbaeb8sosgu.public.blob.vercel-storage.com/menu/pastel-de-nata-TzsshClHzSVFjgG3zBDrkGpPXwZXid.jpg"),
+                        ("Pisang Goreng Keju Karamel", "Pisang kepok renyah limpahan keju parut cheddar dan karamel madu.", Decimal("3.00"), "https://lhauqgbaeb8sosgu.public.blob.vercel-storage.com/menu/pisang-keju-OYbF9QbC7BtSwsAQjJnWusIOuFHjd1.jpg"),
+                        ("Singkong Goreng Garlic Rempah", "Singkong empuk gurih renyah dengan sambal bawang spesial bar.", Decimal("2.50"), "https://lhauqgbaeb8sosgu.public.blob.vercel-storage.com/menu/singkong-garlic-m0PJ0AGaCFW3hvDKhEDJYh4STdSLN7.jpg"),
                     ]
                 }
             ]
