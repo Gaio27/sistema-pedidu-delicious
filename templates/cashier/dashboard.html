@@ -19,7 +19,7 @@
     </div>
 
     <div>
-      <button class="btn btn-sm btn-outline-warning rounded-pill px-3 fw-semibold" onclick="cashierApp.loadPendingOrders(); cashierApp.loadTables();">
+      <button class="btn btn-sm btn-outline-warning rounded-pill px-3 fw-semibold" onclick="cashierApp.loadPendingOrders(); cashierApp.loadTables(); cashierApp.loadActivationRequests();">
         <i class="fa-solid fa-rotate me-1"></i> <span data-i18n="refresh">Refresh</span>
       </button>
     </div>
@@ -41,6 +41,8 @@
               <span class="badge bg-warning bg-opacity-20 text-warning border border-warning border-opacity-25 rounded-pill small" data-i18n="pending_gate_badge">
                 Portaun Kaixa
               </span>
+            </div>
+
             <!-- Incoming Table Activation Requests -->
             <div id="activation-requests-container" class="mb-2"></div>
 

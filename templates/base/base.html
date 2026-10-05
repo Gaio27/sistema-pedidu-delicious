@@ -147,7 +147,7 @@
               <i class="fa-solid fa-vault text-success"></i>
               <span class="d-none d-md-inline" data-i18n="shift_close">Fechu Kaixa</span>
             </button>
-            <button class="dock-item-btn" onclick="if (typeof cashierApp !== 'undefined') { cashierApp.loadPendingOrders(); cashierApp.loadTables(); }" title="Refresh">
+            <button class="dock-item-btn" onclick="if (typeof cashierApp !== 'undefined') { cashierApp.loadPendingOrders(); cashierApp.loadTables(); cashierApp.loadActivationRequests(); }" title="Refresh">
               <i class="fa-solid fa-rotate text-info"></i>
             </button>
           {% elif user.is_kitchen %}

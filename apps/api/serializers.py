@@ -67,16 +67,19 @@ class RestaurantTableSerializer(serializers.ModelSerializer):
         }
 
     def get_pending_activation(self, obj):
-        from apps.tables.models import TableActivationRequest, ActivationRequestStatus
-        req = obj.activation_requests.filter(status=ActivationRequestStatus.PENDING).first()
-        if not req:
+        try:
+            from apps.tables.models import TableActivationRequest, ActivationRequestStatus
+            req = obj.activation_requests.filter(status=ActivationRequestStatus.PENDING).first()
+            if not req:
+                return None
+            return {
+                'id': str(req.id),
+                'guest_count': req.guest_count,
+                'device_token': req.device_token,
+                'requested_at': req.requested_at.isoformat(),
+            }
+        except Exception:
             return None
-        return {
-            'id': str(req.id),
-            'guest_count': req.guest_count,
-            'device_token': req.device_token,
-            'requested_at': req.requested_at.isoformat(),
-        }
 
 
 class TableActivationRequestSerializer(serializers.ModelSerializer):

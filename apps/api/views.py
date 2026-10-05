@@ -406,9 +406,12 @@ class CashierActivationRequestsAPIView(APIView):
     permission_classes = [IsAuthenticated, IsCashierOrAdmin]
 
     def get(self, request):
-        reqs = get_pending_activation_requests_for_restaurant()
-        serializer = TableActivationRequestSerializer(reqs, many=True)
-        return api_response(serializer.data)
+        try:
+            reqs = get_pending_activation_requests_for_restaurant()
+            serializer = TableActivationRequestSerializer(reqs, many=True)
+            return api_response(serializer.data)
+        except Exception:
+            return api_response([])
 
 
 class CashierApproveActivationAPIView(APIView):
