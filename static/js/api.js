@@ -91,7 +91,17 @@ async function apiRequest(endpoint, options = {}) {
       headers,
     });
 
-    const data = await response.json();
+    const text = await response.text();
+    let data = null;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      if (!response.ok) {
+        throw new Error(`Server returned error status ${response.status}`);
+      }
+      throw new Error('Server returned unexpected response format.');
+    }
+
     if (!response.ok || data.success === false) {
       const code = data?.error?.code;
       // If translation key exists for this error code, use it

@@ -463,23 +463,56 @@ class CustomerApp {
     const btn = document.getElementById('btn-request-bill');
     if (!btn) return;
 
-    // Check if at least one order is SERVED
-    const hasServedOrder = this.activeOrders.some((o) => o.status === 'SERVED');
-    const hasCookingOrder = this.activeOrders.some((o) =>
-      ['WAITING_CASHIER_CONFIRMATION', 'CONFIRMED', 'PREPARING'].includes(o.status)
-    );
-
     // If button already shows requested or paid, preserve
-    if (btn.dataset.status === 'BILL_REQUESTED' || btn.dataset.status === 'PAID') {
+    if (btn.dataset.status === 'BILL_REQUESTED') {
+      btn.disabled = true;
+      btn.className = 'btn btn-sm btn-secondary text-white fw-bold rounded-pill px-3 shadow-sm';
+      btn.innerHTML = `<i class="fa-solid fa-clock me-1"></i> ${t('bill_requested')}`;
+      btn.removeAttribute('title');
       return;
     }
 
-    if (!hasServedOrder) {
+    if (btn.dataset.status === 'PAID') {
+      btn.disabled = true;
+      btn.className = 'btn btn-sm btn-success text-white fw-bold rounded-pill px-3 shadow-sm';
+      btn.innerHTML = `<i class="fa-solid fa-circle-check me-1"></i> ${t('paid_status')}`;
+      btn.removeAttribute('title');
+      return;
+    }
+
+    const hasAnyOrder = this.activeOrders && this.activeOrders.length > 0;
+    const hasCookingOrder = hasAnyOrder && this.activeOrders.some((o) =>
+      ['WAITING_CASHIER_CONFIRMATION', 'CONFIRMED', 'PREPARING'].includes(o.status)
+    );
+    const hasServedOrder = hasAnyOrder && this.activeOrders.some((o) =>
+      o.status === 'SERVED' || o.status === 'COMPLETED'
+    );
+
+    if (!hasAnyOrder) {
+      btn.disabled = true;
       btn.dataset.eligible = 'false';
+      btn.className = 'btn btn-sm btn-outline-secondary text-white-50 opacity-60 rounded-pill px-3 shadow-sm';
+      btn.title = t('bill_need_order') || 'Favor halo pedidu uluk molok husu konta.';
+      btn.innerHTML = `<i class="fa-solid fa-receipt me-1"></i> ${t('request_bill')}`;
     } else if (hasCookingOrder) {
+      btn.disabled = true;
       btn.dataset.eligible = 'cooking';
+      btn.className = 'btn btn-sm btn-outline-warning text-warning opacity-75 rounded-pill px-3 shadow-sm';
+      btn.title = t('bill_still_cooking') || 'Pedidu sei tein hela iha dapur.';
+      btn.innerHTML = `<i class="fa-solid fa-utensils me-1"></i> ${t('request_bill')}`;
+    } else if (!hasServedOrder) {
+      btn.disabled = true;
+      btn.dataset.eligible = 'not_served';
+      btn.className = 'btn btn-sm btn-outline-secondary text-white-50 opacity-60 rounded-pill px-3 shadow-sm';
+      btn.title = t('bill_need_served') || 'Hein hahán entrega ba meza ona foin bele husu konta.';
+      btn.innerHTML = `<i class="fa-solid fa-receipt me-1"></i> ${t('request_bill')}`;
     } else {
+      // Eligible: at least one order served and no orders cooking
+      btn.disabled = false;
       btn.dataset.eligible = 'true';
+      btn.className = 'btn btn-sm btn-warning text-dark fw-bold rounded-pill px-3 shadow-sm pulse-gold';
+      btn.title = t('request_bill') || 'Husu Konta';
+      btn.innerHTML = `<i class="fa-solid fa-receipt me-1"></i> ${t('request_bill')}`;
     }
   }
 
@@ -496,7 +529,7 @@ class CustomerApp {
       <div class="glass-card p-3 mb-3 border-warning border-opacity-40 shadow-lg">
         <h6 class="fw-bold mb-3 text-warning d-flex align-items-center justify-content-between" style="font-family: 'Outfit', sans-serif;">
           <span><i class="fa-solid fa-clock-rotate-left me-2"></i> ${t('order_status_title')}</span>
-          <span class="badge bg-warning bg-opacity-20 text-warning border border-warning border-opacity-25 rounded-pill px-2 py-1">${this.activeOrders.length} ${t('total_orders')}</span>
+          <span class="badge bg-warning text-dark fw-bold rounded-pill px-2.5 py-1 shadow-sm">${this.activeOrders.length} ${t('total_orders')}</span>
         </h6>
         ${this.activeOrders
           .map((ord) => {
@@ -544,11 +577,13 @@ class CustomerApp {
   }
 
   async requestBill() {
-    if (!this.sessionToken) return;
+    if (!this.sessionToken) {
+      showToast(t('session_not_open_toast') || 'Sesi meza seidauk loke.', 'warning');
+      return;
+    }
 
-    const hasServedOrder = this.activeOrders.some((o) => o.status === 'SERVED');
-    if (!hasServedOrder) {
-      showToast(t('bill_need_served'), 'warning');
+    if (!this.activeOrders || this.activeOrders.length === 0) {
+      showToast(t('bill_need_order') || 'Favor halo pedidu uluk molok husu konta.', 'warning');
       return;
     }
 
@@ -556,7 +591,13 @@ class CustomerApp {
       ['WAITING_CASHIER_CONFIRMATION', 'CONFIRMED', 'PREPARING'].includes(o.status)
     );
     if (hasCookingOrder) {
-      showToast(t('bill_still_cooking'), 'warning');
+      showToast(t('bill_still_cooking') || 'Pedidu sei tein hela iha dapur.', 'warning');
+      return;
+    }
+
+    const hasServedOrder = this.activeOrders.some((o) => o.status === 'SERVED' || o.status === 'COMPLETED');
+    if (!hasServedOrder) {
+      showToast(t('bill_need_served') || "Hein hahán entrega ba meza ona foin bele husu konta.", 'warning');
       return;
     }
 
@@ -583,10 +624,7 @@ class CustomerApp {
       }
     } catch (e) {
       showToast(e.message, 'error');
-      if (btn) {
-        btn.disabled = false;
-        btn.innerHTML = `<i class="fa-solid fa-receipt me-1"></i> ${t('request_bill')}`;
-      }
+      this.checkBillButtonEligibility();
     }
   }
 

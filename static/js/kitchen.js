@@ -108,45 +108,45 @@ class KitchenKDSApp {
     let actionBtn = '';
     if (column === 'CONFIRMED') {
       actionBtn = `
-        <button class="btn btn-warning w-100 fw-bold py-2 mt-2 rounded-pill text-dark shadow" onclick="kdsApp.startPreparing('${order.id}')">
-          <i class="fa-solid fa-fire me-1"></i> ${t('btn_start_cooking')}
+        <button class="btn btn-warning w-100 fw-bold py-1.5 mt-2 rounded-pill text-dark shadow-sm d-flex align-items-center justify-content-center" style="font-size:0.82rem;" onclick="kdsApp.startPreparing('${order.id}')">
+          <i class="fa-solid fa-fire me-1.5"></i> ${t('btn_start_cooking')}
         </button>
       `;
     } else if (column === 'PREPARING') {
       actionBtn = `
-        <button class="btn btn-success w-100 fw-bold py-2 mt-2 rounded-pill shadow" onclick="kdsApp.markReady('${order.id}')">
-          <i class="fa-solid fa-bell me-1"></i> ${t('btn_mark_ready')}
+        <button class="btn btn-success w-100 fw-bold py-1.5 mt-2 rounded-pill shadow-sm d-flex align-items-center justify-content-center" style="font-size:0.82rem;" onclick="kdsApp.markReady('${order.id}')">
+          <i class="fa-solid fa-bell me-1.5"></i> ${t('btn_mark_ready')}
         </button>
       `;
     } else if (column === 'READY') {
       actionBtn = `
-        <button class="btn btn-outline-light w-100 fw-bold py-2 mt-2 rounded-pill shadow" onclick="kdsApp.markServed('${order.id}')">
-          <i class="fa-solid fa-check-double me-1"></i> ${t('btn_mark_served')}
+        <button class="btn btn-outline-light w-100 fw-bold py-1.5 mt-2 rounded-pill shadow-sm d-flex align-items-center justify-content-center" style="font-size:0.82rem;" onclick="kdsApp.markServed('${order.id}')">
+          <i class="fa-solid fa-check-double me-1.5"></i> ${t('btn_mark_served')}
         </button>
       `;
     }
 
     return `
-      <div class="kds-card p-3 ${isUrgent ? 'urgent' : column === 'PREPARING' ? 'cooking' : column === 'READY' ? 'ready' : ''}" id="card-${order.id}">
-        <div class="d-flex justify-content-between align-items-center mb-2 border-bottom border-secondary pb-2">
-          <div>
-            <h5 class="fw-bold mb-0 text-warning">${order.table_name || order.table_code}</h5>
-            <small class="text-secondary">${order.order_code}</small>
+      <div class="kds-card p-2 p-sm-2.5 mb-2 ${isUrgent ? 'urgent' : column === 'PREPARING' ? 'cooking' : column === 'READY' ? 'ready' : ''}" id="card-${order.id}">
+        <div class="d-flex justify-content-between align-items-center mb-1.5 border-bottom border-white border-opacity-10 pb-1.5">
+          <div class="text-truncate pe-1">
+            <h6 class="fw-bold mb-0 text-warning fs-6 text-truncate">${order.table_name || order.table_code}</h6>
+            <small class="text-white-50" style="font-size:0.72rem;">${order.order_code}</small>
           </div>
-          <span class="badge bg-dark border border-secondary timer-badge" data-time="${order.confirmed_at || order.created_at}">
+          <span class="badge bg-dark bg-opacity-75 border border-secondary timer-badge flex-shrink-0" style="font-size:0.72rem;" data-time="${order.confirmed_at || order.created_at}">
             <i class="fa-regular fa-clock me-1"></i> --:--
           </span>
         </div>
 
-        <ul class="list-unstyled mb-2">
+        <ul class="list-unstyled mb-1.5">
           ${order.items
             .map(
               (item) => `
-            <li class="py-1 border-bottom border-dark d-flex justify-content-between align-items-start">
+            <li class="py-1 border-bottom border-white border-opacity-10 d-flex justify-content-between align-items-start">
               <div>
-                <span class="badge bg-primary fs-6 me-1">${item.quantity}x</span>
-                <span class="fs-6 fw-semibold">${item.menu_name_snapshot}</span>
-                ${item.note ? `<div class="badge bg-danger text-white mt-1 d-block text-start"><i class="fa-solid fa-triangle-exclamation"></i> ${item.note}</div>` : ''}
+                <span class="badge bg-primary px-1.5 py-0.5 me-1" style="font-size:0.75rem;">${item.quantity}x</span>
+                <span class="fw-semibold text-white" style="font-size:0.82rem;">${item.menu_name_snapshot}</span>
+                ${item.note ? `<div class="badge bg-danger text-white mt-1 d-block text-start py-0.5 px-1.5" style="font-size:0.7rem;"><i class="fa-solid fa-triangle-exclamation me-1"></i>${item.note}</div>` : ''}
               </div>
             </li>
           `
@@ -154,7 +154,7 @@ class KitchenKDSApp {
             .join('')}
         </ul>
 
-        ${order.customer_note ? `<div class="p-2 bg-black rounded text-danger small mb-2 border border-danger"><strong>Notasaun Meza:</strong> ${order.customer_note}</div>` : ''}
+        ${order.customer_note ? `<div class="p-1.5 bg-black bg-opacity-50 rounded text-danger small mb-1.5 border border-danger border-opacity-40" style="font-size:0.75rem;"><strong>Notasaun Meza:</strong> ${order.customer_note}</div>` : ''}
 
         ${actionBtn}
       </div>

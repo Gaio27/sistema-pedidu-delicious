@@ -52,7 +52,7 @@
                 <i class="fa-solid fa-circle-check me-1"></i> <span data-i18n="paid_status">Selu Tiha Ona</span>
               </button>
             {% else %}
-              <button class="btn btn-sm btn-warning text-dark fw-bold rounded-pill px-3 shadow-sm" onclick="customerApp.requestBill()" id="btn-request-bill">
+              <button class="btn btn-sm btn-outline-secondary text-white-50 opacity-60 rounded-pill px-3 shadow-sm" disabled onclick="customerApp.requestBill()" id="btn-request-bill" data-status="LOCKED" data-eligible="false" title="Favor halo pedidu uluk molok husu konta">
                 <i class="fa-solid fa-receipt me-1"></i> <span data-i18n="request_bill">Husu Konta</span>
               </button>
             {% endif %}
@@ -210,40 +210,41 @@
   </div>
 </div>
 
-<!-- Cart Offcanvas Drawer (Dark Glassmorphic) -->
-<div class="offcanvas offcanvas-bottom" tabindex="-1" id="cartOffcanvas" style="height: 82vh;">
-  <div class="offcanvas-header px-4 py-3">
-    <h5 class="offcanvas-title fw-bold text-white d-flex align-items-center">
+<!-- Cart Offcanvas Drawer (Dark Glassmorphic Dynamic Size) -->
+<div class="offcanvas offcanvas-bottom" tabindex="-1" id="cartOffcanvas" style="max-height: 85vh; height: min(85vh, 640px);">
+  <div class="offcanvas-header px-3 px-sm-4 py-2.5 border-bottom border-white border-opacity-10">
+    <h5 class="offcanvas-title fw-bold text-white d-flex align-items-center mb-0 fs-6">
       <i class="fa-solid fa-basket-shopping text-warning me-2"></i>
       <span data-i18n="cart_title">Karreta Pedidu</span>
-      <span class="badge bg-warning bg-opacity-20 border border-warning border-opacity-25 text-warning ms-2 small">{{ table.display_name }}</span>
+      <span class="badge bg-warning text-dark fw-bold ms-2 px-2 py-0.5 rounded-pill shadow-sm" style="font-size: 0.75rem;">{{ table.table_code }}</span>
     </h5>
     <div class="d-flex align-items-center gap-2">
       <button type="button" class="btn btn-sm btn-outline-danger border-opacity-50 text-danger rounded-pill px-2.5 py-1 d-flex align-items-center shadow-sm" id="btn-clear-cart" onclick="customerApp.clearCartWithConfirm()" title="Hamos Hotu" style="display:none; font-size:0.75rem;">
-        <i class="fa-solid fa-trash-can me-1 small"></i><span data-i18n="clear_cart">Hamos</span>
+        <i class="fa-solid fa-trash-can me-1 small"></i><span data-i18n="clear_cart">Hotu</span>
       </button>
       <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
     </div>
   </div>
-  <div class="offcanvas-body d-flex flex-column px-4">
+  <div class="offcanvas-body d-flex flex-column px-3 px-sm-4 py-2">
     <div id="cart-items-list" class="flex-grow-1 overflow-auto pe-1"></div>
 
-    <div class="border-top border-white border-opacity-10 pt-3 mt-3">
-      <div class="mb-3">
-        <label for="order-customer-note" class="form-label small fw-bold text-white-50" data-i18n="order_notes_label">Notasaun ba Meza / Dapur:</label>
-        <textarea class="form-control" id="order-customer-note" rows="2" placeholder="Ezemplu: Lalika tau pimenta, kuah haketak..." data-i18n-placeholder="order_notes_placeholder"></textarea>
+    <div class="border-top border-white border-opacity-10 pt-2.5 mt-2">
+      <div class="mb-2">
+        <label for="order-customer-note" class="form-label small fw-bold text-white-50 mb-1" style="font-size: 0.75rem;" data-i18n="order_notes_label">Notasaun ba Meza / Dapur:</label>
+        <textarea class="form-control form-control-sm" id="order-customer-note" rows="1" placeholder="Ezemplu: Lalika tau pimenta, kuah haketak..." data-i18n-placeholder="order_notes_placeholder" style="font-size: 0.8rem;"></textarea>
       </div>
 
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <span class="text-white-50" data-i18n="estimated_total">Totál Estimadu:</span>
-        <span class="fs-3 fw-bold text-warning" id="cart-drawer-total">$0.00</span>
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="text-white-50 small" data-i18n="estimated_total">Totál Estimadu:</span>
+        <span class="fs-4 fw-bold text-warning" id="cart-drawer-total">$0.00</span>
       </div>
 
-      <div class="alert alert-warning py-2 mb-3 bg-warning bg-opacity-10 border border-warning border-opacity-25 text-warning small" data-i18n="gatekeeper_warning">
-        <i class="fa-solid fa-shield-halved me-1"></i> Pedidu sei hetan verifikasaun uluk hosi Kaixa molok tein iha dapur.
+      <div class="p-1.5 px-2 mb-2 bg-warning bg-opacity-10 border border-warning border-opacity-30 text-warning rounded-2 small d-flex align-items-center" style="font-size: 0.74rem; line-height: 1.25;" data-i18n="gatekeeper_warning">
+        <i class="fa-solid fa-shield-halved me-1.5 text-warning flex-shrink-0"></i>
+        <span>Pedidu sei hetan verifikasaun uluk hosi Kaixa molok tein iha dapur.</span>
       </div>
 
-      <button class="btn btn-warning text-dark w-100 py-3 rounded-pill fw-bold fs-6 shadow" id="btn-submit-order" onclick="customerApp.submitOrder()" data-i18n="btn_submit_order">
+      <button class="btn btn-warning text-dark w-100 py-2.5 rounded-pill fw-bold fs-6 shadow" id="btn-submit-order" onclick="customerApp.submitOrder()" data-i18n="btn_submit_order">
         <i class="fa-solid fa-paper-plane me-1"></i> Haruka Pedidu ba Kaixa
       </button>
     </div>

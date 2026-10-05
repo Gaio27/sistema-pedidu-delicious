@@ -15,6 +15,11 @@ class CashierApp {
     this.currentPaymentSessionId = null;
     this.currentBillAmount = 0;
 
+    // Track known IDs to trigger sound alerts when new requests arrive via polling or WS
+    this.knownActivationIds = null;
+    this.knownOrderIds = null;
+    this.knownBillSessionIds = null;
+
     this.init();
   }
 
@@ -56,6 +61,14 @@ class CashierApp {
   async loadPendingOrders() {
     try {
       this.pendingOrders = await apiGet('/api/v1/cashier/orders/');
+      const currentOrderIds = new Set((this.pendingOrders || []).map((o) => String(o.id)));
+      if (this.knownOrderIds !== null) {
+        const hasNew = [...currentOrderIds].some((id) => !this.knownOrderIds.has(id));
+        if (hasNew) {
+          SoundEffects.playBell();
+        }
+      }
+      this.knownOrderIds = currentOrderIds;
       this.renderPendingOrdersUI();
     } catch (e) {
       console.error('Error loading pending orders:', e);
@@ -65,6 +78,14 @@ class CashierApp {
   async loadActivationRequests() {
     try {
       this.activationRequests = await apiGet('/api/v1/cashier/activation-requests/');
+      const currentIds = new Set((this.activationRequests || []).map((r) => String(r.id)));
+      if (this.knownActivationIds !== null) {
+        const hasNew = [...currentIds].some((id) => !this.knownActivationIds.has(id));
+        if (hasNew) {
+          SoundEffects.playBell();
+        }
+      }
+      this.knownActivationIds = currentIds;
       this.renderActivationRequestsUI();
     } catch (e) {
       console.error('Error loading activation requests:', e);
@@ -83,7 +104,7 @@ class CashierApp {
     container.innerHTML = this.activationRequests
       .map(
         (req) => `
-      <div class="glass-card p-2 p-sm-2.5 mb-2 border-warning border-2 bg-warning bg-opacity-10 shadow-sm animate__animated animate__fadeIn">
+      <div class="glass-card p-2 p-sm-2.5 mb-2 border-warning border-2 bg-dark bg-opacity-70 shadow-sm animate__animated animate__fadeIn">
         <div class="d-flex justify-content-between align-items-center mb-1 gap-1">
           <div class="d-flex align-items-center gap-1.5 flex-wrap">
             <span class="badge bg-warning text-dark fw-bold px-2 py-0.5" style="font-size:0.8rem;">
@@ -93,7 +114,7 @@ class CashierApp {
               <i class="fa-solid fa-users me-1"></i>${req.guest_count || 2} ${t('people')}
             </span>
           </div>
-          <span class="badge bg-warning bg-opacity-25 text-warning border border-warning border-opacity-25 px-1.5 py-0.5" style="font-size:0.7rem;">
+          <span class="badge bg-warning text-dark fw-bold px-1.5 py-0.5" style="font-size:0.7rem;">
             Husu Sesi
           </span>
         </div>
@@ -141,9 +162,19 @@ class CashierApp {
   }
 
   async loadTables() {
-
     try {
       this.tables = await apiGet('/api/v1/cashier/tables/');
+      const billSessions = (this.tables || [])
+        .filter((t) => t.active_session && t.active_session.status === 'BILL_REQUESTED')
+        .map((t) => String(t.active_session.id));
+      const currentBillSet = new Set(billSessions);
+      if (this.knownBillSessionIds !== null) {
+        const hasNewBill = [...currentBillSet].some((id) => !this.knownBillSessionIds.has(id));
+        if (hasNewBill) {
+          SoundEffects.playBell();
+        }
+      }
+      this.knownBillSessionIds = currentBillSet;
       this.renderTablesUI();
       this.updateBillAlertsUI();
     } catch (e) {
@@ -319,11 +350,22 @@ class CashierApp {
               </div>
             `
                 : `
-              <div class="my-1 text-center">
+              <div class="my-1">
                 ${
                   hasPendingActivation
-                    ? `<div class="p-1.5 px-2 bg-warning bg-opacity-15 border border-warning border-opacity-50 rounded text-warning text-center animate__animated animate__pulse animate__infinite" style="font-size:0.75rem;">
-                        <i class="fa-solid fa-bell fa-shake me-1"></i><strong>Husu loke sesi!</strong> (${table.pending_activation.guest_count || 2} Ema)
+                    ? `<div class="p-1.5 px-2 bg-dark bg-opacity-70 border border-warning border-opacity-50 rounded-2 shadow-sm">
+                        <div class="d-flex align-items-center justify-content-between mb-1">
+                          <span class="badge bg-warning text-dark fw-bold px-1.5 py-0.5" style="font-size:0.7rem;">
+                            <i class="fa-solid fa-bell fa-shake me-1"></i>Husu Loke Sesi
+                          </span>
+                          <span class="badge bg-dark border border-warning border-opacity-40 text-warning px-1.5 py-0.5" style="font-size:0.7rem;">
+                            <i class="fa-solid fa-users me-1"></i>${table.pending_activation.guest_count || 2} Ema
+                          </span>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between text-white-50" style="font-size:0.72rem;">
+                          <span><i class="fa-solid fa-qrcode text-warning me-1"></i>Kliente scan QR</span>
+                          <span class="text-warning fw-semibold"><i class="fa-regular fa-clock me-1"></i>Hein verifikasaun</span>
+                        </div>
                        </div>`
                     : `<div class="py-1 text-white-50 text-center" style="font-size:0.78rem;"><i class="fa-solid fa-chair me-1 text-secondary"></i> ${t('table_empty')}</div>`
                 }
@@ -331,10 +373,10 @@ class CashierApp {
               <div class="d-flex gap-1.5 mt-auto pt-1">
                 ${
                   hasPendingActivation
-                    ? `<button class="btn btn-sm btn-success flex-fill fw-bold rounded-pill shadow-sm py-1 px-2 d-flex align-items-center justify-content-center" style="font-size:0.78rem;" onclick="cashierApp.approveActivation('${table.pending_activation.id}')">
+                    ? `<button class="btn btn-sm btn-success flex-fill fw-bold rounded-pill shadow-sm py-1 px-2 d-flex align-items-center justify-content-center text-truncate" style="font-size:0.78rem;" onclick="cashierApp.approveActivation('${table.pending_activation.id}')">
                         <i class="fa-solid fa-check-circle me-1"></i> ${t('btn_approve_activation')}
                        </button>`
-                    : `<button class="btn btn-sm btn-outline-warning flex-fill fw-bold rounded-pill py-1 px-2 d-flex align-items-center justify-content-center" style="font-size:0.78rem;" onclick="cashierApp.openSessionModal('${table.id}', '${table.display_name}')">
+                    : `<button class="btn btn-sm btn-outline-warning flex-fill fw-bold rounded-pill py-1 px-2 d-flex align-items-center justify-content-center text-truncate" style="font-size:0.78rem;" onclick="cashierApp.openSessionModal('${table.id}', '${table.display_name}')">
                         <i class="fa-solid fa-door-open me-1"></i> ${t('btn_open_session')}
                        </button>`
                 }

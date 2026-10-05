@@ -9,7 +9,7 @@
   <div class="glass-card p-4 mb-4">
     <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-white border-opacity-10 flex-wrap gap-2">
       <div>
-        <span class="badge bg-warning bg-opacity-20 border border-warning border-opacity-25 text-warning rounded-pill px-3 py-1 fw-bold">{{ order.table_session.table.display_name }}</span>
+        <span class="badge bg-warning text-dark fw-bold rounded-pill px-3 py-1 shadow-sm">{{ order.table_session.table.display_name }}</span>
         <h3 class="fw-bold mb-0 mt-2 text-white">{{ order.order_code }}</h3>
       </div>
       <a href="/t/{{ qr_token }}/" class="btn btn-sm btn-outline-warning rounded-pill px-3 py-2 fw-semibold">
@@ -66,11 +66,13 @@
 
     <!-- Status Alert Detail Card -->
     {% if order.status == 'WAITING_CASHIER_CONFIRMATION' %}
-      <div class="alert alert-warning py-3 d-flex align-items-center gap-3 bg-warning bg-opacity-10 border border-warning border-opacity-30 text-warning">
-        <i class="fa-solid fa-hourglass-half fa-2x text-warning"></i>
+      <div class="alert alert-warning py-3 d-flex align-items-center gap-3 bg-dark border border-warning text-white rounded-3 shadow-sm">
+        <div class="rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px;">
+          <i class="fa-solid fa-hourglass-half fs-5"></i>
+        </div>
         <div>
-          <strong data-i18n="alert_waiting_title">Hein Verifikasaun Kaixa</strong>
-          <div class="small text-white-50 mt-1" data-i18n="alert_waiting_desc">Ita-nia pedidu tama ona ba sistema kaixa. Hein kaixa konfirma, hafoin dapur hahu tein.</div>
+          <strong class="text-warning fs-6" data-i18n="alert_waiting_title">Hein Verifikasaun Kaixa</strong>
+          <div class="small text-white mt-1" data-i18n="alert_waiting_desc">Ita-nia pedidu tama ona ba sistema kaixa. Hein kaixa konfirma, hafoin dapur hahu tein.</div>
         </div>
       </div>
     {% elif order.status == 'CONFIRMED' %}
@@ -82,11 +84,13 @@
         </div>
       </div>
     {% elif order.status == 'PREPARING' %}
-      <div class="alert alert-warning py-3 d-flex align-items-center gap-3 bg-warning bg-opacity-10 border border-warning border-opacity-30 text-warning">
-        <i class="fa-solid fa-fire fa-2x text-warning"></i>
+      <div class="alert alert-warning py-3 d-flex align-items-center gap-3 bg-dark border border-warning text-white rounded-3 shadow-sm">
+        <div class="rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px;">
+          <i class="fa-solid fa-fire fs-5"></i>
+        </div>
         <div>
-          <strong data-i18n="alert_cooking_title">Chef Hahu Tein Ita-nia Hahan</strong>
-          <div class="small text-white-50 mt-1" data-i18n="alert_cooking_desc">Kazu dapur agora dadaun tein hela ita-nia pedidu ho ingredienti fresku.</div>
+          <strong class="text-warning fs-6" data-i18n="alert_cooking_title">Chef Hahu Tein Ita-nia Hahan</strong>
+          <div class="small text-white mt-1" data-i18n="alert_cooking_desc">Kazu dapur agora dadaun tein hela ita-nia pedidu ho ingredienti fresku.</div>
         </div>
       </div>
     {% elif order.status == 'READY' %}
