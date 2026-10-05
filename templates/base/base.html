@@ -138,7 +138,7 @@
               <i class="fa-solid fa-clock-rotate-left text-info"></i>
               <span class="d-none d-md-inline" data-i18n="order_history">Istóriku</span>
             </button>
-            <button class="dock-item-btn position-relative" data-dock-tab="#bill-alerts-panel">
+            <button class="dock-item-btn position-relative" data-dock-tab="#bill-alerts-panel" onclick="if (typeof cashierApp !== 'undefined') { cashierApp.loadTables(); cashierApp.updateBillAlertsUI(); }">
               <i class="fa-solid fa-receipt text-danger"></i>
               <span class="d-none d-md-inline" data-i18n="bill_alerts">Alerta Konta</span>
               <span class="badge bg-danger rounded-pill ms-1" id="bill-alerts-count" style="display:none; font-size:0.65rem;">0</span>

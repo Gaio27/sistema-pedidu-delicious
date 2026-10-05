@@ -397,7 +397,7 @@ class CashierApp {
     const alertsContainer = document.getElementById('bill-alerts-container');
     const badge = document.getElementById('bill-alerts-count');
 
-    const billTables = this.tables.filter((t) => t.active_session && t.active_session.status === 'BILL_REQUESTED');
+    const billTables = (this.tables || []).filter((tbl) => tbl.active_session && tbl.active_session.status === 'BILL_REQUESTED');
 
     if (badge) {
       if (billTables.length > 0) {
@@ -422,19 +422,24 @@ class CashierApp {
 
     alertsContainer.innerHTML = billTables
       .map(
-        (t) => `
-      <div class="col-md-6 col-lg-4">
-        <div class="glass-card p-3 border-danger border-opacity-75">
-          <div class="d-flex justify-content-between align-items-start mb-2">
+        (tbl) => `
+      <div class="col-12 col-md-6 col-lg-4 mb-2">
+        <div class="glass-card p-3 border-danger border-2 shadow-lg animate__animated animate__pulse">
+          <div class="d-flex justify-content-between align-items-start mb-2 gap-2">
             <div>
-              <h5 class="fw-bold mb-0 text-white">${t.display_name}</h5>
-              <small class="text-white-50">${t.table_code} &bull; ${t.active_session.guest_count} ${t('people')}</small>
+              <h5 class="fw-bold mb-0 text-white">${tbl.display_name}</h5>
+              <small class="text-white-50">${tbl.table_code} &bull; ${tbl.active_session.guest_count} ${t('people')}</small>
             </div>
-            <span class="badge bg-danger rounded-pill pulse">${t('request_bill')}!</span>
+            <span class="badge bg-danger text-white rounded-pill px-2 py-1 shadow-sm pulse">
+              <i class="fa-solid fa-receipt me-1"></i>${t('request_bill')}!
+            </span>
           </div>
-          <div class="fs-4 fw-bold text-warning mb-3">${t('total')}: $${t.active_session.bill_total}</div>
-          <button class="btn btn-warning w-100 fw-bold rounded-pill text-dark shadow" onclick="cashierApp.openPaymentModal('${t.active_session.id}', '${t.display_name}')">
-            <i class="fa-solid fa-cash-register me-1"></i> ${t('btn_pay_pos')}
+          <div class="d-flex justify-content-between align-items-center mb-3 p-2 bg-dark bg-opacity-60 rounded-3 border border-secondary border-opacity-25">
+            <span class="text-white-50 small">${t('total')}:</span>
+            <span class="fs-4 fw-bold text-warning">$${tbl.active_session.bill_total}</span>
+          </div>
+          <button class="btn btn-warning w-100 fw-bold rounded-pill text-dark shadow d-flex align-items-center justify-content-center py-2" onclick="cashierApp.openPaymentModal('${tbl.active_session.id}', '${tbl.display_name}')">
+            <i class="fa-solid fa-cash-register me-1.5"></i> ${t('btn_pay_pos')}
           </button>
         </div>
       </div>
