@@ -9,17 +9,17 @@
 <div class="container-fluid px-3 px-md-4 py-3">
 
   <!-- Header -->
-  <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary border-opacity-25 gap-2">
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-2 pb-2 border-bottom border-secondary border-opacity-25 gap-2">
     <div>
-      <h3 class="fw-bold mb-0 text-white d-flex align-items-center">
+      <h4 class="fw-bold mb-0 text-white d-flex align-items-center fs-5">
         <i class="fa-solid fa-cash-register text-warning me-2"></i>
         <span data-i18n="cashier_title">Sentru Kontrolu Kaixa &amp; POS</span>
-      </h3>
-      <small class="text-white-50" data-i18n="cashier_subtitle">Portaun Verifikasaun Pedidu, Sesi Meza, &amp; Pagamentu POS Real-time</small>
+      </h4>
+      <small class="text-white-50 d-none d-sm-inline" style="font-size:0.78rem;" data-i18n="cashier_subtitle">Portaun Verifikasaun Pedidu, Sesi Meza, &amp; Pagamentu POS Real-time</small>
     </div>
 
     <div>
-      <button class="btn btn-sm btn-outline-warning rounded-pill px-3 fw-semibold" onclick="cashierApp.loadPendingOrders(); cashierApp.loadTables(); cashierApp.loadActivationRequests();">
+      <button class="btn btn-sm btn-outline-warning rounded-pill px-2.5 py-1 fw-semibold" onclick="cashierApp.loadPendingOrders(); cashierApp.loadTables(); cashierApp.loadActivationRequests();">
         <i class="fa-solid fa-rotate me-1"></i> <span data-i18n="refresh">Refresh</span>
       </button>
     </div>
@@ -30,15 +30,15 @@
 
     <!-- PANEL 1: LIVE POS & QUEUE -->
     <div class="tab-pane fade show active" id="live-pos-panel">
-      <div class="row g-3">
+      <div class="row g-2 g-md-3">
         <!-- Left: Incoming Pending Queue -->
-        <div class="col-lg-5 col-md-5 col-12">
-          <div class="glass-card p-3 h-100 border-warning border-opacity-50">
-            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-white border-opacity-10">
-              <h5 class="fw-bold mb-0 text-warning d-flex align-items-center">
-                <i class="fa-solid fa-hourglass-half me-2"></i> <span data-i18n="pending_queue_title">Fila Verifikasaun Tama</span>
-              </h5>
-              <span class="badge bg-warning bg-opacity-20 text-warning border border-warning border-opacity-25 rounded-pill small" data-i18n="pending_gate_badge">
+        <div class="col-lg-5 col-md-5 col-12 mb-2 mb-md-0">
+          <div class="glass-card p-2 p-md-3 h-100 border-warning border-opacity-50">
+            <div class="d-flex justify-content-between align-items-center mb-2 pb-1.5 border-bottom border-white border-opacity-10">
+              <h6 class="fw-bold mb-0 text-warning d-flex align-items-center fs-6">
+                <i class="fa-solid fa-hourglass-half me-1.5"></i> <span data-i18n="pending_queue_title">Fila Verifikasaun Tama</span>
+              </h6>
+              <span class="badge bg-warning bg-opacity-20 text-warning border border-warning border-opacity-25 rounded-pill px-2 py-0.5 small" data-i18n="pending_gate_badge">
                 Portaun Kaixa
               </span>
             </div>
@@ -46,7 +46,7 @@
             <!-- Incoming Table Activation Requests -->
             <div id="activation-requests-container" class="mb-2"></div>
 
-            <div id="pending-orders-container" class="overflow-auto pe-1" style="max-height: calc(100vh - 240px);">
+            <div id="pending-orders-container" class="overflow-auto pe-1" style="max-height: calc(100vh - 210px);">
               <!-- Injected by cashier.js -->
             </div>
 
@@ -55,19 +55,19 @@
 
         <!-- Right: Tables Grid & POS -->
         <div class="col-lg-7 col-md-7 col-12">
-          <div class="glass-card p-3 h-100">
-            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-white border-opacity-10 flex-wrap gap-2">
-              <h5 class="fw-bold mb-0 text-white d-flex align-items-center">
-                <i class="fa-solid fa-chair text-primary me-2"></i> <span data-i18n="tables_pos_title">Status Meza &amp; Pagamentu POS</span>
-              </h5>
+          <div class="glass-card p-2 p-md-3 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-2 pb-1.5 border-bottom border-white border-opacity-10 flex-wrap gap-2">
+              <h6 class="fw-bold mb-0 text-white d-flex align-items-center fs-6">
+                <i class="fa-solid fa-chair text-primary me-1.5"></i> <span data-i18n="tables_pos_title">Status Meza &amp; Pagamentu POS</span>
+              </h6>
               <div class="btn-group btn-group-sm" role="group">
-                <button type="button" class="btn btn-warning btn-sm px-3 fw-bold rounded-start-pill text-dark" id="filter-table-all" onclick="cashierApp.setTableFilter('ALL')" data-i18n="filter_all_tables">Meza Hotu</button>
-                <button type="button" class="btn btn-outline-success btn-sm px-3 fw-bold" id="filter-table-open" onclick="cashierApp.setTableFilter('OPEN')" data-i18n="filter_open_tables">🟢 Sesi Loke</button>
-                <button type="button" class="btn btn-outline-secondary btn-sm px-3 fw-bold rounded-end-pill" id="filter-table-avail" onclick="cashierApp.setTableFilter('AVAILABLE')" data-i18n="filter_avail_tables">⚪ Mamuk</button>
+                <button type="button" class="btn btn-warning btn-sm px-2.5 py-0.5 fw-bold rounded-start-pill text-dark" id="filter-table-all" onclick="cashierApp.setTableFilter('ALL')" data-i18n="filter_all_tables">Meza Hotu</button>
+                <button type="button" class="btn btn-outline-success btn-sm px-2.5 py-0.5 fw-bold" id="filter-table-open" onclick="cashierApp.setTableFilter('OPEN')" data-i18n="filter_open_tables">🟢 Sesi Loke</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm px-2.5 py-0.5 fw-bold rounded-end-pill" id="filter-table-avail" onclick="cashierApp.setTableFilter('AVAILABLE')" data-i18n="filter_avail_tables">⚪ Mamuk</button>
               </div>
             </div>
 
-            <div class="row g-3 overflow-auto pe-1" id="tables-grid-container" style="max-height: calc(100vh - 240px);">
+            <div class="row g-2 overflow-auto pe-1" id="tables-grid-container" style="max-height: calc(100vh - 210px);">
               <!-- Injected by cashier.js -->
             </div>
           </div>

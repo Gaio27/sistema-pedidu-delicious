@@ -256,9 +256,35 @@ class CustomerApp {
     if (this.cart[index]) {
       this.cart[index].quantity += delta;
       if (this.cart[index].quantity <= 0) {
+        const removedName = this.cart[index].name;
         this.cart.splice(index, 1);
+        showToast(`${t('item_removed_toast') || 'Item hasai tiha ona'}: ${removedName}`, 'info');
       }
       this.saveCart();
+    }
+  }
+
+  removeFromCart(index) {
+    if (this.cart[index] !== undefined) {
+      const removedName = this.cart[index].name;
+      this.cart.splice(index, 1);
+      this.saveCart();
+      if (typeof SoundEffects !== 'undefined' && SoundEffects.playClick) {
+        SoundEffects.playClick();
+      }
+      showToast(`${t('item_removed_toast') || 'Item hasai tiha ona'}: ${removedName}`, 'info');
+    }
+  }
+
+  clearCartWithConfirm() {
+    if (this.cart.length === 0) return;
+    const confirmMsg = t('clear_cart_confirm') || 'Tebes atu hamos karreta pedidu tomak?';
+    if (confirm(confirmMsg)) {
+      this.clearCart();
+      if (typeof SoundEffects !== 'undefined' && SoundEffects.playClick) {
+        SoundEffects.playClick();
+      }
+      showToast(t('cart_cleared') || 'Karreta mamuk ona.', 'info');
     }
   }
 
@@ -284,6 +310,11 @@ class CustomerApp {
     const totalEl = document.getElementById('cart-total-price');
     const dockBadge = document.getElementById('dock-cart-badge');
     const topDockBadge = document.getElementById('top-dock-cart-badge');
+    const clearCartBtn = document.getElementById('btn-clear-cart');
+
+    if (clearCartBtn) {
+      clearCartBtn.style.display = count > 0 ? 'inline-flex' : 'none';
+    }
 
     if (bar && count > 0) {
       bar.style.display = 'flex';
@@ -327,22 +358,25 @@ class CustomerApp {
         drawerList.innerHTML = this.cart
           .map(
             (item, index) => `
-          <div class="d-flex align-items-center justify-content-between py-3 border-bottom border-secondary border-opacity-25">
-            <div class="pe-2">
-              <div class="fw-bold text-white fs-6">${item.name}</div>
-              <div class="text-warning fw-bold fs-6">
+          <div class="d-flex align-items-center justify-content-between py-2.5 border-bottom border-secondary border-opacity-25 gap-2 animate__animated animate__fadeIn">
+            <div class="pe-1 flex-grow-1 min-w-0">
+              <div class="fw-bold text-white fs-6 text-truncate">${item.name}</div>
+              <div class="text-warning fw-bold small">
                 $${(item.price * item.quantity).toFixed(2)} 
                 <span class="text-white-50 small fw-normal">($${item.price.toFixed(2)}/item)</span>
               </div>
-              ${item.note ? `<div class="small text-warning bg-warning bg-opacity-10 border border-warning border-opacity-25 rounded-pill px-2 py-0 d-inline-block mt-1"><i class="fa-solid fa-pen small me-1"></i>${item.note}</div>` : ''}
+              ${item.note ? `<div class="small text-warning bg-warning bg-opacity-10 border border-warning border-opacity-25 rounded-pill px-2 py-0 d-inline-block mt-0.5" style="font-size:0.75rem;"><i class="fa-solid fa-pen small me-1"></i>${item.note}</div>` : ''}
             </div>
-            <div class="d-flex align-items-center gap-2">
-              <button class="btn btn-sm btn-outline-light rounded-circle d-flex align-items-center justify-content-center" style="width:34px; height:34px;" onclick="customerApp.updateQuantity(${index}, -1)">
+            <div class="d-flex align-items-center gap-1.5 flex-shrink-0">
+              <button class="btn btn-sm btn-outline-light rounded-circle d-flex align-items-center justify-content-center" style="width:30px; height:30px; padding:0;" onclick="customerApp.updateQuantity(${index}, -1)" title="Minus">
                 <i class="fa-solid fa-minus small"></i>
               </button>
-              <span class="fw-bold text-white fs-5 px-1">${item.quantity}</span>
-              <button class="btn btn-sm btn-outline-warning rounded-circle d-flex align-items-center justify-content-center" style="width:34px; height:34px;" onclick="customerApp.updateQuantity(${index}, 1)">
+              <span class="fw-bold text-white px-1" style="min-width:22px; text-align:center;">${item.quantity}</span>
+              <button class="btn btn-sm btn-outline-warning rounded-circle d-flex align-items-center justify-content-center" style="width:30px; height:30px; padding:0;" onclick="customerApp.updateQuantity(${index}, 1)" title="Plus">
                 <i class="fa-solid fa-plus small"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger border-opacity-50 text-danger rounded-circle d-flex align-items-center justify-content-center ms-1" style="width:30px; height:30px; padding:0;" onclick="customerApp.removeFromCart(${index})" title="${t('delete')}">
+                <i class="fa-solid fa-trash-can small"></i>
               </button>
             </div>
           </div>

@@ -218,7 +218,12 @@
       <span data-i18n="cart_title">Karreta Pedidu</span>
       <span class="badge bg-warning bg-opacity-20 border border-warning border-opacity-25 text-warning ms-2 small">{{ table.display_name }}</span>
     </h5>
-    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+    <div class="d-flex align-items-center gap-2">
+      <button type="button" class="btn btn-sm btn-outline-danger border-opacity-50 text-danger rounded-pill px-2.5 py-1 d-flex align-items-center shadow-sm" id="btn-clear-cart" onclick="customerApp.clearCartWithConfirm()" title="Hamos Hotu" style="display:none; font-size:0.75rem;">
+        <i class="fa-solid fa-trash-can me-1 small"></i><span data-i18n="clear_cart">Hamos</span>
+      </button>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+    </div>
   </div>
   <div class="offcanvas-body d-flex flex-column px-4">
     <div id="cart-items-list" class="flex-grow-1 overflow-auto pe-1"></div>

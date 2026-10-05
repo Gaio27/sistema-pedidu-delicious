@@ -107,6 +107,10 @@ const translations = {
 
     // JS Toasts
     added_to_cart: "Aumenta ba karreta:",
+    item_removed_toast: "Item hasai tiha ona hosi karreta.",
+    clear_cart: "Hamos Karreta",
+    clear_cart_confirm: "Tebes atu hamos karreta pedidu tomak?",
+    cart_cleared: "Karreta mamuk ona.",
     cart_empty_toast: "Ita-boot nia karreta mamuk hela!",
     session_not_open_toast: "Sesi meza seidauk loke hosi kaixa.",
     order_sent_toast: "Pedidu haruka ona ba kaixa:",
@@ -451,6 +455,10 @@ const translations = {
 
     // JS Toasts
     added_to_cart: "Adicionado ao carrinho:",
+    item_removed_toast: "Item removido do carrinho.",
+    clear_cart: "Limpar Carrinho",
+    clear_cart_confirm: "Tem certeza que deseja limpar o carrinho?",
+    cart_cleared: "Carrinho esvaziado.",
     cart_empty_toast: "O seu carrinho está vazio!",
     session_not_open_toast: "A sessão da mesa ainda não foi aberta pelo caixa.",
     order_sent_toast: "Pedido enviado para o caixa:",
@@ -795,6 +803,10 @@ const translations = {
 
     // JS Toasts
     added_to_cart: "Added to cart:",
+    item_removed_toast: "Item removed from cart.",
+    clear_cart: "Clear Cart",
+    clear_cart_confirm: "Are you sure you want to clear your cart?",
+    cart_cleared: "Cart cleared.",
     cart_empty_toast: "Your cart is currently empty!",
     session_not_open_toast: "Table session has not been opened by the cashier yet.",
     order_sent_toast: "Order sent to cashier:",
@@ -1139,6 +1151,10 @@ const translations = {
 
     // JS Toasts
     added_to_cart: "Ditambahkan ke keranjang:",
+    item_removed_toast: "Item berhasil dihapus dari keranjang.",
+    clear_cart: "Kosongkan Keranjang",
+    clear_cart_confirm: "Apakah Anda yakin ingin mengosongkan keranjang pesanan?",
+    cart_cleared: "Keranjang telah dikosongkan.",
     cart_empty_toast: "Keranjang pesanan Anda masih kosong!",
     session_not_open_toast: "Sesi meja belum dibuka oleh kasir.",
     order_sent_toast: "Pesanan telah dikirim ke kasir:",

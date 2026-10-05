@@ -83,26 +83,32 @@ class CashierApp {
     container.innerHTML = this.activationRequests
       .map(
         (req) => `
-      <div class="glass-card p-3 mb-2 border-warning border-2 bg-warning bg-opacity-10 shadow-lg animate__animated animate__pulse">
-        <div class="d-flex justify-content-between align-items-center mb-1">
-          <div class="d-flex align-items-center gap-2">
-            <span class="badge bg-warning text-dark fw-bold px-2 py-1">
+      <div class="glass-card p-2 p-sm-2.5 mb-2 border-warning border-2 bg-warning bg-opacity-10 shadow-sm animate__animated animate__fadeIn">
+        <div class="d-flex justify-content-between align-items-center mb-1 gap-1">
+          <div class="d-flex align-items-center gap-1.5 flex-wrap">
+            <span class="badge bg-warning text-dark fw-bold px-2 py-0.5" style="font-size:0.8rem;">
               <i class="fa-solid fa-bell fa-shake me-1"></i> ${req.table_name || req.table_code}
             </span>
-            <span class="fw-bold text-white small">${t('table_activation_requested_title')}</span>
+            <span class="badge bg-dark bg-opacity-75 text-warning border border-warning border-opacity-50 px-1.5 py-0.5" style="font-size:0.72rem;">
+              <i class="fa-solid fa-users me-1"></i>${req.guest_count || 2} ${t('people')}
+            </span>
           </div>
-          <span class="badge bg-dark text-warning border border-warning border-opacity-50 small">${req.guest_count || 2} ${t('people')}</span>
+          <span class="badge bg-warning bg-opacity-25 text-warning border border-warning border-opacity-25 px-1.5 py-0.5" style="font-size:0.7rem;">
+            Husu Sesi
+          </span>
         </div>
-        <p class="small text-white-50 mb-2">
-          ${t('table_activation_requested_desc')}
-        </p>
-        <div class="d-flex gap-2">
-          <button class="btn btn-sm btn-success fw-bold flex-fill rounded-pill shadow py-1" onclick="cashierApp.approveActivation('${req.id}')">
-            <i class="fa-solid fa-check me-1"></i> ${t('btn_approve_activation')}
-          </button>
-          <button class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="cashierApp.rejectActivation('${req.id}')" title="${t('cancel')}">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
+        <div class="d-flex align-items-center justify-content-between gap-2 mt-1">
+          <small class="text-white-50 text-truncate" style="font-size:0.78rem;">
+            <i class="fa-solid fa-qrcode me-1 text-warning"></i>${t('table_activation_requested_title')}
+          </small>
+          <div class="d-flex gap-1.5 ms-auto flex-shrink-0">
+            <button class="btn btn-sm btn-success fw-bold rounded-pill px-2.5 py-1 shadow-sm d-flex align-items-center" style="font-size:0.78rem;" onclick="cashierApp.approveActivation('${req.id}')">
+              <i class="fa-solid fa-check me-1"></i> ${t('btn_approve_activation')}
+            </button>
+            <button class="btn btn-sm btn-outline-danger rounded-circle d-flex align-items-center justify-content-center" style="width:28px; height:28px; padding:0;" onclick="cashierApp.rejectActivation('${req.id}')" title="${t('cancel')}">
+              <i class="fa-solid fa-xmark small"></i>
+            </button>
+          </div>
         </div>
       </div>
     `
@@ -154,10 +160,10 @@ class CashierApp {
 
     if (this.pendingOrders.length === 0) {
       container.innerHTML = `
-        <div class="text-center py-5 text-white-50">
-          <i class="fa-solid fa-circle-check fa-3x text-success mb-2"></i>
-          <h6 class="text-white">${t('all_verified')}</h6>
-          <p class="small text-white-50 mb-0">${t('new_orders_appear_here')}</p>
+        <div class="text-center py-4 text-white-50">
+          <i class="fa-solid fa-circle-check fa-2x text-success mb-2"></i>
+          <h6 class="text-white small mb-1">${t('all_verified')}</h6>
+          <p class="small text-white-50 mb-0" style="font-size:0.75rem;">${t('new_orders_appear_here')}</p>
         </div>
       `;
       return;
@@ -166,40 +172,40 @@ class CashierApp {
     container.innerHTML = this.pendingOrders
       .map(
         (order) => `
-      <div class="glass-card p-3 mb-3 border-warning border-opacity-50">
-        <div class="d-flex justify-content-between align-items-start mb-2">
-          <div>
-            <span class="badge bg-warning text-dark fw-bold me-1">${order.table_name || order.table_code}</span>
-            <span class="fw-bold text-white">${order.order_code}</span>
-            <span class="text-white-50 small ms-2"><i class="fa-regular fa-clock"></i> ${new Date(order.submitted_at).toLocaleTimeString()}</span>
+      <div class="glass-card p-2 p-sm-2.5 mb-2 border-warning border-opacity-50 shadow-sm animate__animated animate__fadeIn">
+        <div class="d-flex justify-content-between align-items-center mb-1.5 gap-1">
+          <div class="d-flex align-items-center gap-1.5 flex-wrap">
+            <span class="badge bg-warning text-dark fw-bold px-2 py-0.5" style="font-size:0.8rem;">${order.table_name || order.table_code}</span>
+            <span class="fw-bold text-white small">${order.order_code}</span>
+            <span class="text-white-50 small ms-1" style="font-size:0.72rem;"><i class="fa-regular fa-clock me-0.5"></i>${new Date(order.submitted_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
           </div>
-          <span class="badge bg-warning bg-opacity-25 border border-warning text-warning rounded-pill">${t('status_waiting')}</span>
+          <span class="badge bg-warning bg-opacity-25 border border-warning text-warning rounded-pill px-2 py-0.5" style="font-size:0.7rem;">${t('status_waiting')}</span>
         </div>
 
-        <div class="border border-secondary border-opacity-25 rounded-3 p-2 bg-dark bg-opacity-50 mb-2">
-          <ul class="list-unstyled mb-0 small">
+        <div class="border border-secondary border-opacity-25 rounded-2 p-1.5 px-2 bg-dark bg-opacity-60 mb-2">
+          <ul class="list-unstyled mb-0" style="font-size:0.8rem;">
             ${order.items
               .map(
                 (item) => `
-              <li class="d-flex justify-content-between py-1 border-bottom border-secondary border-opacity-25">
-                <span class="text-white"><strong>${item.quantity}x</strong> ${item.menu_name_snapshot} ${item.note ? `<span class="badge bg-warning text-dark ms-1"><i class="fa-solid fa-pen"></i> ${item.note}</span>` : ''}</span>
-                <span class="fw-semibold text-warning">$${item.subtotal}</span>
+              <li class="d-flex justify-content-between py-0.5 border-bottom border-secondary border-opacity-25">
+                <span class="text-white text-truncate pe-1"><strong>${item.quantity}x</strong> ${item.menu_name_snapshot} ${item.note ? `<span class="badge bg-warning text-dark ms-1 py-0 px-1" style="font-size:0.68rem;"><i class="fa-solid fa-pen small"></i> ${item.note}</span>` : ''}</span>
+                <span class="fw-semibold text-warning flex-shrink-0">$${item.subtotal}</span>
               </li>
             `
               )
               .join('')}
           </ul>
-          ${order.customer_note ? `<div class="mt-2 p-1 bg-danger bg-opacity-20 border border-danger border-opacity-25 rounded small text-danger"><strong>${t('customer_notes')}</strong> ${order.customer_note}</div>` : ''}
+          ${order.customer_note ? `<div class="mt-1 p-1 bg-danger bg-opacity-20 border border-danger border-opacity-25 rounded small text-danger" style="font-size:0.75rem;"><strong>${t('customer_notes')}</strong> ${order.customer_note}</div>` : ''}
         </div>
 
-        <div class="d-flex justify-content-between align-items-center">
-          <div class="fw-bold fs-5 text-warning">${t('total')}: $${order.grand_total}</div>
-          <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="cashierApp.promptReject('${order.id}', '${order.order_code}')">
-              <i class="fa-solid fa-xmark me-1"></i> ${t('btn_reject')}
+        <div class="d-flex justify-content-between align-items-center gap-2">
+          <div class="fw-bold text-warning fs-6">${t('total')}: $${order.grand_total}</div>
+          <div class="d-flex gap-1.5">
+            <button class="btn btn-sm btn-outline-danger rounded-pill px-2.5 py-1 d-flex align-items-center" style="font-size:0.78rem;" onclick="cashierApp.promptReject('${order.id}', '${order.order_code}')">
+              <i class="fa-solid fa-xmark me-1 small"></i> ${t('btn_reject')}
             </button>
-            <button class="btn btn-sm btn-success rounded-pill px-3 fw-bold shadow" onclick="cashierApp.confirmOrder('${order.id}')">
-              <i class="fa-solid fa-check me-1"></i> ${t('btn_confirm_send')}
+            <button class="btn btn-sm btn-success rounded-pill px-2.5 py-1 fw-bold shadow-sm d-flex align-items-center" style="font-size:0.78rem;" onclick="cashierApp.confirmOrder('${order.id}')">
+              <i class="fa-solid fa-check me-1 small"></i> ${t('btn_confirm_send')}
             </button>
           </div>
         </div>
@@ -222,9 +228,9 @@ class CashierApp {
 
     if (filteredTables.length === 0) {
       container.innerHTML = `
-        <div class="col-12 text-center py-5 text-white-50">
-          <i class="fa-solid fa-chair fa-3x mb-2 text-secondary"></i>
-          <h6 class="text-white">${t('no_orders_history')}</h6>
+        <div class="col-12 text-center py-4 text-white-50">
+          <i class="fa-solid fa-chair fa-2x mb-2 text-secondary"></i>
+          <h6 class="text-white small mb-0">${t('no_orders_history')}</h6>
         </div>
       `;
       return;
@@ -242,99 +248,98 @@ class CashierApp {
         if (isOccupied) {
           cardBorder = isPaid ? 'border-success' : (session.status === 'BILL_REQUESTED' ? 'border-danger' : 'border-primary');
         } else if (hasPendingActivation) {
-          cardBorder = 'border-warning border-2 shadow-lg';
+          cardBorder = 'border-warning border-2 shadow-sm';
         }
 
         let sessionBadge = '';
         if (session) {
           if (isPaid) {
-            sessionBadge = `<span class="badge bg-success text-white rounded-pill"><i class="fa-solid fa-check-circle me-1"></i> ${t('paid_status')}</span>`;
+            sessionBadge = `<span class="badge bg-success text-white rounded-pill px-1.5 py-0.5" style="font-size:0.7rem;"><i class="fa-solid fa-check-circle me-1"></i> ${t('paid_status')}</span>`;
           } else if (session.status === 'BILL_REQUESTED') {
-            sessionBadge = `<span class="badge bg-danger text-white rounded-pill pulse"><i class="fa-solid fa-receipt me-1"></i> ${t('request_bill')}</span>`;
+            sessionBadge = `<span class="badge bg-danger text-white rounded-pill pulse px-1.5 py-0.5" style="font-size:0.7rem;"><i class="fa-solid fa-receipt me-1"></i> ${t('request_bill')}</span>`;
           } else {
-            sessionBadge = `<span class="badge bg-info bg-opacity-25 border border-info text-info rounded-pill">${t('active_session')}</span>`;
+            sessionBadge = `<span class="badge bg-info bg-opacity-25 border border-info text-info rounded-pill px-1.5 py-0.5" style="font-size:0.7rem;">${t('active_session')}</span>`;
           }
         } else if (hasPendingActivation) {
-          sessionBadge = `<span class="badge bg-warning text-dark rounded-pill pulse"><i class="fa-solid fa-bell fa-shake me-1"></i> Husu Loke Sesi</span>`;
+          sessionBadge = `<span class="badge bg-warning text-dark rounded-pill pulse px-1.5 py-0.5" style="font-size:0.7rem;"><i class="fa-solid fa-bell fa-shake me-1"></i> Husu Loke</span>`;
         } else {
-          sessionBadge = `<span class="badge bg-secondary bg-opacity-25 border border-secondary text-secondary rounded-pill">${t('filter_avail_tables')}</span>`;
+          sessionBadge = `<span class="badge bg-secondary bg-opacity-25 border border-secondary text-secondary rounded-pill px-1.5 py-0.5" style="font-size:0.7rem;">${t('filter_avail_tables')}</span>`;
         }
 
         return `
-        <div class="col-md-6 mb-3">
-          <div class="glass-card p-3 h-100 ${cardBorder}">
-            <div class="d-flex justify-content-between align-items-start mb-1">
-              <div>
-                <h5 class="fw-bold mb-0 text-white">${table.display_name}</h5>
-                <span class="text-white-50 small">${table.table_code} &bull; ${t('th_capacity')}: ${table.capacity || 4}</span>
+        <div class="col-12 col-sm-6 col-xl-4 mb-2">
+          <div class="glass-card p-2 p-sm-2.5 h-100 ${cardBorder} d-flex flex-column shadow-sm">
+            <div class="d-flex justify-content-between align-items-center mb-1 gap-1">
+              <div class="text-truncate">
+                <span class="fw-bold text-white fs-6 text-truncate d-block">${table.display_name}</span>
+                <span class="text-white-50" style="font-size:0.72rem;">${table.table_code} &bull; ${table.capacity || 4} <i class="fa-solid fa-user-group ms-0.5 small"></i></span>
               </div>
-              <div>${sessionBadge}</div>
+              <div class="flex-shrink-0">${sessionBadge}</div>
             </div>
 
             ${
               isOccupied
                 ? `
-              <div class="p-2 bg-dark bg-opacity-50 rounded-3 small my-2 border border-secondary border-opacity-25">
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                  <span class="text-white-50">${t('guests')}: <strong class="text-white">${session.guest_count} ${t('people')}</strong></span>
+              <div class="p-1.5 px-2 bg-dark bg-opacity-60 rounded-2 small my-1.5 border border-secondary border-opacity-25">
+                <div class="d-flex justify-content-between align-items-center mb-0.5" style="font-size:0.75rem;">
+                  <span class="text-white-50">${t('guests')}: <strong class="text-white">${session.guest_count}</strong></span>
                   <span class="text-white-50">${t('total_orders')}: <strong class="text-white">${session.orders_count}</strong></span>
                 </div>
-                <div class="d-flex justify-content-between align-items-center border-top border-secondary border-opacity-25 pt-1">
+                <div class="d-flex justify-content-between align-items-center border-top border-secondary border-opacity-25 pt-1" style="font-size:0.78rem;">
                   <span class="text-white-50">${t('remaining_bill')}:</span>
-                  <span class="fw-bold fs-6 ${isPaid ? 'text-success' : 'text-warning'}">
+                  <span class="fw-bold ${isPaid ? 'text-success' : 'text-warning'}">
                     $${session.bill_total}
-                    ${isPaid ? ` <span class="badge bg-success-subtle text-success small">${t('paid_status')}</span>` : (remaining < parseFloat(session.bill_total) ? ` <small class="text-danger">($${remaining.toFixed(2)} resta)</small>` : '')}
+                    ${isPaid ? ` <span class="badge bg-success-subtle text-success small px-1 py-0">${t('paid_status')}</span>` : (remaining < parseFloat(session.bill_total) ? ` <small class="text-danger">($${remaining.toFixed(2)})</small>` : '')}
                   </span>
                 </div>
               </div>
 
-              <div class="d-flex gap-2 mt-auto flex-wrap">
+              <div class="d-flex gap-1.5 mt-auto pt-1">
                 ${
                   isPaid
                     ? `
-                  <button class="btn btn-sm btn-success flex-fill fw-bold rounded-pill" onclick="cashierApp.viewReceiptForSession('${session.id}')" title="${t('receipt_title')}">
-                    <i class="fa-solid fa-receipt me-1"></i> ${t('receipt_title')} (${t('paid_status')})
+                  <button class="btn btn-sm btn-success flex-fill fw-bold rounded-pill py-1 px-2 d-flex align-items-center justify-content-center" style="font-size:0.78rem;" onclick="cashierApp.viewReceiptForSession('${session.id}')" title="${t('receipt_title')}">
+                    <i class="fa-solid fa-receipt me-1"></i> ${t('receipt_title')}
                   </button>
                 `
                     : `
-                  <button class="btn btn-sm btn-warning flex-fill fw-bold rounded-pill text-dark shadow" onclick="cashierApp.openPaymentModal('${session.id}', '${table.display_name}')">
+                  <button class="btn btn-sm btn-warning flex-fill fw-bold rounded-pill text-dark shadow-sm py-1 px-2 text-truncate d-flex align-items-center justify-content-center" style="font-size:0.78rem;" onclick="cashierApp.openPaymentModal('${session.id}', '${table.display_name}')">
                     <i class="fa-solid fa-cash-register me-1"></i> ${t('btn_pay_pos')} ($${remaining.toFixed(2)})
                   </button>
                 `
                 }
                 
-                <a href="/t/${table.qr_token}/" target="_blank" class="btn btn-sm btn-outline-info rounded-circle" title="QR Menu">
-                  <i class="fa-solid fa-qrcode"></i>
+                <a href="/t/${table.qr_token}/" target="_blank" class="btn btn-sm btn-outline-info rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:28px; height:28px; padding:0;" title="QR Menu">
+                  <i class="fa-solid fa-qrcode small"></i>
                 </a>
 
-                <button class="btn btn-sm btn-outline-danger rounded-circle" title="${t('close')}" onclick="cashierApp.handleCloseSession('${session.id}', '${table.display_name}')">
-                  <i class="fa-solid fa-lock"></i>
+                <button class="btn btn-sm btn-outline-danger rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:28px; height:28px; padding:0;" title="${t('close')}" onclick="cashierApp.handleCloseSession('${session.id}', '${table.display_name}')">
+                  <i class="fa-solid fa-lock small"></i>
                 </button>
               </div>
             `
                 : `
-              <div class="text-center py-2 text-white-50 small">
+              <div class="my-1 text-center">
                 ${
                   hasPendingActivation
-                    ? `<div class="p-2 bg-warning bg-opacity-15 border border-warning border-opacity-50 rounded-3 text-warning mb-2 animate__animated animate__pulse animate__infinite">
-                        <i class="fa-solid fa-bell fa-shake me-1"></i> <strong>Kliente scan QR &amp; husu loke sesi!</strong><br>
-                        <small class="text-white-50">${table.pending_activation.guest_count || 2} Ema &bull; Hein verifikasaun</small>
+                    ? `<div class="p-1.5 px-2 bg-warning bg-opacity-15 border border-warning border-opacity-50 rounded text-warning text-center animate__animated animate__pulse animate__infinite" style="font-size:0.75rem;">
+                        <i class="fa-solid fa-bell fa-shake me-1"></i><strong>Husu loke sesi!</strong> (${table.pending_activation.guest_count || 2} Ema)
                        </div>`
-                    : t('table_empty')
+                    : `<div class="py-1 text-white-50 text-center" style="font-size:0.78rem;"><i class="fa-solid fa-chair me-1 text-secondary"></i> ${t('table_empty')}</div>`
                 }
               </div>
-              <div class="d-flex gap-2 mt-auto">
+              <div class="d-flex gap-1.5 mt-auto pt-1">
                 ${
                   hasPendingActivation
-                    ? `<button class="btn btn-sm btn-success flex-fill fw-bold rounded-pill shadow py-2" onclick="cashierApp.approveActivation('${table.pending_activation.id}')">
+                    ? `<button class="btn btn-sm btn-success flex-fill fw-bold rounded-pill shadow-sm py-1 px-2 d-flex align-items-center justify-content-center" style="font-size:0.78rem;" onclick="cashierApp.approveActivation('${table.pending_activation.id}')">
                         <i class="fa-solid fa-check-circle me-1"></i> ${t('btn_approve_activation')}
                        </button>`
-                    : `<button class="btn btn-sm btn-outline-warning flex-fill fw-bold rounded-pill" onclick="cashierApp.openSessionModal('${table.id}', '${table.display_name}')">
+                    : `<button class="btn btn-sm btn-outline-warning flex-fill fw-bold rounded-pill py-1 px-2 d-flex align-items-center justify-content-center" style="font-size:0.78rem;" onclick="cashierApp.openSessionModal('${table.id}', '${table.display_name}')">
                         <i class="fa-solid fa-door-open me-1"></i> ${t('btn_open_session')}
                        </button>`
                 }
-                <a href="/t/${table.qr_token}/" target="_blank" class="btn btn-sm btn-outline-secondary rounded-circle" title="QR">
-                  <i class="fa-solid fa-qrcode"></i>
+                <a href="/t/${table.qr_token}/" target="_blank" class="btn btn-sm btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:28px; height:28px; padding:0;" title="QR">
+                  <i class="fa-solid fa-qrcode small"></i>
                 </a>
               </div>
             `
@@ -343,7 +348,6 @@ class CashierApp {
         </div>
       `;
       })
-
       .join('');
   }
 
