@@ -58,3 +58,58 @@ def test_public_order_submit_and_cashier_flow_api(active_session, menu_item_fish
     assert kitchen_res.status_code == 200
     kitchen_list = kitchen_res.json()['data']
     assert any(o['id'] == order_id for o in kitchen_list)
+
+
+@pytest.mark.django_db
+def test_table_activation_request_and_approval_flow(restaurant, cashier_user):
+    from apps.tables.models import RestaurantTable
+    table_two = RestaurantTable.objects.create(
+        restaurant=restaurant,
+        table_code='T-02',
+        display_name='Meza 02'
+    )
+    client = APIClient()
+
+    # 1. Check unopened table resolve
+    res0 = client.get(f'/api/v1/public/tables/resolve/{table_two.qr_token}/')
+    assert res0.status_code == 200
+    assert res0.json()['data']['session']['has_active_session'] is False
+    assert res0.json()['data']['activation_request']['has_pending_activation'] is False
+
+
+    # 2. Customer submits activation request
+    act_res = client.post(
+        f'/api/v1/public/tables/{table_two.qr_token}/request-activation/',
+        {'guest_count': 3},
+        format='json',
+        HTTP_X_DEVICE_TOKEN='device-phone-999'
+    )
+    assert act_res.status_code == 201
+    act_data = act_res.json()['data']
+    assert act_data['status'] == 'PENDING'
+    req_id = act_data['request_id']
+
+    # 3. Table resolve now reports pending activation
+    res1 = client.get(f'/api/v1/public/tables/resolve/{table_two.qr_token}/')
+    assert res1.json()['data']['activation_request']['has_pending_activation'] is True
+
+    # 4. Cashier views pending activation requests
+    client.force_authenticate(user=cashier_user)
+    list_res = client.get('/api/v1/cashier/activation-requests/')
+    assert list_res.status_code == 200
+    req_items = list_res.json()['data']
+    assert any(r['id'] == req_id for r in req_items)
+
+    # 5. Cashier approves activation request
+    approve_res = client.post(f'/api/v1/cashier/activation-requests/{req_id}/approve/')
+    assert approve_res.status_code == 200
+    session_data = approve_res.json()['data']
+    assert session_data['status'] == 'OPEN'
+    assert session_data['table_code'] == table_two.table_code
+
+    # 6. Customer now detects active session without refreshing manually
+    client.logout()
+    res2 = client.get(f'/api/v1/public/tables/resolve/{table_two.qr_token}/')
+    assert res2.json()['data']['session']['has_active_session'] is True
+    assert res2.json()['data']['session']['public_token'] == session_data['public_token']
+

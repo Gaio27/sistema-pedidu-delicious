@@ -4,6 +4,7 @@ from . import views
 urlpatterns = [
     # Public Customer Dine-In API
     path('public/tables/resolve/<str:qr_token>/', views.PublicTableResolveAPIView.as_view(), name='api-public-table-resolve'),
+    path('public/tables/<str:qr_token>/request-activation/', views.PublicTableRequestActivationAPIView.as_view(), name='api-public-table-request-activation'),
     path('public/menu/', views.PublicMenuAPIView.as_view(), name='api-public-menu'),
     path('public/sessions/<str:session_token>/orders/', views.PublicOrderSubmitAPIView.as_view(), name='api-public-order-submit'),
     path('public/sessions/<str:session_token>/orders/list/', views.PublicOrderListAPIView.as_view(), name='api-public-order-list'),
@@ -19,8 +20,12 @@ urlpatterns = [
     path('cashier/tables/', views.CashierTablesListAPIView.as_view(), name='api-cashier-tables-list'),
     path('cashier/tables/<uuid:table_id>/open-session/', views.CashierOpenTableSessionAPIView.as_view(), name='api-cashier-open-session'),
     path('cashier/table-sessions/<uuid:session_id>/close/', views.CashierCloseTableSessionAPIView.as_view(), name='api-cashier-close-session'),
+    path('cashier/activation-requests/', views.CashierActivationRequestsAPIView.as_view(), name='api-cashier-activation-requests'),
+    path('cashier/activation-requests/<uuid:request_id>/approve/', views.CashierApproveActivationAPIView.as_view(), name='api-cashier-approve-activation'),
+    path('cashier/activation-requests/<uuid:request_id>/reject/', views.CashierRejectActivationAPIView.as_view(), name='api-cashier-reject-activation'),
     path('cashier/table-sessions/<uuid:session_id>/payments/', views.CashierPaymentAPIView.as_view(), name='api-cashier-payments'),
     path('cashier/shift/summary/', views.CashierShiftSummaryAPIView.as_view(), name='api-cashier-shift-summary'),
+
 
     # Kitchen API
     path('kitchen/orders/', views.KitchenQueueAPIView.as_view(), name='api-kitchen-queue'),

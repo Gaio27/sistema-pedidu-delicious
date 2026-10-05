@@ -7,6 +7,7 @@ class CashierApp {
   constructor() {
     this.pendingOrders = [];
     this.tables = [];
+    this.activationRequests = [];
     this.tableFilter = 'ALL';
     this.todayOrdersHistory = [];
     this.selectedTableId = null;
@@ -20,19 +21,23 @@ class CashierApp {
   init() {
     this.loadPendingOrders();
     this.loadTables();
+    this.loadActivationRequests();
     this.initWebSocket();
 
     window.addEventListener('languageChanged', () => {
       this.renderPendingOrdersUI();
       this.renderTablesUI();
+      this.renderActivationRequestsUI();
     });
 
-    // Polling fallback every 6 seconds
+    // Polling fallback every 5 seconds
     setInterval(() => {
       this.loadPendingOrders();
       this.loadTables();
-    }, 6000);
+      this.loadActivationRequests();
+    }, 5000);
   }
+
 
   setTableFilter(filter) {
     this.tableFilter = filter;
@@ -57,7 +62,80 @@ class CashierApp {
     }
   }
 
+  async loadActivationRequests() {
+    try {
+      this.activationRequests = await apiGet('/api/v1/cashier/activation-requests/');
+      this.renderActivationRequestsUI();
+    } catch (e) {
+      console.error('Error loading activation requests:', e);
+    }
+  }
+
+  renderActivationRequestsUI() {
+    const container = document.getElementById('activation-requests-container');
+    if (!container) return;
+
+    if (!this.activationRequests || this.activationRequests.length === 0) {
+      container.innerHTML = '';
+      return;
+    }
+
+    container.innerHTML = this.activationRequests
+      .map(
+        (req) => `
+      <div class="glass-card p-3 mb-2 border-warning border-2 bg-warning bg-opacity-10 shadow-lg animate__animated animate__pulse">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-warning text-dark fw-bold px-2 py-1">
+              <i class="fa-solid fa-bell fa-shake me-1"></i> ${req.table_name || req.table_code}
+            </span>
+            <span class="fw-bold text-white small">${t('table_activation_requested_title')}</span>
+          </div>
+          <span class="badge bg-dark text-warning border border-warning border-opacity-50 small">${req.guest_count || 2} ${t('people')}</span>
+        </div>
+        <p class="small text-white-50 mb-2">
+          ${t('table_activation_requested_desc')}
+        </p>
+        <div class="d-flex gap-2">
+          <button class="btn btn-sm btn-success fw-bold flex-fill rounded-pill shadow py-1" onclick="cashierApp.approveActivation('${req.id}')">
+            <i class="fa-solid fa-check me-1"></i> ${t('btn_approve_activation')}
+          </button>
+          <button class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="cashierApp.rejectActivation('${req.id}')" title="${t('cancel')}">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+    `
+      )
+      .join('');
+  }
+
+  async approveActivation(requestId) {
+    try {
+      await apiPost(`/api/v1/cashier/activation-requests/${requestId}/approve/`);
+      SoundEffects.playSuccess();
+      showToast(t('session_opened_success') || 'Sesi meza loke ho susesu!', 'success');
+      this.loadActivationRequests();
+      this.loadTables();
+    } catch (e) {
+      showToast(e.message, 'error');
+    }
+  }
+
+  async rejectActivation(requestId) {
+    if (!confirm('Rekuza pedidu loke meza ne\'e?')) return;
+    try {
+      await apiPost(`/api/v1/cashier/activation-requests/${requestId}/reject/`, { reason: 'Rekuza hosi Kaixa' });
+      showToast('Pedidu loke meza rekuza ona.', 'info');
+      this.loadActivationRequests();
+      this.loadTables();
+    } catch (e) {
+      showToast(e.message, 'error');
+    }
+  }
+
   async loadTables() {
+
     try {
       this.tables = await apiGet('/api/v1/cashier/tables/');
       this.renderTablesUI();
@@ -158,6 +236,14 @@ class CashierApp {
         const isOccupied = session !== null;
         const remaining = session ? parseFloat(session.remaining_balance !== undefined ? session.remaining_balance : session.bill_total) : 0;
         const isPaid = session && (session.is_fully_paid || session.status === 'PAID' || remaining <= 0);
+        const hasPendingActivation = !isOccupied && table.pending_activation;
+
+        let cardBorder = 'border-secondary border-opacity-25';
+        if (isOccupied) {
+          cardBorder = isPaid ? 'border-success' : (session.status === 'BILL_REQUESTED' ? 'border-danger' : 'border-primary');
+        } else if (hasPendingActivation) {
+          cardBorder = 'border-warning border-2 shadow-lg';
+        }
 
         let sessionBadge = '';
         if (session) {
@@ -168,17 +254,21 @@ class CashierApp {
           } else {
             sessionBadge = `<span class="badge bg-info bg-opacity-25 border border-info text-info rounded-pill">${t('active_session')}</span>`;
           }
+        } else if (hasPendingActivation) {
+          sessionBadge = `<span class="badge bg-warning text-dark rounded-pill pulse"><i class="fa-solid fa-bell fa-shake me-1"></i> Husu Loke Sesi</span>`;
+        } else {
+          sessionBadge = `<span class="badge bg-secondary bg-opacity-25 border border-secondary text-secondary rounded-pill">${t('filter_avail_tables')}</span>`;
         }
 
         return `
         <div class="col-md-6 mb-3">
-          <div class="glass-card p-3 h-100 ${isOccupied ? (isPaid ? 'border-success' : (session.status === 'BILL_REQUESTED' ? 'border-danger' : 'border-primary')) : 'border-secondary border-opacity-25'}">
+          <div class="glass-card p-3 h-100 ${cardBorder}">
             <div class="d-flex justify-content-between align-items-start mb-1">
               <div>
                 <h5 class="fw-bold mb-0 text-white">${table.display_name}</h5>
                 <span class="text-white-50 small">${table.table_code} &bull; ${t('th_capacity')}: ${table.capacity || 4}</span>
               </div>
-              <div>${isOccupied ? sessionBadge : `<span class="badge bg-secondary bg-opacity-25 border border-secondary text-secondary rounded-pill">${t('filter_avail_tables')}</span>`}</div>
+              <div>${sessionBadge}</div>
             </div>
 
             ${
@@ -223,13 +313,26 @@ class CashierApp {
               </div>
             `
                 : `
-              <div class="text-center py-3 text-white-50 small">
-                ${t('table_empty')}
+              <div class="text-center py-2 text-white-50 small">
+                ${
+                  hasPendingActivation
+                    ? `<div class="p-2 bg-warning bg-opacity-15 border border-warning border-opacity-50 rounded-3 text-warning mb-2 animate__animated animate__pulse animate__infinite">
+                        <i class="fa-solid fa-bell fa-shake me-1"></i> <strong>Kliente scan QR &amp; husu loke sesi!</strong><br>
+                        <small class="text-white-50">${table.pending_activation.guest_count || 2} Ema &bull; Hein verifikasaun</small>
+                       </div>`
+                    : t('table_empty')
+                }
               </div>
               <div class="d-flex gap-2 mt-auto">
-                <button class="btn btn-sm btn-outline-warning flex-fill fw-bold rounded-pill" onclick="cashierApp.openSessionModal('${table.id}', '${table.display_name}')">
-                  <i class="fa-solid fa-door-open me-1"></i> ${t('btn_open_session')}
-                </button>
+                ${
+                  hasPendingActivation
+                    ? `<button class="btn btn-sm btn-success flex-fill fw-bold rounded-pill shadow py-2" onclick="cashierApp.approveActivation('${table.pending_activation.id}')">
+                        <i class="fa-solid fa-check-circle me-1"></i> ${t('btn_approve_activation')}
+                       </button>`
+                    : `<button class="btn btn-sm btn-outline-warning flex-fill fw-bold rounded-pill" onclick="cashierApp.openSessionModal('${table.id}', '${table.display_name}')">
+                        <i class="fa-solid fa-door-open me-1"></i> ${t('btn_open_session')}
+                       </button>`
+                }
                 <a href="/t/${table.qr_token}/" target="_blank" class="btn btn-sm btn-outline-secondary rounded-circle" title="QR">
                   <i class="fa-solid fa-qrcode"></i>
                 </a>
@@ -240,6 +343,7 @@ class CashierApp {
         </div>
       `;
       })
+
       .join('');
   }
 
@@ -795,7 +899,12 @@ class CashierApp {
   initWebSocket() {
     this.ws = new WebSocketClient('/ws/cashier/', (msg) => {
       console.log('Cashier WS update:', msg);
-      if (msg.event === 'NEW_ORDER_WAITING') {
+      if (msg.event === 'TABLE_ACTIVATION_REQUESTED') {
+        SoundEffects.playBell();
+        showToast(`🔔 Meza ${msg.data.table_name || msg.data.table_code} husu atu loke sesi!`, 'warning');
+        this.loadActivationRequests();
+        this.loadTables();
+      } else if (msg.event === 'NEW_ORDER_WAITING' || msg.event === 'ORDER_CREATED') {
         SoundEffects.playBell();
         showToast(`🔔 Pedidu foun ${msg.data.order_code} - ${msg.data.table_name || msg.data.table_code}!`, 'warning');
         this.loadPendingOrders();
@@ -804,8 +913,10 @@ class CashierApp {
         showToast(`💳 Husu konta hosi ${msg.data.table_name || msg.data.table_code}!`, 'info');
         this.loadTables();
       } else if (msg.event === 'SESSION_OPENED' || msg.event === 'SESSION_CLOSED' || msg.event === 'PAYMENT_COMPLETED') {
+        this.loadActivationRequests();
         this.loadTables();
       }
     });
   }
 }
+

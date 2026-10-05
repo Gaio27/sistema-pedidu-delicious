@@ -1,7 +1,7 @@
 from django.db import transaction
 from django.utils import timezone
 from django.core.exceptions import ValidationError
-from .models import RestaurantTable, TableSession, TableStatus, SessionStatus
+from .models import RestaurantTable, TableSession, TableStatus, SessionStatus, TableActivationRequest, ActivationRequestStatus
 
 ACTIVE_SESSION_STATUSES = [
     SessionStatus.OPEN,
@@ -10,10 +10,11 @@ ACTIVE_SESSION_STATUSES = [
     SessionStatus.PAID,
 ]
 
-def open_table_session(*, table: RestaurantTable, opened_by, guest_count: int = 1, request_id: str = "") -> TableSession:
+def open_table_session(*, table: RestaurantTable, opened_by, guest_count: int = 1, request_id: str = "", device_token: str = "") -> TableSession:
     """
     Opens a new dine-in table session atomically.
     Ensures that only ONE active session exists per table.
+    Links and approves any pending TableActivationRequest for this table.
     """
     with transaction.atomic():
         locked_table = RestaurantTable.objects.select_for_update().get(id=table.id)
@@ -31,12 +32,30 @@ def open_table_session(*, table: RestaurantTable, opened_by, guest_count: int = 
         if existing_active:
             raise ValidationError(f"Table already has an active session (Session ID: {existing_active.id}).")
             
+        # Check and resolve any pending activation requests for this table
+        pending_reqs = TableActivationRequest.objects.filter(
+            table=locked_table,
+            status=ActivationRequestStatus.PENDING
+        )
+        resolved_device_token = device_token
+        for req in pending_reqs:
+            req.status = ActivationRequestStatus.APPROVED
+            req.resolved_at = timezone.now()
+            req.resolved_by = opened_by
+            req.save(update_fields=['status', 'resolved_at', 'resolved_by'])
+            if not resolved_device_token and req.device_token:
+                resolved_device_token = req.device_token
+            if guest_count <= 1 and req.guest_count > 1:
+                guest_count = req.guest_count
+
         session = TableSession.objects.create(
             restaurant=locked_table.restaurant,
             table=locked_table,
             opened_by=opened_by,
             guest_count=max(1, guest_count),
-            status=SessionStatus.OPEN
+            status=SessionStatus.OPEN,
+            primary_device_token=resolved_device_token or None,
+            authorized_device_tokens=[resolved_device_token] if resolved_device_token else []
         )
         
         locked_table.status = TableStatus.OCCUPIED
@@ -66,11 +85,112 @@ def open_table_session(*, table: RestaurantTable, opened_by, guest_count: int = 
                 'table_id': str(locked_table.id),
                 'table_code': locked_table.table_code,
                 'table_name': locked_table.display_name,
+                'qr_token': locked_table.qr_token,
                 'status': session.status,
             }
         )
         
         return session
+
+
+def request_table_activation(*, table: RestaurantTable, device_token: str = "", guest_count: int = 2) -> TableActivationRequest:
+    """
+    Submits a table activation request from customer scanning an unopened/locked table QR.
+    Emits TABLE_ACTIVATION_REQUESTED outbox event to notify cashier immediately.
+    """
+    with transaction.atomic():
+        locked_table = RestaurantTable.objects.select_for_update().get(id=table.id)
+        if not locked_table.is_active:
+            raise ValidationError("Meza la ativu.")
+        if locked_table.status == TableStatus.MAINTENANCE:
+            raise ValidationError("Meza iha manutensaun nia laran.")
+
+        # If table already has an active session, return None
+        existing_active = TableSession.objects.filter(
+            table=locked_table,
+            status__in=ACTIVE_SESSION_STATUSES
+        ).first()
+        if existing_active:
+            return None
+
+        # Re-use or update existing pending request
+        req = TableActivationRequest.objects.filter(
+            table=locked_table,
+            status=ActivationRequestStatus.PENDING
+        ).first()
+
+        if req:
+            req.requested_at = timezone.now()
+            if device_token:
+                req.device_token = device_token
+            if guest_count > 0:
+                req.guest_count = guest_count
+            req.save(update_fields=['requested_at', 'device_token', 'guest_count'])
+        else:
+            req = TableActivationRequest.objects.create(
+                restaurant=locked_table.restaurant,
+                table=locked_table,
+                device_token=device_token or "",
+                guest_count=max(1, guest_count),
+                status=ActivationRequestStatus.PENDING
+            )
+
+        from apps.outbox.services import create_outbox_event
+        create_outbox_event(
+            aggregate_type='TABLE',
+            aggregate_id=locked_table.id,
+            event_type='TABLE_ACTIVATION_REQUESTED',
+            payload={
+                'request_id': str(req.id),
+                'table_id': str(locked_table.id),
+                'table_code': locked_table.table_code,
+                'table_name': locked_table.display_name,
+                'guest_count': req.guest_count,
+                'device_token': req.device_token,
+                'requested_at': req.requested_at.isoformat(),
+            }
+        )
+
+        return req
+
+
+def approve_table_activation(*, request_id: str, approved_by, request_id_header: str = "") -> TableSession:
+    """
+    Approves a table activation request by opening the table session and claiming the requesting device.
+    """
+    with transaction.atomic():
+        req = TableActivationRequest.objects.select_for_update().get(id=request_id)
+        if req.status != ActivationRequestStatus.PENDING:
+            existing_active = TableSession.objects.filter(
+                table=req.table,
+                status__in=ACTIVE_SESSION_STATUSES
+            ).first()
+            if existing_active:
+                return existing_active
+            raise ValidationError(f"Pedidu loke meza la válidu tanba status '{req.status}'.")
+
+        session = open_table_session(
+            table=req.table,
+            opened_by=approved_by,
+            guest_count=req.guest_count,
+            request_id=request_id_header,
+            device_token=req.device_token or ""
+        )
+        return session
+
+
+def reject_table_activation(*, request_id: str, rejected_by, reason: str = "") -> TableActivationRequest:
+    """
+    Rejects a table activation request.
+    """
+    with transaction.atomic():
+        req = TableActivationRequest.objects.select_for_update().get(id=request_id)
+        req.status = ActivationRequestStatus.REJECTED
+        req.resolved_at = timezone.now()
+        req.resolved_by = rejected_by
+        req.save(update_fields=['status', 'resolved_at', 'resolved_by'])
+        return req
+
 
 def close_table_session(*, session: TableSession, closed_by, reason: str = "Completed", request_id: str = "") -> TableSession:
     """

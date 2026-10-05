@@ -66,8 +66,12 @@
     </div>
   </div>
 
+  <!-- Session Activation Status Banner -->
+  <div id="session-activation-status-banner"></div>
+
   <!-- Live Orders Dynamic Section -->
   <div id="customer-active-orders"></div>
+
 
   <!-- Category Filter Pills -->
   <div class="mb-4">
@@ -126,10 +130,11 @@
                         <i class="fa-solid fa-plus"></i> <span data-i18n="add">Aumenta</span>
                       </button>
                     {% else %}
-                      <button class="btn btn-sm btn-outline-secondary rounded-pill px-2 py-1" onclick="event.stopPropagation(); showToast(t('session_not_open_toast'), 'warning')" style="font-size: 0.72rem;">
+                      <button class="btn btn-sm btn-outline-warning rounded-pill px-2 py-1" onclick="event.stopPropagation(); customerApp.requestTableActivation(true); showToast(t('session_not_open_toast'), 'warning')" style="font-size: 0.72rem;">
                         <i class="fa-solid fa-lock me-1"></i> <span data-i18n="locked">Xave Hela</span>
                       </button>
                     {% endif %}
+
                   {% else %}
                     <span class="badge bg-danger bg-opacity-25 border border-danger text-danger rounded-pill px-2 py-1" style="font-size: 0.7rem;" data-i18n="sold_out">Hotu Ona</span>
                   {% endif %}

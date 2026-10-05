@@ -10,8 +10,14 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 
 from apps.accounts.permissions import IsCashierRole, IsKitchenRole, IsAdminRole, IsCashierOrAdmin, IsKitchenOrAdmin
 from apps.tables.models import RestaurantTable, TableSession
-from apps.tables.selectors import get_table_by_qr_token, get_session_by_public_token, list_tables_with_status
-from apps.tables.services import open_table_session, close_table_session, request_bill_for_session, rotate_table_qr
+from apps.tables.selectors import (
+    get_table_by_qr_token, get_session_by_public_token, list_tables_with_status,
+    get_pending_activation_requests_for_restaurant, get_pending_activation_request_for_table
+)
+from apps.tables.services import (
+    open_table_session, close_table_session, request_bill_for_session, rotate_table_qr,
+    request_table_activation, approve_table_activation, reject_table_activation
+)
 from apps.catalog.selectors import get_categories, get_public_menu
 from apps.catalog.models import MenuItem
 from apps.catalog.services import set_menu_item_availability, update_menu_item_price
@@ -26,7 +32,8 @@ from apps.payments.selectors import get_completed_payment_for_session
 
 from .serializers import (
     RestaurantTableSerializer, CategorySerializer, MenuItemSerializer,
-    OrderSerializer, OrderSubmitRequestSerializer, CashPaymentRequestSerializer
+    OrderSerializer, OrderSubmitRequestSerializer, CashPaymentRequestSerializer,
+    TableActivationRequestSerializer
 )
 
 def api_response(data=None, success=True, error=None, http_status=status.HTTP_200_OK, request_id=None):
@@ -74,6 +81,7 @@ class PublicTableResolveAPIView(APIView):
         
         from apps.tables.selectors import get_active_session_for_table
         active_session = get_active_session_for_table(table)
+        pending_req = get_pending_activation_request_for_table(table)
 
         return api_response({
             "table": {
@@ -88,8 +96,56 @@ class PublicTableResolveAPIView(APIView):
                 "available_for_ordering": active_session is not None and active_session.is_active,
                 "public_token": active_session.public_token if active_session else None,
                 "status": active_session.status if active_session else None,
+            },
+            "activation_request": {
+                "has_pending_activation": pending_req is not None,
+                "request_id": str(pending_req.id) if pending_req else None,
             }
         })
+
+
+class PublicTableRequestActivationAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request, qr_token):
+        table = get_table_by_qr_token(qr_token)
+        if not table:
+            return api_error("TABLE_NOT_FOUND", "Meza ho QR code ne'e la hetan.", http_status=status.HTTP_404_NOT_FOUND)
+
+        from apps.tables.selectors import get_active_session_for_table
+        active_session = get_active_session_for_table(table)
+        if active_session:
+            return api_response({
+                "status": "ALREADY_OPEN",
+                "message": "Sesi meza loke tiha ona.",
+                "session_token": active_session.public_token,
+            })
+
+        device_token = (
+            request.headers.get('X-Device-Token') or
+            request.COOKIES.get('celvass_device_id') or
+            request.data.get('device_token') or ""
+        )
+        guest_count = int(request.data.get('guest_count', 2))
+
+        try:
+            req = request_table_activation(
+                table=table,
+                device_token=device_token,
+                guest_count=guest_count
+            )
+            return api_response({
+                "status": "PENDING",
+                "message": "Pedidu loke meza haruka ona ba Kaixa.",
+                "request_id": str(req.id) if req else None,
+                "table_code": table.table_code,
+                "table_name": table.display_name,
+            }, http_status=status.HTTP_201_CREATED)
+        except ValidationError as e:
+            return api_error("ACTIVATION_ERROR", str(e.message if hasattr(e, 'message') else e), http_status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return api_error("SERVER_ERROR", str(e), http_status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
 class PublicMenuAPIView(APIView):
@@ -345,7 +401,56 @@ class CashierCloseTableSessionAPIView(APIView):
             return api_error("RESOURCE_NOT_FOUND", "Sesi meza la hetan.", http_status=status.HTTP_404_NOT_FOUND)
 
 
+class CashierActivationRequestsAPIView(APIView):
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated, IsCashierOrAdmin]
+
+    def get(self, request):
+        reqs = get_pending_activation_requests_for_restaurant()
+        serializer = TableActivationRequestSerializer(reqs, many=True)
+        return api_response(serializer.data)
+
+
+class CashierApproveActivationAPIView(APIView):
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated, IsCashierRole | IsAdminRole]
+
+    def post(self, request, request_id):
+        user = request.user if request.user.is_authenticated else None
+        try:
+            session = approve_table_activation(request_id=str(request_id), approved_by=user)
+            return api_response({
+                "session_id": str(session.id),
+                "public_token": session.public_token,
+                "status": session.status,
+                "table_code": session.table.table_code,
+                "guest_count": session.guest_count,
+            }, http_status=status.HTTP_200_OK)
+        except ValidationError as e:
+            return api_error("ACTIVATION_ERROR", str(e.message if hasattr(e, 'message') else e), http_status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return api_error("SERVER_ERROR", str(e), http_status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class CashierRejectActivationAPIView(APIView):
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated, IsCashierRole | IsAdminRole]
+
+    def post(self, request, request_id):
+        user = request.user if request.user.is_authenticated else None
+        reason = request.data.get('reason', '')
+        try:
+            req = reject_table_activation(request_id=str(request_id), rejected_by=user, reason=reason)
+            return api_response({
+                "request_id": str(req.id),
+                "status": req.status,
+            })
+        except Exception as e:
+            return api_error("ACTIVATION_ERROR", str(e), http_status=status.HTTP_400_BAD_REQUEST)
+
+
 class CashierPaymentAPIView(APIView):
+
     authentication_classes = [SessionAuthentication, BasicAuthentication]
     permission_classes = [IsAuthenticated, IsCashierRole | IsAdminRole]
 

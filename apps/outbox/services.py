@@ -56,8 +56,8 @@ def dispatch_single_event(event_id: uuid.UUID):
         payload = event.payload
 
         # Broadcast routing:
-        # 1. Cashier group receives all order creations, session open/close, bill requests, payments
-        if event_type in ['ORDER_CREATED', 'BILL_REQUESTED', 'SESSION_OPENED', 'SESSION_CLOSED', 'PAYMENT_COMPLETED']:
+        # 1. Cashier group receives all order creations, session open/close, bill requests, payments, and activation requests
+        if event_type in ['ORDER_CREATED', 'BILL_REQUESTED', 'SESSION_OPENED', 'SESSION_CLOSED', 'PAYMENT_COMPLETED', 'TABLE_ACTIVATION_REQUESTED']:
             async_to_sync(channel_layer.group_send)(
                 'cashier_channel',
                 {
@@ -89,6 +89,19 @@ def dispatch_single_event(event_id: uuid.UUID):
                     'data': payload
                 }
             )
+
+        # 4. Table group per QR token (for tables waiting to be activated)
+        qr_token = payload.get('qr_token')
+        if qr_token:
+            async_to_sync(channel_layer.group_send)(
+                f'table_{qr_token}',
+                {
+                    'type': 'customer_message',
+                    'event': event_type,
+                    'data': payload
+                }
+            )
+
 
         event.status = OutboxStatus.DISPATCHED
         event.dispatched_at = timezone.now()

@@ -344,6 +344,13 @@ const translations = {
     label_password: "Liafuan Xave (Password):",
     label_role: "Papél / Funsaun (Role):",
     btn_create_account_now: "Kria Konta Agora",
+    session_not_open_toast: "Sesi meza seidauk loke. Haruka ona pedidu ba Kaixa atu loke sesaun...",
+    waiting_cashier_activation: "Haruka ona pedidu ba Kaixa...",
+    waiting_cashier_activation_desc: "Kaixa sei verifika no loke meza ne'e kedas. Pájina sei loke sesaun automatikamente lahó presiza refresh!",
+    session_opened_celebration: "Meza loke tiha ona! Ita-boot bele hahu halo pedidu agora.",
+    table_activation_requested_title: "Pedidu Loke Meza",
+    table_activation_requested_desc: "Kliente scan QR meza ne'e no hein hela atu loke sesaun hodi bele fihir menu no haruka pedidu.",
+    btn_approve_activation: "Konfirma & Loke Sesi",
   },
 
   pt: {
@@ -681,6 +688,13 @@ const translations = {
     label_password: "Palavra-passe (Password):",
     label_role: "Função / Papel (Role):",
     btn_create_account_now: "Criar Conta Agora",
+    session_not_open_toast: "A sessão da mesa ainda não está aberta. O pedido de abertura foi enviado ao caixa...",
+    waiting_cashier_activation: "Aguardando verificação do Caixa...",
+    waiting_cashier_activation_desc: "O caixa verificará e abrirá esta mesa. A página atualizará automaticamente sem necessidade de recarregar!",
+    session_opened_celebration: "Mesa aberta com sucesso! Pode começar a fazer os seus pedidos.",
+    table_activation_requested_title: "Pedido de Abertura de Mesa",
+    table_activation_requested_desc: "O cliente leu o código QR e aguarda a abertura da sessão para pedir.",
+    btn_approve_activation: "Confirmar & Abrir Sessão",
   },
 
   en: {
@@ -1018,6 +1032,13 @@ const translations = {
     label_password: "Password:",
     label_role: "Role / Position:",
     btn_create_account_now: "Create Account Now",
+    session_not_open_toast: "Table session is not open yet. Request sent to cashier to open...",
+    waiting_cashier_activation: "Request sent to Cashier...",
+    waiting_cashier_activation_desc: "Cashier will verify and open this table. This page will automatically unlock without needing a refresh!",
+    session_opened_celebration: "Table opened! You can now start placing orders.",
+    table_activation_requested_title: "Table Activation Request",
+    table_activation_requested_desc: "Customer scanned QR code and is waiting for table session to open.",
+    btn_approve_activation: "Confirm & Open Session",
   },
 
   id: {
@@ -1355,6 +1376,13 @@ const translations = {
     label_password: "Kata Sandi (Password):",
     label_role: "Peran / Jabatan (Role):",
     btn_create_account_now: "Buat Akun Sekarang",
+    session_not_open_toast: "Sesi meja belum dibuka. Permintaan telah dikirim ke kasir...",
+    waiting_cashier_activation: "Menunggu verifikasi Kasir...",
+    waiting_cashier_activation_desc: "Kasir akan memverifikasi dan membuka meja ini. Halaman akan otomatis terbuka tanpa perlu refresh manual!",
+    session_opened_celebration: "Meja berhasil dibuka! Anda dapat mulai memesan makanan sekarang.",
+    table_activation_requested_title: "Permintaan Buka Meja",
+    table_activation_requested_desc: "Pelanggan scan QR meja ini dan sedang menunggu kasir membuka sesi.",
+    btn_approve_activation: "Konfirmasi & Buka Sesi",
   }
 };
 

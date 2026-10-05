@@ -16,6 +16,8 @@ class CustomerApp {
     this.selectedItem = null;
     this.activeOrders = [];
     this.lastOrdersJson = null;
+    this.sessionWatchTimer = null;
+    this.isSessionOpening = false;
 
     this.init();
   }
@@ -32,6 +34,11 @@ class CustomerApp {
   }
 
   init() {
+    // If table has no active session, initiate automatic cashier activation verification
+    if (!this.sessionToken && this.qrToken) {
+      this.startActivationFlow();
+    }
+
     // Ensure mobile table badge in dock has the table code
     const mobileTableBadge = document.getElementById('dock-table-name-mobile');
     if (mobileTableBadge) {
@@ -50,6 +57,7 @@ class CustomerApp {
       this.renderOrdersUI();
       this.checkBillButtonEligibility();
     });
+
 
     // Category Filter
     document.querySelectorAll('.cat-pill').forEach((btn) => {
@@ -114,7 +122,105 @@ class CustomerApp {
     }
   }
 
+  startActivationFlow() {
+    this.renderActivationWaitingBanner();
+    this.requestTableActivation(false);
+    this.startSessionWatch();
+  }
+
+  renderActivationWaitingBanner() {
+    const bannerEl = document.getElementById('session-activation-status-banner');
+    if (!bannerEl) return;
+    bannerEl.innerHTML = `
+      <div class="glass-card p-3 mb-3 border-warning border-opacity-60 bg-dark bg-opacity-70 text-center shadow-lg animate__animated animate__fadeIn">
+        <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
+          <div class="spinner-grow spinner-grow-sm text-warning" role="status"></div>
+          <h6 class="fw-bold mb-0 text-warning" data-i18n="waiting_cashier_activation">${t('waiting_cashier_activation')}</h6>
+        </div>
+        <p class="small text-white-70 mb-0" data-i18n="waiting_cashier_activation_desc">
+          ${t('waiting_cashier_activation_desc')}
+        </p>
+      </div>
+    `;
+  }
+
+  async requestTableActivation(userTriggered = false) {
+    if (!this.qrToken) return;
+    try {
+      const res = await apiPost(
+        `/api/v1/public/tables/${this.qrToken}/request-activation/`,
+        { device_token: this.deviceId, guest_count: 2 },
+        { 'X-Device-Token': this.deviceId }
+      );
+      if (res.status === 'ALREADY_OPEN' && res.session_token) {
+        this.handleSessionOpened({ public_token: res.session_token });
+      } else if (userTriggered) {
+        showToast(t('waiting_cashier_activation'), 'info');
+      }
+    } catch (e) {
+      console.warn('Activation request error:', e);
+    }
+  }
+
+  startSessionWatch() {
+    if (!this.qrToken) return;
+
+    // 1. WebSocket for instant push on table QR group
+    try {
+      this.tableWs = new WebSocketClient(`/ws/table/${this.qrToken}/`, (msg) => {
+        if (msg.event === 'SESSION_OPENED') {
+          this.handleSessionOpened(msg.data);
+        }
+      });
+    } catch (e) {
+      console.warn('Table WS connection failed, falling back to polling:', e);
+    }
+
+    // 2. High-frequency polling (every 2.5s) to guarantee instant auto-unlock on all devices
+    if (this.sessionWatchTimer) clearInterval(this.sessionWatchTimer);
+    this.sessionWatchTimer = setInterval(async () => {
+      if (document.hidden) return;
+      try {
+        const res = await apiGet(`/api/v1/public/tables/resolve/${this.qrToken}/`);
+        if (res && res.session && res.session.has_active_session && res.session.public_token) {
+          clearInterval(this.sessionWatchTimer);
+          this.handleSessionOpened(res.session);
+        }
+      } catch (err) {
+        // Silent catch on poll error
+      }
+    }, 2500);
+  }
+
+  handleSessionOpened(sessionData) {
+    if (this.isSessionOpening) return;
+    this.isSessionOpening = true;
+    if (this.sessionWatchTimer) clearInterval(this.sessionWatchTimer);
+
+    SoundEffects.playSuccess();
+    showToast(t('session_opened_celebration'), 'success');
+
+    const bannerEl = document.getElementById('session-activation-status-banner');
+    if (bannerEl) {
+      bannerEl.innerHTML = `
+        <div class="glass-card p-3 border-success border-opacity-75 bg-success bg-opacity-20 text-center shadow-lg animate__animated animate__zoomIn mb-3">
+          <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
+            <i class="fa-solid fa-circle-check fs-4 text-success"></i>
+            <h6 class="fw-bold mb-0 text-white">${t('session_opened_celebration')}</h6>
+          </div>
+          <small class="text-white-50">Loke hela pájina pedidu...</small>
+        </div>
+      `;
+    }
+
+    // Smoothly reload page so template renders with full active session & unlocked buttons
+    setTimeout(() => {
+      window.location.reload();
+    }, 350);
+  }
+
   loadCart() {
+
     try {
       const data = localStorage.getItem(this.storageKey);
       return data ? JSON.parse(data) : [];

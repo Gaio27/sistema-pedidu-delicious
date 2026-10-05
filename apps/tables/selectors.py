@@ -1,5 +1,5 @@
 from typing import Optional, List
-from .models import RestaurantTable, TableSession, SessionStatus, TableStatus
+from .models import RestaurantTable, TableSession, SessionStatus, TableStatus, TableActivationRequest, ActivationRequestStatus
 
 ACTIVE_SESSION_STATUSES = [
     SessionStatus.OPEN,
@@ -25,5 +25,18 @@ def get_session_by_public_token(public_token: str) -> Optional[TableSession]:
 
 def list_tables_with_status():
     return RestaurantTable.objects.filter(is_active=True).prefetch_related(
-        'sessions'
+        'sessions', 'activation_requests'
     ).order_by('sort_order', 'table_code')
+
+def get_pending_activation_requests_for_restaurant(restaurant=None) -> List[TableActivationRequest]:
+    qs = TableActivationRequest.objects.filter(status=ActivationRequestStatus.PENDING).select_related('table')
+    if restaurant:
+        qs = qs.filter(restaurant=restaurant)
+    return qs.order_by('-requested_at')
+
+def get_pending_activation_request_for_table(table: RestaurantTable) -> Optional[TableActivationRequest]:
+    return TableActivationRequest.objects.filter(
+        table=table,
+        status=ActivationRequestStatus.PENDING
+    ).first()
+

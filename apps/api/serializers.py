@@ -38,10 +38,11 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class RestaurantTableSerializer(serializers.ModelSerializer):
     active_session = serializers.SerializerMethodField()
+    pending_activation = serializers.SerializerMethodField()
 
     class Meta:
         model = RestaurantTable
-        fields = ['id', 'table_code', 'display_name', 'capacity', 'qr_token', 'status', 'sort_order', 'active_session']
+        fields = ['id', 'table_code', 'display_name', 'capacity', 'qr_token', 'status', 'sort_order', 'active_session', 'pending_activation']
 
     def get_active_session(self, obj):
         from apps.tables.selectors import get_active_session_for_table
@@ -64,6 +65,30 @@ class RestaurantTableSerializer(serializers.ModelSerializer):
             'has_unconfirmed': bill['has_active_unconfirmed_orders'],
             'items': bill['items'],
         }
+
+    def get_pending_activation(self, obj):
+        from apps.tables.models import TableActivationRequest, ActivationRequestStatus
+        req = obj.activation_requests.filter(status=ActivationRequestStatus.PENDING).first()
+        if not req:
+            return None
+        return {
+            'id': str(req.id),
+            'guest_count': req.guest_count,
+            'device_token': req.device_token,
+            'requested_at': req.requested_at.isoformat(),
+        }
+
+
+class TableActivationRequestSerializer(serializers.ModelSerializer):
+    table_id = serializers.UUIDField(source='table.id', read_only=True)
+    table_code = serializers.CharField(source='table.table_code', read_only=True)
+    table_name = serializers.CharField(source='table.display_name', read_only=True)
+
+    class Meta:
+        from apps.tables.models import TableActivationRequest
+        model = TableActivationRequest
+        fields = ['id', 'table_id', 'table_code', 'table_name', 'device_token', 'guest_count', 'status', 'requested_at']
+
 
 class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:

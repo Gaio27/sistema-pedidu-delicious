@@ -101,3 +101,36 @@ class TableSession(models.Model):
             SessionStatus.PAYMENT_PENDING,
             SessionStatus.PAID
         ]
+
+
+class ActivationRequestStatus(models.TextChoices):
+    PENDING = 'PENDING', 'Pending'
+    APPROVED = 'APPROVED', 'Approved'
+    REJECTED = 'REJECTED', 'Rejected'
+    CANCELLED = 'CANCELLED', 'Cancelled'
+
+
+class TableActivationRequest(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    restaurant = models.ForeignKey('restaurants.Restaurant', on_delete=models.CASCADE, related_name='activation_requests')
+    table = models.ForeignKey(RestaurantTable, on_delete=models.CASCADE, related_name='activation_requests')
+    device_token = models.CharField(max_length=128, null=True, blank=True, db_index=True)
+    status = models.CharField(max_length=20, choices=ActivationRequestStatus.choices, default=ActivationRequestStatus.PENDING, db_index=True)
+    guest_count = models.PositiveIntegerField(default=2)
+    requested_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+    resolved_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='resolved_activations')
+
+    class Meta:
+        db_table = 'table_activation_requests'
+        verbose_name = 'Table Activation Request'
+        verbose_name_plural = 'Table Activation Requests'
+        ordering = ['-requested_at']
+        indexes = [
+            models.Index(fields=['table', 'status']),
+            models.Index(fields=['status', 'requested_at']),
+        ]
+
+    def __str__(self):
+        return f"Activation Request: {self.table.display_name} [{self.status}]"
+
