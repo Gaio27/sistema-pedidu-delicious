@@ -5,7 +5,7 @@ from django.db import models, transaction
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 
-from apps.tables.models import TableSession, SessionStatus
+from apps.tables.models import TableSession, SessionStatus, RestaurantTable, TableStatus
 from apps.ordering.models import Order, OrderStatus
 from .models import Payment, PaymentMethod, PaymentStatus
 from apps.audit.services import log_audit_event
@@ -146,10 +146,18 @@ def record_cash_payment(
             idempotency_key=idempotency_key
         )
 
-        # Update Session state to PAID
-        locked_session.status = SessionStatus.PAID
+        # Update Session state to CLOSED and release table immediately
+        locked_session.status = SessionStatus.CLOSED
         locked_session.paid_at = timezone.now()
-        locked_session.save(update_fields=['status', 'paid_at', 'updated_at'])
+        locked_session.closed_at = timezone.now()
+        locked_session.closed_by = cashier_user
+        locked_session.close_reason = "Payment Completed"
+        locked_session.save(update_fields=['status', 'paid_at', 'closed_at', 'closed_by', 'close_reason', 'updated_at'])
+
+        # Free table for next guests
+        table = RestaurantTable.objects.select_for_update().get(id=locked_session.table_id)
+        table.status = TableStatus.AVAILABLE
+        table.save(update_fields=['status', 'updated_at'])
 
         # Mark all billable orders as COMPLETED
         Order.objects.filter(
@@ -169,6 +177,8 @@ def record_cash_payment(
                 'amount': str(payment.amount),
                 'tendered': str(payment.tendered_amount),
                 'change': str(payment.change_amount),
+                'session_closed': True,
+                'table_freed': table.table_code,
             },
             request_id=request_id
         )
@@ -181,14 +191,25 @@ def record_cash_payment(
             payload={
                 'payment_id': str(payment.id),
                 'payment_code': payment.payment_code,
-                'session_id': str(locked_session.id),
-                'session_token': locked_session.public_token,
-                'table_code': locked_session.table.table_code,
-                'table_name': locked_session.table.display_name,
+                'table_session_id': str(locked_session.id),
+                'table_code': table.table_code,
+                'table_name': table.display_name,
                 'amount': str(payment.amount),
                 'tendered_amount': str(payment.tendered_amount),
                 'change_amount': str(payment.change_amount),
-                'paid_at': payment.paid_at.isoformat(),
+            }
+        )
+
+        create_outbox_event(
+            aggregate_type='TABLE_SESSION',
+            aggregate_id=locked_session.id,
+            event_type='SESSION_CLOSED',
+            payload={
+                'session_id': str(locked_session.id),
+                'public_token': locked_session.public_token,
+                'table_id': str(table.id),
+                'table_code': table.table_code,
+                'status': locked_session.status,
             }
         )
 

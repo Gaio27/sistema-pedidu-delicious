@@ -15,10 +15,16 @@ class CashierApp {
     this.currentPaymentSessionId = null;
     this.currentBillAmount = 0;
 
-    // Track known IDs to trigger sound alerts when new requests arrive via polling or WS
     this.knownActivationIds = null;
     this.knownOrderIds = null;
     this.knownBillSessionIds = null;
+
+    // History state
+    this.currentHistorySubTab = 'orders';
+    this.ordersDateFilter = 'today';
+    this.billsDateFilter = 'today';
+    this.ordersHistoryData = [];
+    this.billsHistoryData = [];
 
     this.init();
   }
@@ -93,6 +99,7 @@ class CashierApp {
   }
 
   renderActivationRequestsUI() {
+    this.updatePendingCountBadge();
     const container = document.getElementById('activation-requests-container');
     if (!container) return;
 
@@ -183,10 +190,8 @@ class CashierApp {
   }
 
   renderPendingOrdersUI() {
+    this.updatePendingCountBadge();
     const container = document.getElementById('pending-orders-container');
-    const countBadge = document.getElementById('pending-count-badge');
-    if (countBadge) countBadge.textContent = this.pendingOrders.length;
-
     if (!container) return;
 
     if (this.pendingOrders.length === 0) {
@@ -448,52 +453,274 @@ class CashierApp {
       .join('');
   }
 
-  async loadTodayOrdersHistory() {
+  // --- PENDING COUNT BADGE HELPER ---
+  updatePendingCountBadge() {
+    const countBadge = document.getElementById('pending-count-badge');
+    if (!countBadge) return;
+    const pendingOrdersCount = (this.pendingOrders || []).length;
+    const pendingActivationsCount = (this.activationRequests || []).length;
+    const totalPending = pendingOrdersCount + pendingActivationsCount;
+    if (totalPending > 0) {
+      countBadge.textContent = totalPending;
+      countBadge.style.display = 'inline-block';
+    } else {
+      countBadge.textContent = '0';
+      countBadge.style.display = 'none';
+    }
+  }
+
+  // --- HISTORY SUBTAB SWITCHING ---
+  switchHistorySubTab(tab) {
+    this.currentHistorySubTab = tab;
+    const btnOrders = document.getElementById('subtab-btn-orders');
+    const btnBills = document.getElementById('subtab-btn-bills');
+    const viewOrders = document.getElementById('subview-orders-history');
+    const viewBills = document.getElementById('subview-bills-history');
+
+    if (tab === 'orders') {
+      if (btnOrders) { btnOrders.classList.add('active'); btnOrders.classList.remove('text-white-50'); }
+      if (btnBills) { btnBills.classList.remove('active'); btnBills.classList.add('text-white-50'); }
+      if (viewOrders) viewOrders.style.display = 'block';
+      if (viewBills) viewBills.style.display = 'none';
+      this.loadOrdersHistory();
+    } else {
+      if (btnBills) { btnBills.classList.add('active'); btnBills.classList.remove('text-white-50'); }
+      if (btnOrders) { btnOrders.classList.remove('active'); btnOrders.classList.add('text-white-50'); }
+      if (viewBills) viewBills.style.display = 'block';
+      if (viewOrders) viewOrders.style.display = 'none';
+      this.loadBillsHistory();
+    }
+  }
+
+  refreshActiveHistoryTab() {
+    if (this.currentHistorySubTab === 'bills') {
+      this.loadBillsHistory();
+    } else {
+      this.loadOrdersHistory();
+    }
+  }
+
+  // --- ORDERS HISTORY ---
+  setOrdersDateFilter(range) {
+    this.ordersDateFilter = range;
+    const btnToday = document.getElementById('order-date-today');
+    const btnAll = document.getElementById('order-date-all');
+    if (range === 'today') {
+      btnToday?.classList.add('active');
+      btnAll?.classList.remove('active');
+    } else {
+      btnAll?.classList.add('active');
+      btnToday?.classList.remove('active');
+    }
+    this.loadOrdersHistory();
+  }
+
+  loadTodayOrdersHistory() {
+    if (this.currentHistorySubTab === 'bills') {
+      this.loadBillsHistory();
+    } else {
+      this.loadOrdersHistory();
+    }
+  }
+
+  async loadOrdersHistory() {
     const tbody = document.getElementById('orders-history-tbody');
     if (!tbody) return;
 
+    const range = this.ordersDateFilter || 'today';
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-white-50"><i class="fa-solid fa-spinner fa-spin me-2"></i>${t('loading_history') || 'Karga hela dadus pedidu...'}</td></tr>`;
+
     try {
-      const orders = await apiGet('/api/v1/cashier/orders/history/');
-      this.todayOrdersHistory = orders || [];
-      this.renderOrdersHistoryTable(this.todayOrdersHistory);
+      const orders = await apiGet(`/api/v1/cashier/orders/history/?date_range=${range}`);
+      this.ordersHistoryData = orders || [];
+      this.filterOrdersHistory();
     } catch (e) {
-      tbody.innerHTML = '<tr><td colspan="7" class="text-center py-3 text-danger">Erro karga istóriku pedidu.</td></tr>';
+      tbody.innerHTML = `<tr><td colspan="7" class="text-center py-3 text-danger"><i class="fa-solid fa-triangle-exclamation me-1"></i>Erro karga istóriku pedidu.</td></tr>`;
     }
   }
 
   filterOrdersHistory() {
+    const statusVal = document.getElementById('order-status-filter')?.value || 'ALL';
     const q = (document.getElementById('order-history-search')?.value || '').toLowerCase().trim();
-    if (!q) {
-      this.renderOrdersHistoryTable(this.todayOrdersHistory);
-      return;
+
+    let list = this.ordersHistoryData || [];
+
+    if (statusVal !== 'ALL') {
+      list = list.filter((o) => o.status === statusVal);
     }
-    const filtered = this.todayOrdersHistory.filter(
-      (o) => o.order_code.toLowerCase().includes(q) || o.table_name.toLowerCase().includes(q) || o.items_summary.toLowerCase().includes(q)
-    );
-    this.renderOrdersHistoryTable(filtered);
+
+    if (q) {
+      list = list.filter(
+        (o) =>
+          (o.order_code && o.order_code.toLowerCase().includes(q)) ||
+          (o.table_name && o.table_name.toLowerCase().includes(q)) ||
+          (o.table_code && o.table_code.toLowerCase().includes(q)) ||
+          (o.session_code && o.session_code.toLowerCase().includes(q)) ||
+          (o.items_summary && o.items_summary.toLowerCase().includes(q))
+      );
+    }
+
+    this.renderOrdersHistoryTable(list);
   }
 
   renderOrdersHistoryTable(orders) {
     const tbody = document.getElementById('orders-history-tbody');
     if (!tbody) return;
 
-    if (orders.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-white-50">Laiha pedidu tuir peskiza ne\'e.</td></tr>';
+    if (!orders || orders.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-white-50"><i class="fa-solid fa-inbox fa-2x mb-2 text-secondary d-block"></i>Laiha pedidu tuir peskiza ne'e.</td></tr>`;
       return;
     }
+
+    const statusBadge = (s) => {
+      switch (s) {
+        case 'WAITING_CASHIER_CONFIRMATION':
+          return `<span class="badge bg-warning bg-opacity-25 border border-warning text-warning px-2 py-0.5" style="font-size:0.72rem;">⏳ Hein Kaixa</span>`;
+        case 'CONFIRMED':
+          return `<span class="badge bg-info bg-opacity-25 border border-info text-info px-2 py-0.5" style="font-size:0.72rem;">🟡 Konfirmadu</span>`;
+        case 'PREPARING':
+          return `<span class="badge bg-primary bg-opacity-25 border border-primary text-primary px-2 py-0.5" style="font-size:0.72rem;">🔥 Tein</span>`;
+        case 'READY':
+          return `<span class="badge bg-warning text-dark px-2 py-0.5" style="font-size:0.72rem;">🟢 Prontu</span>`;
+        case 'SERVED':
+          return `<span class="badge bg-success bg-opacity-25 border border-success text-success px-2 py-0.5" style="font-size:0.72rem;">🍽️ Entrega</span>`;
+        case 'COMPLETED':
+          return `<span class="badge bg-success text-white px-2 py-0.5" style="font-size:0.72rem;">✅ Kompletu</span>`;
+        case 'REJECTED':
+          return `<span class="badge bg-danger text-white px-2 py-0.5" style="font-size:0.72rem;">❌ Rekuza</span>`;
+        case 'CANCELLED':
+          return `<span class="badge bg-secondary text-white px-2 py-0.5" style="font-size:0.72rem;">Kansela</span>`;
+        default:
+          return `<span class="badge bg-secondary px-2 py-0.5" style="font-size:0.72rem;">${s}</span>`;
+      }
+    };
 
     tbody.innerHTML = orders
       .map(
         (o) => `
-      <tr>
-        <td class="text-white-50">${o.created_at}</td>
-        <td><strong class="text-white">${o.order_code}</strong></td>
-        <td><span class="badge bg-dark border border-secondary">${o.table_name}</span></td>
-        <td class="text-white-50">${o.items_summary}</td>
-        <td class="fw-bold text-warning">$${o.grand_total}</td>
-        <td><span class="badge bg-secondary">${o.status}</span></td>
+      <tr class="align-middle">
+        <td>
+          <div class="fw-semibold text-white small">${o.created_at}</div>
+          <div class="text-white-50" style="font-size:0.7rem;">${o.created_date || ''}</div>
+        </td>
+        <td>
+          <strong class="text-white small">${o.order_code}</strong>
+          ${o.customer_note ? `<div class="text-warning text-truncate" style="font-size:0.7rem; max-width:140px;" title="${o.customer_note}"><i class="fa-regular fa-note-sticky me-1"></i>${o.customer_note}</div>` : ''}
+          ${o.rejection_reason ? `<div class="text-danger text-truncate" style="font-size:0.7rem; max-width:140px;" title="${o.rejection_reason}"><i class="fa-solid fa-ban me-1"></i>${o.rejection_reason}</div>` : ''}
+        </td>
+        <td>
+          <span class="badge bg-dark border border-secondary text-white">${o.table_name || o.table_code}</span>
+          <div class="text-white-50" style="font-size:0.68rem;">${o.session_code || ''}</div>
+        </td>
+        <td class="text-white-50 small">${o.items_summary}</td>
+        <td class="fw-bold text-warning small">$${o.grand_total}</td>
+        <td>${statusBadge(o.status)}</td>
         <td class="text-end">
-          <span class="text-info small"><i class="fa-solid fa-check"></i></span>
+          ${
+            o.can_print_receipt
+              ? `<button class="btn btn-sm btn-outline-warning rounded-pill px-2.5 py-0.5 fw-semibold shadow-sm d-inline-flex align-items-center" style="font-size:0.75rem;" onclick="cashierApp.viewReceiptForSession('${o.session_id}')" title="Print Resibu">
+                  <i class="fa-solid fa-print me-1"></i> ${t('btn_print_receipt')}
+                 </button>`
+              : `<span class="badge bg-dark border border-secondary text-white-50" style="font-size:0.7rem;">-</span>`
+          }
+        </td>
+      </tr>
+    `
+      )
+      .join('');
+  }
+
+  // --- BILLS & RECEIPTS HISTORY ---
+  setBillsDateFilter(range) {
+    this.billsDateFilter = range;
+    const btnToday = document.getElementById('bill-date-today');
+    const btnAll = document.getElementById('bill-date-all');
+    if (range === 'today') {
+      btnToday?.classList.add('active');
+      btnAll?.classList.remove('active');
+    } else {
+      btnAll?.classList.add('active');
+      btnToday?.classList.remove('active');
+    }
+    this.loadBillsHistory();
+  }
+
+  async loadBillsHistory() {
+    const tbody = document.getElementById('bills-history-tbody');
+    if (!tbody) return;
+
+    const range = this.billsDateFilter || 'today';
+    tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-white-50"><i class="fa-solid fa-spinner fa-spin me-2"></i>${t('loading_history') || 'Karga hela dadus resibu...'}</td></tr>`;
+
+    try {
+      const bills = await apiGet(`/api/v1/cashier/bills/history/?date_range=${range}`);
+      this.billsHistoryData = bills || [];
+      this.filterBillsHistory();
+    } catch (e) {
+      tbody.innerHTML = `<tr><td colspan="8" class="text-center py-3 text-danger"><i class="fa-solid fa-triangle-exclamation me-1"></i>Erro karga istóriku konta & resibu.</td></tr>`;
+    }
+  }
+
+  filterBillsHistory() {
+    const q = (document.getElementById('bill-history-search')?.value || '').toLowerCase().trim();
+    let list = this.billsHistoryData || [];
+
+    if (q) {
+      list = list.filter(
+        (b) =>
+          (b.payment_code && b.payment_code.toLowerCase().includes(q)) ||
+          (b.table_name && b.table_name.toLowerCase().includes(q)) ||
+          (b.table_code && b.table_code.toLowerCase().includes(q)) ||
+          (b.cashier_name && b.cashier_name.toLowerCase().includes(q))
+      );
+    }
+
+    // Compute total revenue badge
+    const totalRev = list.reduce((sum, b) => sum + parseFloat(b.amount || 0), 0);
+    const badgeEl = document.getElementById('bills-total-revenue-badge');
+    if (badgeEl) {
+      badgeEl.textContent = `${t('total_revenue_badge') || 'Totál'}: $${totalRev.toFixed(2)}`;
+    }
+
+    this.renderBillsHistoryTable(list);
+  }
+
+  renderBillsHistoryTable(bills) {
+    const tbody = document.getElementById('bills-history-tbody');
+    if (!tbody) return;
+
+    if (!bills || bills.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-white-50"><i class="fa-solid fa-receipt fa-2x mb-2 text-secondary d-block"></i>${t('no_bills_found') || 'Laiha dadus konta ka resibu.'}</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = bills
+      .map(
+        (b) => `
+      <tr class="align-middle">
+        <td>
+          <div class="fw-semibold text-white small">${b.paid_at_time}</div>
+          <div class="text-white-50" style="font-size:0.7rem;">${b.paid_at_date}</div>
+        </td>
+        <td>
+          <strong class="text-warning small">${b.payment_code}</strong>
+        </td>
+        <td>
+          <span class="badge bg-dark border border-secondary text-white">${b.table_name || b.table_code}</span>
+        </td>
+        <td>
+          <span class="badge bg-secondary bg-opacity-40 text-light px-2 py-0.5" style="font-size:0.72rem;">${b.method || 'Cash'}</span>
+        </td>
+        <td class="fw-bold text-success small">$${b.amount}</td>
+        <td>
+          <div class="small text-white-50" style="font-size:0.75rem;">Simu: <span class="text-white fw-semibold">$${b.tendered_amount}</span></div>
+          <div class="small text-white-50" style="font-size:0.75rem;">Troku: <span class="text-success fw-semibold">$${b.change_amount}</span></div>
+        </td>
+        <td class="text-white-50 small">${b.cashier_name}</td>
+        <td class="text-end">
+          <button class="btn btn-sm btn-outline-warning rounded-pill px-2.5 py-1 fw-bold shadow-sm d-inline-flex align-items-center" style="font-size:0.78rem;" onclick="cashierApp.viewReceiptForSession('${b.session_id}')" title="Print Resibu">
+            <i class="fa-solid fa-print me-1.5"></i> ${t('btn_print_receipt')}
+          </button>
         </td>
       </tr>
     `

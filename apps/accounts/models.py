@@ -48,3 +48,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     @property
     def is_kitchen(self):
         return self.role == Role.KITCHEN or self.is_admin
+
+    def get_full_name(self):
+        return self.full_name or self.username
+
+    def get_short_name(self):
+        return self.username

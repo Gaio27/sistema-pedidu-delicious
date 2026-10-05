@@ -15,6 +15,7 @@ urlpatterns = [
     # Cashier API
     path('cashier/orders/', views.CashierPendingOrdersAPIView.as_view(), name='api-cashier-pending-orders'),
     path('cashier/orders/history/', views.CashierOrdersHistoryAPIView.as_view(), name='api-cashier-orders-history'),
+    path('cashier/bills/history/', views.CashierBillsHistoryAPIView.as_view(), name='api-cashier-bills-history'),
     path('cashier/orders/<uuid:order_id>/confirm/', views.CashierConfirmOrderAPIView.as_view(), name='api-cashier-confirm-order'),
     path('cashier/orders/<uuid:order_id>/reject/', views.CashierRejectOrderAPIView.as_view(), name='api-cashier-reject-order'),
     path('cashier/tables/', views.CashierTablesListAPIView.as_view(), name='api-cashier-tables-list'),

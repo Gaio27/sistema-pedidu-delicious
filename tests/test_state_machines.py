@@ -63,7 +63,9 @@ def test_order_lifecycle_happy_path(active_session, menu_item_fish, cashier_user
     
     active_session.refresh_from_db()
     order.refresh_from_db()
-    assert active_session.status == SessionStatus.PAID
+    active_session.table.refresh_from_db()
+    assert active_session.status == SessionStatus.CLOSED
+    assert active_session.table.status == TableStatus.AVAILABLE
     assert order.status == OrderStatus.COMPLETED
 
 @pytest.mark.django_db

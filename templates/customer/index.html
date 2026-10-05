@@ -212,17 +212,17 @@
 
 <!-- Cart Offcanvas Drawer (Dark Glassmorphic Dynamic Size) -->
 <div class="offcanvas offcanvas-bottom" tabindex="-1" id="cartOffcanvas" style="max-height: 85vh; height: min(85vh, 640px);">
-  <div class="offcanvas-header px-3 px-sm-4 py-2.5 border-bottom border-white border-opacity-10">
-    <h5 class="offcanvas-title fw-bold text-white d-flex align-items-center mb-0 fs-6">
-      <i class="fa-solid fa-basket-shopping text-warning me-2"></i>
-      <span data-i18n="cart_title">Karreta Pedidu</span>
-      <span class="badge bg-warning text-dark fw-bold ms-2 px-2 py-0.5 rounded-pill shadow-sm" style="font-size: 0.75rem;">{{ table.table_code }}</span>
-    </h5>
-    <div class="d-flex align-items-center gap-2">
+  <div class="offcanvas-header px-3 px-sm-4 py-2 border-bottom border-white border-opacity-10 d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center flex-grow-1 min-w-0 me-2">
+      <i class="fa-solid fa-basket-shopping text-warning me-2 flex-shrink-0"></i>
+      <h5 class="offcanvas-title fw-bold text-white mb-0 fs-6 text-truncate" data-i18n="cart_title">Karreta Pedidu</h5>
+      <span class="badge bg-warning text-dark fw-bold ms-2 px-2 py-0.5 rounded-pill shadow-sm flex-shrink-0" style="font-size: 0.75rem;">{{ table.table_code }}</span>
+    </div>
+    <div class="d-flex align-items-center gap-1.5 ms-auto flex-shrink-0">
       <button type="button" class="btn btn-sm btn-outline-danger border-opacity-50 text-danger rounded-pill px-2.5 py-1 d-flex align-items-center shadow-sm" id="btn-clear-cart" onclick="customerApp.clearCartWithConfirm()" title="Hamos Hotu" style="display:none; font-size:0.75rem;">
         <i class="fa-solid fa-trash-can me-1 small"></i><span data-i18n="clear_cart">Hotu</span>
       </button>
-      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+      <button type="button" class="btn-close btn-close-white ms-1" data-bs-dismiss="offcanvas" aria-label="Close" style="padding: 0.35rem;"></button>
     </div>
   </div>
   <div class="offcanvas-body d-flex flex-column px-3 px-sm-4 py-2">

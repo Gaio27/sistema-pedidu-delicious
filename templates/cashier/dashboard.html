@@ -75,43 +75,135 @@
       </div>
     </div>
 
-    <!-- PANEL 2: TODAY'S ORDERS HISTORY & SEARCH -->
+    <!-- PANEL 2: TODAY'S ORDERS & BILLS HISTORY WITH RECEIPT PRINTING -->
     <div class="tab-pane fade" id="orders-history-panel">
-      <div class="glass-card p-4">
-        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
-          <h5 class="fw-bold mb-0 text-white">
-            <i class="fa-solid fa-list-check text-info me-2"></i> <span data-i18n="history_title">Istóriku Pedidu Hotu Ohin Nian</span>
-          </h5>
-          <div class="d-flex gap-2">
-            <div class="input-group input-group-sm" style="max-width: 280px;">
-              <span class="input-group-text bg-dark border-secondary text-secondary"><i class="fa-solid fa-magnifying-glass"></i></span>
-              <input type="text" id="order-history-search" class="form-control bg-dark border-secondary text-white" placeholder="Buka meza ka kódigu pedidu..." data-i18n-placeholder="search_history_placeholder" oninput="cashierApp.filterOrdersHistory()">
-            </div>
-            <button class="btn btn-sm btn-outline-info rounded-pill" onclick="cashierApp.loadTodayOrdersHistory()">
-              <i class="fa-solid fa-rotate"></i>
+      <div class="glass-card p-3 p-sm-4">
+        <!-- Top Sub-Navigation Switcher (Orders vs Bills & Receipts) -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 pb-2 border-bottom border-white border-opacity-10 gap-2">
+          <div class="d-flex align-items-center gap-1.5 p-1 bg-dark bg-opacity-60 rounded-pill border border-white border-opacity-10">
+            <button class="btn btn-sm rounded-pill px-3 py-1 fw-bold active btn-subtab-history" id="subtab-btn-orders" onclick="cashierApp.switchHistorySubTab('orders')">
+              <i class="fa-solid fa-list-check me-1.5 text-info"></i><span data-i18n="tab_orders_sub">📋 Pedidu</span>
             </button>
+            <button class="btn btn-sm rounded-pill px-3 py-1 fw-bold text-white-50 btn-subtab-history" id="subtab-btn-bills" onclick="cashierApp.switchHistorySubTab('bills')">
+              <i class="fa-solid fa-receipt me-1.5 text-warning"></i><span data-i18n="tab_bills_sub">🧾 Konta &amp; Resivu</span>
+            </button>
+          </div>
+
+          <!-- Quick Refresh Button -->
+          <button class="btn btn-sm btn-outline-info rounded-pill px-3 py-1 fw-semibold d-flex align-items-center gap-1 shadow-sm" onclick="cashierApp.refreshActiveHistoryTab()">
+            <i class="fa-solid fa-rotate"></i>
+            <span class="d-none d-sm-inline" data-i18n="refresh">Atualiza</span>
+          </button>
+        </div>
+
+        <!-- SUBVIEW 1: ORDERS HISTORY -->
+        <div id="subview-orders-history">
+          <!-- Filters Bar -->
+          <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+            <!-- Date Filter Toggle (Today vs All) -->
+            <div class="d-flex align-items-center gap-1">
+              <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn btn-sm btn-outline-secondary text-white active" id="order-date-today" onclick="cashierApp.setOrdersDateFilter('today')">
+                  <span data-i18n="filter_today">Ohin</span>
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary text-white" id="order-date-all" onclick="cashierApp.setOrdersDateFilter('all')">
+                  <span data-i18n="filter_all">Hotu</span>
+                </button>
+              </div>
+
+              <!-- Status Dropdown Filter -->
+              <select class="form-select form-select-sm bg-dark border-secondary text-white ms-1" id="order-status-filter" style="width: auto; font-size: 0.8rem;" onchange="cashierApp.filterOrdersHistory()">
+                <option value="ALL">Status Hotu (All)</option>
+                <option value="WAITING_CASHIER_CONFIRMATION">⏳ Hein Kaixa</option>
+                <option value="CONFIRMED">🟡 Konfirmadu</option>
+                <option value="PREPARING">🔥 Tein (Cooking)</option>
+                <option value="READY">🟢 Prontu</option>
+                <option value="SERVED">🍽️ Entrega</option>
+                <option value="COMPLETED">✅ Kompletu</option>
+                <option value="REJECTED">❌ Rekuza</option>
+              </select>
+            </div>
+
+            <!-- Search input -->
+            <div class="input-group input-group-sm ms-auto" style="max-width: 280px;">
+              <span class="input-group-text bg-dark border-secondary text-secondary"><i class="fa-solid fa-magnifying-glass"></i></span>
+              <input type="text" id="order-history-search" class="form-control bg-dark border-secondary text-white" placeholder="Buka meza, sesaun, kódigu..." data-i18n-placeholder="search_orders_placeholder" oninput="cashierApp.filterOrdersHistory()">
+            </div>
+          </div>
+
+          <!-- Orders Table -->
+          <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle mb-0 small">
+              <thead>
+                <tr class="text-white-50 border-secondary">
+                  <th style="min-width: 75px;" data-i18n="th_time">Oras</th>
+                  <th style="min-width: 110px;" data-i18n="th_order_code">Kódigu Pedidu</th>
+                  <th style="min-width: 90px;" data-i18n="th_table">Meza &amp; Sesi</th>
+                  <th style="min-width: 160px;" data-i18n="th_items">Item Pedidu</th>
+                  <th style="min-width: 70px;" data-i18n="th_total">Totál ($)</th>
+                  <th style="min-width: 100px;" data-i18n="th_status">Status</th>
+                  <th class="text-end" style="min-width: 80px;" data-i18n="th_action">Asaun</th>
+                </tr>
+              </thead>
+              <tbody id="orders-history-tbody">
+                <tr>
+                  <td colspan="7" class="text-center py-4 text-white-50" data-i18n="loading_history">Karga hela dadus pedidu...</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
-        <div class="table-responsive">
-          <table class="table table-dark table-hover align-middle mb-0 small">
-            <thead>
-              <tr class="text-white-50 border-secondary">
-                <th data-i18n="th_time">Oras</th>
-                <th data-i18n="th_order_code">Kódigu Pedidu</th>
-                <th data-i18n="th_table">Meza</th>
-                <th data-i18n="th_items">Item Pedidu</th>
-                <th data-i18n="th_total">Totál ($)</th>
-                <th data-i18n="th_status">Status</th>
-                <th class="text-end" data-i18n="th_action">Asaun</th>
-              </tr>
-            </thead>
-            <tbody id="orders-history-tbody">
-              <tr>
-                <td colspan="7" class="text-center py-4 text-white-50" data-i18n="loading_history">Karga hela dadus pedidu...</td>
-              </tr>
-            </tbody>
-          </table>
+        <!-- SUBVIEW 2: BILLS & RECEIPTS HISTORY -->
+        <div id="subview-bills-history" style="display:none;">
+          <!-- Bills Header & Summary -->
+          <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+            <!-- Date Filter Toggle (Today vs All) -->
+            <div class="d-flex align-items-center gap-2">
+              <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn btn-sm btn-outline-secondary text-white active" id="bill-date-today" onclick="cashierApp.setBillsDateFilter('today')">
+                  <span data-i18n="filter_today">Ohin</span>
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary text-white" id="bill-date-all" onclick="cashierApp.setBillsDateFilter('all')">
+                  <span data-i18n="filter_all">Hotu</span>
+                </button>
+              </div>
+
+              <!-- Revenue Summary Badge -->
+              <span class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-40 px-2.5 py-1.5 rounded-pill fw-bold" id="bills-total-revenue-badge" style="font-size: 0.8rem;">
+                Totál: $0.00
+              </span>
+            </div>
+
+            <!-- Search input -->
+            <div class="input-group input-group-sm ms-auto" style="max-width: 280px;">
+              <span class="input-group-text bg-dark border-secondary text-secondary"><i class="fa-solid fa-magnifying-glass"></i></span>
+              <input type="text" id="bill-history-search" class="form-control bg-dark border-secondary text-white" placeholder="Buka meza ka kódigu resibu..." data-i18n-placeholder="search_bills_placeholder" oninput="cashierApp.filterBillsHistory()">
+            </div>
+          </div>
+
+          <!-- Bills Table -->
+          <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle mb-0 small">
+              <thead>
+                <tr class="text-white-50 border-secondary">
+                  <th style="min-width: 85px;" data-i18n="date_time">Data / Oras</th>
+                  <th style="min-width: 120px;" data-i18n="th_bill_code">Kódigu Resibu</th>
+                  <th style="min-width: 80px;" data-i18n="th_table">Meza</th>
+                  <th style="min-width: 90px;">Metodu</th>
+                  <th style="min-width: 75px;" data-i18n="th_total">Totál</th>
+                  <th style="min-width: 110px;" data-i18n="th_tendered_change">Simu / Troku</th>
+                  <th style="min-width: 80px;" data-i18n="th_cashier">Kaixa</th>
+                  <th class="text-end" style="min-width: 95px;" data-i18n="th_action">Asaun</th>
+                </tr>
+              </thead>
+              <tbody id="bills-history-tbody">
+                <tr>
+                  <td colspan="8" class="text-center py-4 text-white-50" data-i18n="loading_history">Karga hela dadus resibu...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -354,6 +446,14 @@
     background: linear-gradient(135deg, #f97316, #ea580c) !important;
     border-color: #f97316 !important;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+  .btn-subtab-history {
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .btn-subtab-history.active {
+    background: linear-gradient(135deg, #f97316, #ea580c) !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
   }
 </style>
 {% endblock %}

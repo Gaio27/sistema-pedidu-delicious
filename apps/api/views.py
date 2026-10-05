@@ -623,22 +623,85 @@ class CashierOrdersHistoryAPIView(APIView):
 
     def get(self, request):
         today = timezone.localdate()
-        orders = Order.objects.filter(
-            created_at__date=today
-        ).select_related('table_session__table').prefetch_related('items').order_by('-created_at')[:100]
+        date_filter = request.GET.get('date_range', 'today')
+        status_filter = request.GET.get('status', 'ALL')
+
+        orders_qs = Order.objects.select_related(
+            'table_session__table'
+        ).prefetch_related('items').order_by('-created_at')
+
+        if date_filter == 'today':
+            orders_qs = orders_qs.filter(created_at__date=today)
+
+        if status_filter and status_filter != 'ALL':
+            orders_qs = orders_qs.filter(status=status_filter)
+
+        orders = orders_qs[:150]
 
         data = []
         for o in orders:
+            session = o.table_session
             data.append({
                 'id': str(o.id),
                 'order_code': o.order_code,
-                'table_name': o.table_session.table.display_name,
-                'table_code': o.table_session.table.table_code,
+                'session_id': str(session.id),
+                'session_code': f"SES-{str(session.id)[:6].upper()}",
+                'session_status': session.status,
+                'table_name': session.table.display_name,
+                'table_code': session.table.table_code,
                 'status': o.status,
                 'grand_total': str(o.grand_total),
                 'items_summary': ", ".join([f"{item.quantity}x {item.menu_name_snapshot}" for item in o.items.all()]),
+                'customer_note': o.customer_note or '',
+                'rejection_reason': o.rejection_reason or '',
                 'created_at': o.created_at.strftime("%H:%M"),
+                'created_date': o.created_at.strftime("%d/%m/%Y"),
+                'can_print_receipt': bool(o.status == OrderStatus.COMPLETED or session.status in [SessionStatus.PAID, SessionStatus.CLOSED]),
             })
+        return api_response(data)
+
+
+class CashierBillsHistoryAPIView(APIView):
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated, IsCashierOrAdmin]
+
+    def get(self, request):
+        today = timezone.localdate()
+        date_filter = request.GET.get('date_range', 'today')
+
+        payments_qs = Payment.objects.filter(
+            status=PaymentStatus.COMPLETED
+        ).select_related('table_session__table', 'received_by').order_by('-paid_at')
+
+        if date_filter == 'today':
+            payments_qs = payments_qs.filter(paid_at__date=today)
+
+        payments = payments_qs[:150]
+
+        data = []
+        for p in payments:
+            session = p.table_session
+            tbl = session.table
+            cashier_name = (
+                getattr(p.received_by, 'full_name', '') or getattr(p.received_by, 'username', 'Kaixa')
+                if p.received_by else "Kaixa"
+            )
+            data.append({
+                'id': str(p.id),
+                'session_id': str(session.id),
+                'payment_code': p.payment_code,
+                'table_name': tbl.display_name,
+                'table_code': tbl.table_code,
+                'method': p.get_method_display(),
+                'amount': str(p.amount),
+                'tendered_amount': str(p.tendered_amount or p.amount),
+                'change_amount': str(p.change_amount or '0.00'),
+                'cashier_name': cashier_name,
+                'paid_at_time': p.paid_at.strftime("%H:%M") if p.paid_at else "-",
+                'paid_at_date': p.paid_at.strftime("%d/%m/%Y") if p.paid_at else "-",
+                'paid_at_full': p.paid_at.strftime("%d/%m/%Y %H:%M") if p.paid_at else "-",
+            })
+
         return api_response(data)
 
 

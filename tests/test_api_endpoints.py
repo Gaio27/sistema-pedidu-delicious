@@ -141,6 +141,46 @@ def test_public_request_bill_endpoint(active_session, menu_item_fish, cashier_us
 
     # 3. Request bill when served -> Should succeed (200)
     res2 = client.post(f'/api/v1/public/sessions/{active_session.public_token}/request-bill/')
-    print('DEBUG 2 (served):', res2.status_code, res2.json())
+    assert res2.status_code == 200
+    assert res2.json()['success'] is True
+
+
+@pytest.mark.django_db
+def test_cashier_orders_and_bills_history_endpoints(active_session, menu_item_fish, cashier_user):
+    from rest_framework.test import APIClient
+    from apps.ordering.services import submit_customer_order, confirm_order_by_cashier
+    from apps.payments.services import record_cash_payment
+    from decimal import Decimal
+
+    client = APIClient()
+    client.force_authenticate(user=cashier_user)
+
+    order = submit_customer_order(
+        table_session=active_session,
+        items_data=[{'menu_item_id': menu_item_fish.id, 'quantity': 2}],
+        idempotency_key="history-test-order"
+    )
+    confirm_order_by_cashier(order=order, confirmed_by=cashier_user)
+
+    # 1. Orders History Endpoint
+    res_orders = client.get('/api/v1/cashier/orders/history/?date_range=today')
+    assert res_orders.status_code == 200
+    orders_data = res_orders.json().get('data', [])
+    assert len(orders_data) >= 1
+    assert any(o['order_code'] == order.order_code for o in orders_data)
+
+    # 2. Pay Bill (Payment Completed -> session closed and table freed)
+    payment = record_cash_payment(
+        session=active_session,
+        cashier_user=cashier_user,
+        tendered_amount=Decimal("20.00")
+    )
+
+    # 3. Bills History Endpoint
+    res_bills = client.get('/api/v1/cashier/bills/history/?date_range=today')
+    assert res_bills.status_code == 200
+    bills_data = res_bills.json().get('data', [])
+    assert len(bills_data) >= 1
+    assert any(b['payment_code'] == payment.payment_code for b in bills_data)
 
 
