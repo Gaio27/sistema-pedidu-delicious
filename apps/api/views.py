@@ -1,4 +1,5 @@
 import uuid
+import logging
 from decimal import Decimal
 from django.core.exceptions import ValidationError
 from django.utils import timezone
@@ -8,8 +9,10 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 
+logger = logging.getLogger(__name__)
+
 from apps.accounts.permissions import IsCashierRole, IsKitchenRole, IsAdminRole, IsCashierOrAdmin, IsKitchenOrAdmin
-from apps.tables.models import RestaurantTable, TableSession
+from apps.tables.models import RestaurantTable, TableSession, TableStatus, SessionStatus
 from apps.tables.selectors import (
     get_table_by_qr_token, get_session_by_public_token, list_tables_with_status,
     get_pending_activation_requests_for_restaurant, get_pending_activation_request_for_table
@@ -270,8 +273,10 @@ class PublicRequestBillAPIView(APIView):
                 "bill": bill
             })
         except ValidationError as e:
-            return api_error("BILL_REQUEST_INVALID", str(e.message if hasattr(e, 'message') else e), http_status=status.HTTP_400_BAD_REQUEST)
+            msg = str(e.message if hasattr(e, 'message') else (e.messages[0] if hasattr(e, 'messages') and e.messages else str(e)))
+            return api_error("BILL_REQUEST_INVALID", msg, http_status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
+            logger.exception("Error requesting bill for session %s: %s", session_token, e)
             return api_error("SERVER_ERROR", str(e), http_status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 

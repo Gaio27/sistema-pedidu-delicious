@@ -113,3 +113,34 @@ def test_table_activation_request_and_approval_flow(restaurant, cashier_user):
     assert res2.json()['data']['session']['has_active_session'] is True
     assert res2.json()['data']['session']['public_token'] == session_data['public_token']
 
+
+@pytest.mark.django_db
+def test_public_request_bill_endpoint(active_session, menu_item_fish, cashier_user, kitchen_user):
+    from rest_framework.test import APIClient
+    from apps.ordering.services import submit_customer_order, confirm_order_by_cashier
+    from apps.kitchen.services import start_preparing_order, mark_order_ready, mark_order_served
+    from apps.ordering.models import OrderStatus
+
+    client = APIClient()
+
+    # 1. Request bill when 0 orders -> Should return 400 with BILL_REQUEST_INVALID
+    res = client.post(f'/api/v1/public/sessions/{active_session.public_token}/request-bill/')
+    print('DEBUG 1 (0 orders):', res.status_code, res.json())
+
+    # 2. Submit order, confirm, prepare, mark ready, mark served
+    order = submit_customer_order(
+        table_session=active_session,
+        items_data=[{'menu_item_id': menu_item_fish.id, 'quantity': 1}],
+        idempotency_key="bill-api-order-1"
+    )
+    confirmed = confirm_order_by_cashier(order=order, confirmed_by=cashier_user)
+    prep = start_preparing_order(order=confirmed, staff_user=kitchen_user)
+    ready = mark_order_ready(order=prep, staff_user=kitchen_user)
+    served = mark_order_served(order=ready, staff_user=cashier_user)
+    assert served.status == OrderStatus.SERVED
+
+    # 3. Request bill when served -> Should succeed (200)
+    res2 = client.post(f'/api/v1/public/sessions/{active_session.public_token}/request-bill/')
+    print('DEBUG 2 (served):', res2.status_code, res2.json())
+
+
